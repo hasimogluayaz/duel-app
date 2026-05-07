@@ -1,27 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* =============================================
+   LIGHT MODE (default)
+   ============================================= */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+  --bg:         #f7f4ff;
+  --surface:    #ffffff;
+  --surface-2:  #f0ebff;
+  --stroke:     #e2d5ff;
+  --fg:         #1a0a35;
+  --fg-muted:   #6d55a0;
+  --fg-subtle:  #a090c0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* =============================================
+   DARK MODE
+   ============================================= */
+.dark {
+  color-scheme: dark;
+  --bg:         #0c0a18;
+  --surface:    #160f2d;
+  --surface-2:  #1f1640;
+  --stroke:     #2d1f52;
+  --fg:         #f5f0ff;
+  --fg-muted:   #a89bc0;
+  --fg-subtle:  #6b5b9e;
+}
+
+/* =============================================
+   BASE STYLES
+   ============================================= */
+@layer base {
+  * { box-sizing: border-box; }
+
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    scroll-behavior: smooth;
   }
+
+  body {
+    background-color: var(--bg);
+    color: var(--fg);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  /* Light mode body gradient */
+  html:not(.dark) body {
+    background-image:
+      radial-gradient(ellipse 70% 40% at 10% 0%, rgba(139, 92, 246, 0.08) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 30% at 90% 100%, rgba(236, 72, 153, 0.05) 0%, transparent 60%);
+  }
+
+  /* Dark mode body gradient */
+  html.dark body {
+    background-image:
+      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(168, 85, 247, 0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(236, 72, 153, 0.08) 0%, transparent 60%);
+  }
+
+  ::selection {
+    background-color: #8b5cf6;
+    color: white;
+  }
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--stroke); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--fg-subtle); }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
+/* =============================================
+   UTILITIES
+   ============================================= */
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .animate-slide-up  { animation: slideUp 0.2s ease-out; }
+  .animate-fade-in   { animation: fadeIn 0.3s ease-out; }
+  .animate-pulse-soft { animation: pulseSoft 2s ease-in-out infinite; }
+  .animate-float     { animation: float 3s ease-in-out infinite; }
+
+  .text-gradient {
+    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #f97316 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #f97316, #fbbf24);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .glow-purple { box-shadow: 0 0 30px rgba(139, 92, 246, 0.3); }
+  .glow-gold   { box-shadow: 0 0 20px rgba(249, 115, 22, 0.25); }
+
+  .btn-gradient {
+    background: linear-gradient(135deg, #8b5cf6, #ec4899) !important;
+    color: white !important;
+    border: none !important;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .btn-gradient:hover { opacity: 0.9; }
+  .btn-gradient:active { transform: scale(0.98); }
+
+  /* Card hover effect */
+  .card-hover {
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  }
+  .card-hover:hover {
+    border-color: rgba(139, 92, 246, 0.4) !important;
+    box-shadow: 0 4px 24px rgba(139, 92, 246, 0.08);
+    transform: translateY(-1px);
+  }
+
+  .text-balance { text-wrap: balance; }
+}
+
+/* =============================================
+   KEYFRAMES
+   ============================================= */
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes pulseSoft {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-8px); }
 }

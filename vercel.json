@@ -1,0 +1,23 @@
+{
+  "crons": [
+    {
+      "path": "/api/scenario/generate",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-reset",
+      "schedule": "0 0 * * 1"
+    }
+  ],
+  "functions": {
+    "app/api/duel/[id]/result/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/scenario/generate/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/personality/analyze/route.ts": {
+      "maxDuration": 20
+    }
+  }
+}

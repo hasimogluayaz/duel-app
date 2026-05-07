@@ -1,0 +1,193 @@
+'use client'
+
+export const dynamic = 'force-dynamic'
+
+import { useEffect, useState, useRef, useCallback } from 'react'
+import { useParams, useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import { Avatar } from '@/components/ui/Avatar'
+import { Spinner } from '@/components/ui/Spinner'
+import { timeAgo } from '@/lib/utils/formatting'
+import type { Message, Profile } from '@/types'
+import { ArrowLeft, Send } from 'lucide-react'
+import Link from 'next/link'
+import { cn } from '@/lib/utils/cn'
+
+export default function ConversationPage() {
+  const params = useParams()
+  const router = useRouter()
+  const supabase = createClient()
+  const username = params.username as string
+
+  const [messages, setMessages] = useState<Message[]>([])
+  const [partner, setPartner] = useState<Profile | null>(null)
+  const [myId, setMyId] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [input, setInput] = useState('')
+  const [sending, setSending] = useState(false)
+  const bottomRef = useRef<HTMLDivElement>(null)
+
+  const scrollToBottom = useCallback(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [])
+
+  useEffect(() => {
+    const load = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { router.push('/giris'); return }
+      setMyId(user.id)
+
+      const res = await fetch(`/api/messages/${username}`)
+      if (!res.ok) { router.push('/mesajlar'); return }
+      const json = await res.json()
+      setMessages(json.messages ?? [])
+      setPartner(json.partner)
+      setLoading(false)
+    }
+    load()
+  }, [username])
+
+  useEffect(() => { scrollToBottom() }, [messages, scrollToBottom])
+
+  // Realtime subscription
+  useEffect(() => {
+    if (!myId || !partner) return
+
+    const channel = supabase
+      .channel(`messages:${[myId, partner.id].sort().join('-')}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'messages',
+          filter: `receiver_id=eq.${myId}`,
+        },
+        (payload: { new: unknown }) => {
+          const msg = payload.new as Message
+          if (msg.sender_id !== partner.id) return
+          setMessages(prev => [...prev, msg])
+          // Mark as read
+          supabase.from('messages').update({ is_read: true }).eq('id', msg.id).then(() => {})
+        }
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [myId, partner])
+
+  async function sendMessage(e: React.FormEvent) {
+    e.preventDefault()
+    const content = input.trim()
+    if (!content || sending) return
+
+    setSending(true)
+    setInput('')
+
+    const res = await fetch(`/api/messages/${username}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content }),
+    })
+    const json = await res.json()
+
+    if (res.ok && json.message) {
+      setMessages(prev => [...prev, json.message])
+    }
+    setSending(false)
+  }
+
+  if (loading) return (
+    <div className="flex justify-center items-center min-h-[calc(100vh-4rem)]">
+      <Spinner size="lg" />
+    </div>
+  )
+
+  if (!partner) return null
+
+  return (
+    <div className="max-w-xl mx-auto flex flex-col h-[calc(100vh-4rem)]">
+
+      {/* Header */}
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-stroke bg-surface/80 backdrop-blur-md sticky top-16 z-10">
+        <Link href="/mesajlar" className="p-2 -ml-2 rounded-xl hover:bg-surface-2 transition-colors text-fg-muted hover:text-fg">
+          <ArrowLeft size={18} />
+        </Link>
+        <Link href={`/profil/${partner.username}`} className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
+          <Avatar src={partner.avatar_url} username={partner.username} size="sm" />
+          <div className="min-w-0">
+            <p className="text-sm font-bold text-fg truncate">{partner.display_name || partner.username}</p>
+            <p className="text-xs text-fg-subtle">@{partner.username}</p>
+          </div>
+        </Link>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-2">
+        {messages.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-center py-12">
+            <Avatar src={partner.avatar_url} username={partner.username} size="xl" className="mb-4" />
+            <p className="font-bold text-fg">{partner.display_name || partner.username}</p>
+            <p className="text-sm text-fg-subtle mt-1">Konuşmayı başlat</p>
+          </div>
+        ) : (
+          messages.map((msg, idx) => {
+            const isMine = msg.sender_id === myId
+            const prevMsg = messages[idx - 1]
+            const sameGroup = prevMsg && prevMsg.sender_id === msg.sender_id &&
+              new Date(msg.created_at).getTime() - new Date(prevMsg.created_at).getTime() < 60_000
+
+            return (
+              <div key={msg.id} className={cn('flex', isMine ? 'justify-end' : 'justify-start', sameGroup ? 'mt-0.5' : 'mt-3')}>
+                {!isMine && !sameGroup && (
+                  <Avatar src={partner.avatar_url} username={partner.username} size="xs" className="mr-2 mt-auto mb-1 shrink-0" />
+                )}
+                {!isMine && sameGroup && <div className="w-6 mr-2 shrink-0" />}
+                <div className={cn('max-w-[75%] flex flex-col', isMine ? 'items-end' : 'items-start')}>
+                  <div className={cn(
+                    'px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed',
+                    isMine
+                      ? 'bg-purple-600 text-white rounded-br-sm'
+                      : 'bg-surface border border-stroke text-fg rounded-bl-sm'
+                  )}>
+                    {msg.content}
+                  </div>
+                  {(!messages[idx + 1] || messages[idx + 1].sender_id !== msg.sender_id) && (
+                    <p className="text-[11px] text-fg-subtle mt-1 px-1">{timeAgo(msg.created_at)}</p>
+                  )}
+                </div>
+              </div>
+            )
+          })
+        )}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <form onSubmit={sendMessage} className="flex items-end gap-2 px-4 py-3 border-t border-stroke bg-surface/80 backdrop-blur-md">
+        <textarea
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault()
+              sendMessage(e as unknown as React.FormEvent)
+            }
+          }}
+          placeholder="Mesaj yaz..."
+          rows={1}
+          maxLength={500}
+          className="flex-1 bg-surface-2 border border-stroke rounded-2xl px-4 py-3 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-purple-500 resize-none max-h-32 transition-colors"
+          style={{ height: 'auto' }}
+        />
+        <button
+          type="submit"
+          disabled={!input.trim() || sending}
+          className="w-10 h-10 bg-purple-600 rounded-2xl flex items-center justify-center hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
+        >
+          <Send size={16} className="text-white" />
+        </button>
+      </form>
+    </div>
+  )
+}

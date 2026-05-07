@@ -52,13 +52,6 @@ export async function GET(req: Request) {
         myEntry = entries[myIdx]
       } else {
         // User not in top 100, find their rank
-        const { count: aboveMe } = await supabase
-          .from('profiles')
-          .select('*', { count: 'exact', head: true })
-          .eq('is_admin', false)
-          .eq('is_banned', false)
-          .gt(pointsColumn, 0)
-
         const { data: myProfile } = await supabase
           .from('profiles')
           .select('id, username, display_name, avatar_url, total_points, weekly_points')
@@ -66,10 +59,18 @@ export async function GET(req: Request) {
           .single()
 
         if (myProfile) {
+          const myPoints = period === 'all_time' ? myProfile.total_points : myProfile.weekly_points
+          const { count: aboveMe } = await supabase
+            .from('profiles')
+            .select('*', { count: 'exact', head: true })
+            .eq('is_admin', false)
+            .eq('is_banned', false)
+            .gt(pointsColumn, myPoints ?? 0)
+
           myEntry = {
             rank: (aboveMe ?? 0) + 1,
             ...myProfile,
-            points: period === 'all_time' ? myProfile.total_points : myProfile.weekly_points,
+            points: myPoints,
             duel_count: 0,
             win_count: 0,
           }
