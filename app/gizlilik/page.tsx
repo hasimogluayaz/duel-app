@@ -31,8 +31,8 @@ export default function GizlilikPage() {
           <p>
             Kapisio platformu kapsamında kişisel verilerinizin işlenmesinden sorumlu taraf,
             platform işleticisidir. İletişim için:{' '}
-            <a href="mailto:gizlilik@kapisio.com" className="text-primary hover:underline">
-              gizlilik@kapisio.com
+            <a href="mailto:info@kapisio.com" className="text-primary hover:underline">
+              info@kapisio.com
             </a>
           </p>
         </section>
@@ -171,8 +171,8 @@ export default function GizlilikPage() {
           </ul>
           <p className="mt-3 text-sm">
             Haklarınızı kullanmak için{' '}
-            <a href="mailto:gizlilik@kapisio.com" className="text-primary hover:underline">
-              gizlilik@kapisio.com
+            <a href="mailto:info@kapisio.com" className="text-primary hover:underline">
+              info@kapisio.com
             </a>{' '}
             adresine yazabilirsiniz. Talepler 30 gün içinde yanıtlanır.
           </p>

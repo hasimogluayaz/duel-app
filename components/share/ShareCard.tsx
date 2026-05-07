@@ -104,7 +104,7 @@ export function ShareCard({ duel, winnerProfile, onClose }: Props) {
 
             {/* Footer */}
             <p style={{ fontSize: 22, color: '#52525b', marginTop: 'auto' }}>
-              duel.app&apos;da oyna →
+              kapisio.com&apos;da oyna →
             </p>
           </div>
         </div>

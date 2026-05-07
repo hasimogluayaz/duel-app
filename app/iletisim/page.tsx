@@ -103,8 +103,8 @@ export default function IletisimPage() {
           <div className="p-4 bg-surface border border-stroke rounded-xl">
             <Mail size={20} className="text-purple-400 mb-2" />
             <p className="text-sm font-medium text-fg mb-1">Email</p>
-            <a href="mailto:destek@kapisio.com" className="text-xs text-purple-400 hover:underline">
-              destek@kapisio.com
+            <a href="mailto:info@kapisio.com" className="text-xs text-purple-400 hover:underline">
+              info@kapisio.com
             </a>
           </div>
           <div className="p-4 bg-surface border border-stroke rounded-xl">

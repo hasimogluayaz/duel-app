@@ -85,8 +85,8 @@ export default function CerezPolitikasiPage() {
           <h2 className="text-lg font-bold text-fg mb-3">İletişim</h2>
           <p>
             Çerez politikamız hakkında sorularınız için:{' '}
-            <a href="mailto:gizlilik@duel.app" className="text-purple-400 hover:underline">
-              gizlilik@duel.app
+            <a href="mailto:info@kapisio.com" className="text-purple-400 hover:underline">
+              info@kapisio.com
             </a>
           </p>
         </section>
