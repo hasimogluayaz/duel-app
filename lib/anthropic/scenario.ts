@@ -1,10 +1,14 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import Groq from 'groq-sdk'
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' })
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY ?? '' })
 
 export async function generateDailyScenario(): Promise<string> {
-  const prompt = `Sen Türk üniversite öğrencileri için eğlenceli, günlük hayattan senaryolar üreten bir AI'sın.
+  const completion = await groq.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
+    messages: [
+      {
+        role: 'user',
+        content: `Sen Türk üniversite öğrencileri için eğlenceli, günlük hayattan senaryolar üreten bir AI'sın.
 Her gün farklı, komik, tartışmalı ama zararsız bir senaryo üret.
 Senaryo bir soru veya durum olmalı. Maksimum 2 cümle.
 Örnekler:
@@ -13,24 +17,22 @@ Senaryo bir soru veya durum olmalı. Maksimum 2 cümle.
 - "Arkadaşından borç isteyeceksin ama utanıyorsun. Ne yazarsın?"
 Sadece JSON formatında döndür: {"scenario": "senaryo metni"}
 
-Bugünkü senaryoyu üret.`
+Bugünkü senaryoyu üret.`,
+      },
+    ],
+    temperature: 0.9,
+    max_tokens: 200,
+    response_format: { type: 'json_object' },
+  })
 
-  const result = await model.generateContent(prompt)
-  const text = result.response.text().trim()
-
-  // JSON'u temizle (bazen ```json ``` bloğu gelir)
-  const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
+  const text = completion.choices[0]?.message?.content ?? ''
   try {
-    const parsed = JSON.parse(cleaned) as { scenario: string }
+    const parsed = JSON.parse(text) as { scenario: string }
     return parsed.scenario
   } catch {
-    const match = cleaned.match(/\{[\s\S]*\}/)
-    if (match) {
-      const parsed = JSON.parse(match[0]) as { scenario: string }
-      return parsed.scenario
-    }
-    // If JSON fails entirely, the text itself may be the scenario
-    if (cleaned.length > 10 && !cleaned.startsWith('{')) return cleaned
+    const match = text.match(/\{[\s\S]*\}/)
+    if (match) return (JSON.parse(match[0]) as { scenario: string }).scenario
+    if (text.length > 10) return text
     throw new Error('AI yanıtı geçersiz format döndürdü.')
   }
 }
