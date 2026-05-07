@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
 function getCookieHandlers() {
@@ -31,9 +32,9 @@ export function createClient(): any {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function createServiceClient(): any {
-  return createServerClient(
-    SUPABASE_URL,
-    SUPABASE_SERVICE_KEY,
-    { cookies: getCookieHandlers() }
-  )
+  // Use direct supabase-js client (not SSR) so service role key
+  // is never overridden by session cookies — auth.role() = 'service_role'
+  return createSupabaseClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  })
 }
