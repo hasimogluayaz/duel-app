@@ -2,7 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { AIPersonalityResponse } from '@/types'
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash-8b' })
+const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' })
 
 export async function analyzePersonality(answers: string[]): Promise<AIPersonalityResponse> {
   const prompt = `Sen bir kişilik analiz uzmanısın. Kullanıcının cevaplarını analiz ederek eğlenceli bir kişilik tipi belirleyeceksin.
