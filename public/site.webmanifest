@@ -1,0 +1,24 @@
+{
+  "name": "Kapisio — AI Destekli Kapışma",
+  "short_name": "Kapisio",
+  "description": "Her gün yeni senaryo, arkadaşınla kapış, AI kazananı ilan etsin!",
+  "start_url": "/oyun",
+  "display": "standalone",
+  "background_color": "#0c0a18",
+  "theme_color": "#8b5cf6",
+  "lang": "tr",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
