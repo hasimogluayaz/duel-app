@@ -8,13 +8,14 @@ export async function generateDailyScenario(): Promise<string> {
     messages: [
       {
         role: 'user',
-        content: `Sen Türk üniversite öğrencileri için eğlenceli, günlük hayattan senaryolar üreten bir AI'sın.
-Her gün farklı, komik, tartışmalı ama zararsız bir senaryo üret.
-Senaryo bir soru veya durum olmalı. Maksimum 2 cümle.
+        content: `Sen Türkçe konuşan gençler için eğlenceli, günlük hayattan senaryolar üreten bir AI'sın.
+Her gün farklı bir konu seç: iş, aşk, aile, arkadaşlık, sosyal medya, alışveriş, ulaşım, teknoloji, yemek, tatil vb.
+Senaryo komik, tartışmalı veya utandırıcı ama zararsız bir durum olmalı. Maksimum 2 cümle.
 Örnekler:
-- "Sınav sabahı hocana ödevini unuttuğunu nasıl anlatırsın? Mesajını buraya yaz."
-- "Kafanda harika bir fikir var ama gruba yazmaya çekiniyorsun. Nasıl açarsın konuyu?"
-- "Arkadaşından borç isteyeceksin ama utanıyorsun. Ne yazarsın?"
+- "Yanlış kişiye mesaj attın ve fark ettin. Ne yazarsın?"
+- "Kasiyerde para bitmişini öğrendin. Arkandaki kuyruğa ne söylersin?"
+- "Patronuna yanlışlıkla emoji göndermişsin. Nasıl kurtarırsın?"
+- "Sokakta birini tanıdığını sandın ve selamladın ama tanımıyormuşsun. Ne yaparsın?"
 Sadece JSON formatında döndür: {"scenario": "senaryo metni"}
 
 Bugünkü senaryoyu üret.`,
