@@ -1,15 +1,28 @@
 import { createApiClient } from '@/lib/supabase/typed'
+import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { generateDailyScenario } from '@/lib/anthropic/scenario'
 
 export async function POST(req: Request) {
   try {
-    // Validate cron secret
     const auth = req.headers.get('authorization')
     const isInternal = req.headers.get('x-internal') === 'true'
     const cronSecret = process.env.CRON_SECRET
 
-    if (!isInternal && auth !== `Bearer ${cronSecret}`) {
+    // Allow cron/internal callers
+    let authorized = isInternal || auth === `Bearer ${cronSecret}`
+
+    // Also allow admin users
+    if (!authorized) {
+      const supabase = createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', user.id).single()
+        authorized = profile?.is_admin === true
+      }
+    }
+
+    if (!authorized) {
       return NextResponse.json({ error: 'Yetkisiz' }, { status: 401 })
     }
 

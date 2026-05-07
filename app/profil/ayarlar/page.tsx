@@ -64,9 +64,18 @@ export default function AyarlarPage() {
 
   async function changePassword(e: React.FormEvent) {
     e.preventDefault()
-    if (pwForm.next !== pwForm.confirm) { toast('Şifreler eşleşmiyor.', 'error'); return }
+    if (!pwForm.current) { toast('Mevcut şifreyi gir.', 'error'); return }
+    if (pwForm.next !== pwForm.confirm) { toast('Yeni şifreler eşleşmiyor.', 'error'); return }
     if (pwForm.next.length < 8) { toast('Yeni şifre en az 8 karakter olmalı.', 'error'); return }
     setPwLoading(true)
+
+    // Verify current password first
+    const { data: { user: authUser } } = await supabase.auth.getUser()
+    const email = authUser?.email
+    if (!email) { toast('Oturum hatası.', 'error'); setPwLoading(false); return }
+
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password: pwForm.current })
+    if (signInError) { toast('Mevcut şifre yanlış.', 'error'); setPwLoading(false); return }
 
     const { error } = await supabase.auth.updateUser({ password: pwForm.next })
     if (error) toast('Şifre değiştirilemedi: ' + error.message, 'error')
@@ -181,6 +190,13 @@ export default function AyarlarPage() {
           </div>
         </div>
         <form onSubmit={changePassword} className="flex flex-col gap-4">
+          <Input
+            type="password"
+            label="Mevcut Şifre"
+            placeholder="Mevcut şifreni gir"
+            value={pwForm.current}
+            onChange={e => setPwForm(f => ({ ...f, current: e.target.value }))}
+          />
           <Input
             type="password"
             label="Yeni Şifre"

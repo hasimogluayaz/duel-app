@@ -20,6 +20,17 @@ Bugünkü senaryoyu üret.`
 
   // JSON'u temizle (bazen ```json ``` bloğu gelir)
   const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-  const parsed = JSON.parse(cleaned) as { scenario: string }
-  return parsed.scenario
+  try {
+    const parsed = JSON.parse(cleaned) as { scenario: string }
+    return parsed.scenario
+  } catch {
+    const match = cleaned.match(/\{[\s\S]*\}/)
+    if (match) {
+      const parsed = JSON.parse(match[0]) as { scenario: string }
+      return parsed.scenario
+    }
+    // If JSON fails entirely, the text itself may be the scenario
+    if (cleaned.length > 10 && !cleaned.startsWith('{')) return cleaned
+    throw new Error('AI yanıtı geçersiz format döndürdü.')
+  }
 }

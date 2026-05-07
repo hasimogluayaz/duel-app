@@ -117,8 +117,9 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     const total = (votesA ?? 0) + (votesB ?? 0)
     const maxVotes = Math.max(votesA ?? 0, votesB ?? 0)
 
-    if (total >= 5 && maxVotes / total >= 0.7) {
-      fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/duel/${duel.id}/result`, {
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL
+    if (appUrl && total >= 5 && maxVotes / total >= 0.7) {
+      fetch(`${appUrl}/api/duel/${duel.id}/result`, {
         method: 'GET',
         headers: { 'x-internal': 'true' },
       }).catch(() => {})

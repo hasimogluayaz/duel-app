@@ -27,7 +27,7 @@ export default async function ProfilPage({ params }: Props) {
     .eq('username', params.username.toLowerCase())
     .single()
 
-  if (!profile || profile.is_admin) notFound()
+  if (!profile || (profile.is_admin && user?.id !== profile.id)) notFound()
 
   const [
     { count: duelCount },

@@ -30,6 +30,11 @@ Kazananı ilan et ve kaybedeni roast'la. Sadece JSON döndür.`
   const text = result.response.text().trim()
 
   const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-  const parsed = JSON.parse(cleaned) as AIVerdictResponse
-  return parsed
+  try {
+    return JSON.parse(cleaned) as AIVerdictResponse
+  } catch {
+    const match = cleaned.match(/\{[\s\S]*\}/)
+    if (match) return JSON.parse(match[0]) as AIVerdictResponse
+    throw new Error('AI yanıtı geçersiz format döndürdü.')
+  }
 }

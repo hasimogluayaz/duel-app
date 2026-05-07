@@ -81,12 +81,13 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     const { count: winCount } = await supabase
       .from('duels').select('*', { count: 'exact', head: true }).eq('winner_id', winnerId)
 
-    if (winCount === 1) {
+    const wc = winCount ?? 0
+    if (wc >= 1 && wc - 1 < 1) {
       await supabase.from('achievements').upsert({
         user_id: winnerId, type: 'first_win' as const, earned_at: new Date().toISOString()
       } as any)
     }
-    if (winCount === 10) {
+    if (wc >= 10 && wc - 1 < 10) {
       await supabase.from('achievements').upsert({
         user_id: winnerId, type: 'roast_master' as const, earned_at: new Date().toISOString()
       } as any)

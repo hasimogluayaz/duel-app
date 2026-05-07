@@ -1,12 +1,15 @@
-const BANNED_WORDS = [
-  // Türkçe küfürler ve argo
-  'sik', 'sikim', 'sikeyim', 'siktir', 'orospu', 'orosbuçu', 'göt', 'götü', 'amk', 'amına',
-  'amını', 'bok', 'boktan', 'oç', 'piç', 'piçlik', 'kahpe', 'kaltak', 'şerefsiz', 'ibne',
-  'götveren', 'ублюдок', 'hassiktir', 'lanet', 'it', 'köpek', 'eşek', 'mal', 'gerizekalı',
-  'aptal', 'salak', 'kevaşe', 'sürtük', 'serseri', 'hıyar', 'gavat', 'pezevenk',
-  // İngilizce küfürler
-  'fuck', 'shit', 'bitch', 'asshole', 'bastard', 'cunt', 'dick', 'pussy', 'whore',
-  'nigger', 'faggot',
+// Words matched as substrings (always offensive regardless of context)
+const BANNED_SUBSTRINGS = [
+  'sik', 'sikim', 'sikeyim', 'siktir', 'orospu', 'orosbuçu', 'amk', 'amına', 'amını',
+  'hassiktir', 'götveren', 'ibne', 'kevaşe', 'sürtük', 'pezevenk', 'gavat',
+  'fuck', 'shit', 'asshole', 'cunt', 'pussy', 'nigger', 'faggot',
+]
+
+// Words matched as whole words (can appear in innocent contexts otherwise)
+const BANNED_WHOLE_WORDS = [
+  'göt', 'götü', 'bok', 'boktan', 'oç', 'piç', 'piçlik', 'kahpe', 'kaltak',
+  'şerefsiz', 'gerizekalı', 'hıyar', 'serseri',
+  'bitch', 'bastard', 'dick', 'whore',
 ]
 
 export function validateAnswer(content: string): { valid: boolean; error?: string } {
@@ -20,9 +23,17 @@ export function validateAnswer(content: string): { valid: boolean; error?: strin
     return { valid: false, error: 'Cevap 280 karakteri geçemez.' }
   }
 
-  const lowerContent = content.toLowerCase()
-  for (const word of BANNED_WORDS) {
-    if (lowerContent.includes(word)) {
+  const lower = content.toLowerCase()
+
+  for (const word of BANNED_SUBSTRINGS) {
+    if (lower.includes(word)) {
+      return { valid: false, error: 'Cevabınız uygunsuz içerik barındırıyor.' }
+    }
+  }
+
+  for (const word of BANNED_WHOLE_WORDS) {
+    const re = new RegExp(`(^|[^a-zA-ZğüşıöçĞÜŞİÖÇ])${word}([^a-zA-ZğüşıöçĞÜŞİÖÇ]|$)`, 'i')
+    if (re.test(lower)) {
       return { valid: false, error: 'Cevabınız uygunsuz içerik barındırıyor.' }
     }
   }

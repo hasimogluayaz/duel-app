@@ -20,6 +20,11 @@ Sadece JSON döndür.`
   const text = result.response.text().trim()
 
   const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim()
-  const parsed = JSON.parse(cleaned) as AIPersonalityResponse
-  return parsed
+  try {
+    return JSON.parse(cleaned) as AIPersonalityResponse
+  } catch {
+    const match = cleaned.match(/\{[\s\S]*\}/)
+    if (match) return JSON.parse(match[0]) as AIPersonalityResponse
+    throw new Error('AI yanıtı geçersiz format döndürdü.')
+  }
 }

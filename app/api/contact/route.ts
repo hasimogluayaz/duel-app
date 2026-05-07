@@ -22,8 +22,8 @@ export async function POST(request: Request) {
   })
 
   if (error) {
-    // Table may not exist yet — still return success so UX works
     console.error('Contact insert error:', error.message)
+    return NextResponse.json({ error: 'Mesaj gönderilemedi. Lütfen daha sonra tekrar deneyin.' }, { status: 500 })
   }
 
   return NextResponse.json({ success: true })

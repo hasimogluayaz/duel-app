@@ -10,7 +10,6 @@ export async function GET(req: Request) {
 
     const { data: { user } } = await supabase.auth.getUser()
 
-    // Get top 100 profiles ordered by the relevant points column
     const pointsColumn = period === 'all_time' ? 'total_points' : 'weekly_points'
 
     const { data: profiles } = await supabase
@@ -23,35 +22,48 @@ export async function GET(req: Request) {
 
     if (!profiles) return NextResponse.json({ entries: [], myEntry: null })
 
-    // Get win/duel counts for each profile
-    const entries = await Promise.all(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      profiles.map(async (p: any, i: number) => {
-        const [{ count: duelCount }, { count: winCount }] = await Promise.all([
-          supabase.from('duels').select('*', { count: 'exact', head: true })
-            .or(`challenger_id.eq.${p.id},challenged_id.eq.${p.id}`)
-            .eq('status', 'completed'),
-          supabase.from('duels').select('*', { count: 'exact', head: true })
-            .eq('winner_id', p.id),
-        ])
-        return {
-          rank: i + 1,
-          ...p,
-          points: period === 'all_time' ? p.total_points : p.weekly_points,
-          duel_count: duelCount ?? 0,
-          win_count: winCount ?? 0,
-        }
-      })
-    )
+    const profileIds = profiles.map((p: any) => p.id)
+
+    // Fetch all duel counts in 2 queries instead of 200
+    const [{ data: completedDuels }, { data: winData }] = await Promise.all([
+      supabase
+        .from('duels')
+        .select('challenger_id, challenged_id')
+        .eq('status', 'completed')
+        .or(`challenger_id.in.(${profileIds.join(',')}),challenged_id.in.(${profileIds.join(',')})`),
+      supabase
+        .from('duels')
+        .select('winner_id')
+        .eq('status', 'completed')
+        .in('winner_id', profileIds),
+    ])
+
+    const duelCountMap: Record<string, number> = {}
+    const winCountMap: Record<string, number> = {}
+
+    for (const d of completedDuels ?? []) {
+      duelCountMap[d.challenger_id] = (duelCountMap[d.challenger_id] ?? 0) + 1
+      duelCountMap[d.challenged_id] = (duelCountMap[d.challenged_id] ?? 0) + 1
+    }
+    for (const d of winData ?? []) {
+      winCountMap[d.winner_id] = (winCountMap[d.winner_id] ?? 0) + 1
+    }
+
+    const entries = profiles.map((p: any, i: number) => ({
+      rank: i + 1,
+      ...p,
+      points: period === 'all_time' ? p.total_points : p.weekly_points,
+      duel_count: duelCountMap[p.id] ?? 0,
+      win_count: winCountMap[p.id] ?? 0,
+    }))
 
     // My entry
     let myEntry = null
     if (user) {
-      const myIdx = entries.findIndex(e => e.id === user.id)
+      const myIdx = entries.findIndex((e: any) => e.id === user.id)
       if (myIdx >= 0) {
         myEntry = entries[myIdx]
       } else {
-        // User not in top 100, find their rank
         const { data: myProfile } = await supabase
           .from('profiles')
           .select('id, username, display_name, avatar_url, total_points, weekly_points')
