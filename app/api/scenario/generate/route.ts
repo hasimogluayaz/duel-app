@@ -1,4 +1,4 @@
-import { createApiClient } from '@/lib/supabase/typed'
+import { createServiceClient } from '@/lib/supabase/typed'
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { generateDailyScenario } from '@/lib/anthropic/scenario'
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Yetkisiz' }, { status: 401 })
     }
 
-    const supabase = createApiClient()
+    const supabase = createServiceClient()
     const today = new Date().toISOString().split('T')[0]
 
     // Check if today's scenario already exists
@@ -59,7 +59,8 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ scenario })
   } catch (_err) {
-    console.error('Scenario generation error:', _err)
-    return NextResponse.json({ error: 'Senaryo üretilemedi.' }, { status: 500 })
+    const msg = _err instanceof Error ? _err.message : String(_err)
+    console.error('Scenario generation error:', msg)
+    return NextResponse.json({ error: msg }, { status: 500 })
   }
 }
