@@ -70,6 +70,27 @@ export async function requireAdmin(userId: string): Promise<void> {
  * Usage:
  *   export const POST = withAuth(async (req, { userId }) => { ... })
  */
+type OptionalAuthHandler = (
+  req: Request,
+  ctx: { userId: string | null; params?: Record<string, string> },
+) => Promise<NextResponse>
+
+export function optionalAuth(handler: OptionalAuthHandler) {
+  return async (req: Request, routeCtx?: { params?: Record<string, string> }) => {
+    try {
+      const supabase = createApiClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      return await handler(req, { userId: user?.id ?? null, params: routeCtx?.params })
+    } catch (error) {
+      if (error instanceof ApiError) {
+        return NextResponse.json({ error: error.message, code: error.code }, { status: error.status })
+      }
+      console.error(`[API ${req.method} ${new URL(req.url).pathname}]`, error)
+      return NextResponse.json({ error: 'Sunucu hatası.', code: 'SERVER_ERROR' }, { status: 500 })
+    }
+  }
+}
+
 type AuthedHandler = (
   req: Request,
   ctx: { userId: string; params?: Record<string, string> },

@@ -12,17 +12,16 @@ export const POST = withAuth(async (req, { userId }) => {
   const scenarioId = requireUuid(body.scenario_id, 'Senaryo ID')
   const content = validateAnswerContent(String(body.content ?? ''))
 
-  // Verify scenario exists and is active today
-  const today = new Date().toISOString().split('T')[0]
+  // Verify scenario exists and is approved
   const { data: scenario } = await supabase
     .from('scenarios')
     .select('id')
-    .eq('active_date', today)
     .eq('id', scenarioId)
+    .eq('is_approved', true)
     .single()
 
   if (!scenario) {
-    throw new ApiError('Senaryo bulunamadı veya bugün aktif değil.', 404, 'NOT_FOUND')
+    throw new ApiError('Senaryo bulunamadı.', 404, 'NOT_FOUND')
   }
 
   // Check if already answered (idempotent — return existing answer)
@@ -49,13 +48,64 @@ export const POST = withAuth(async (req, { userId }) => {
     throw new ApiError('Cevap kaydedilemedi.', 500, 'DB_ERROR')
   }
 
-  // Update profile: points + streak (non-critical, fire-and-forget)
+  // Update profile + missions (non-critical, fire-and-forget)
   updateProfileAsync(supabase, userId).catch((e) =>
     console.error('[answer] Profile update failed:', e),
   )
+  updateMissionProgress(supabase, userId, 'answer_scenario').catch(() => {})
 
   return NextResponse.json({ answer })
 })
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function updateMissionProgress(supabase: any, userId: string, missionType: string): Promise<void> {
+  const today = new Date().toISOString().split('T')[0]
+  const goals: Record<string, { goal: number; points: number }> = {
+    answer_scenario: { goal: 1, points: 20 },
+    vote_3: { goal: 3, points: 15 },
+    challenge_duel: { goal: 1, points: 25 },
+    create_scenario: { goal: 1, points: 30 },
+    follow_user: { goal: 1, points: 10 },
+  }
+  const cfg = goals[missionType]
+  if (!cfg) return
+
+  const { data: existing } = await supabase
+    .from('user_daily_missions')
+    .select('id, progress, completed')
+    .eq('user_id', userId)
+    .eq('date', today)
+    .eq('mission_type', missionType)
+    .maybeSingle()
+
+  if (existing?.completed) return
+
+  const newProgress = (existing?.progress ?? 0) + 1
+  const completed = newProgress >= cfg.goal
+
+  await supabase.from('user_daily_missions').upsert({
+    user_id: userId,
+    date: today,
+    mission_type: missionType,
+    progress: newProgress,
+    completed,
+    ...(completed ? { completed_at: new Date().toISOString(), points_awarded: cfg.points } : {}),
+  }, { onConflict: 'user_id,date,mission_type' })
+
+  if (completed) {
+    await supabase.from('profiles')
+      .update({ total_points: supabase.rpc('increment', { x: cfg.points }) })
+      .eq('id', userId)
+    // Use raw update instead of rpc
+    const { data: p } = await supabase.from('profiles').select('total_points, weekly_points').eq('id', userId).single()
+    if (p) {
+      await supabase.from('profiles').update({
+        total_points: (p.total_points ?? 0) + cfg.points,
+        weekly_points: (p.weekly_points ?? 0) + cfg.points,
+      }).eq('id', userId)
+    }
+  }
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function updateProfileAsync(supabase: any, userId: string): Promise<void> {

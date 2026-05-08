@@ -318,9 +318,79 @@ function FeedTab() {
   )
 }
 
+// ─── Friends Feed Tab ─────────────────────────────────────────────────────────
+function FriendsTab() {
+  const [answers, setAnswers] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/feed/friends')
+      .then((r) => r.json())
+      .then((d) => {
+        setAnswers(d.answers ?? [])
+        setLoading(false)
+      })
+      .catch(() => setLoading(false))
+  }, [])
+
+  if (loading) return <div className="flex justify-center py-20"><Spinner size="lg" /></div>
+
+  if (answers.length === 0) {
+    return (
+      <Card className="text-center py-16 border-dashed">
+        <Users size={32} className="text-fg-subtle opacity-30 mx-auto mb-3" />
+        <p className="text-fg font-semibold mb-1">Takip ettiğin kimse yok</p>
+        <p className="text-fg-subtle text-sm">
+          Oyuncular sekmesinden insanları takip et — cevaplarını burada gör.
+        </p>
+      </Card>
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      {answers.map((a: any) => (
+        <Card key={a.id} className="hover:border-purple-500/30 transition-colors">
+          {a.scenario_content && (
+            <p className="text-xs text-fg-subtle italic mb-2 border-l-2 border-purple-500/40 pl-2 line-clamp-2">
+              &ldquo;{a.scenario_content}&rdquo;
+            </p>
+          )}
+          <div className="flex items-start gap-3">
+            <Link href={`/profil/${a.username}`}>
+              <Avatar src={a.avatar_url} username={a.username} size="sm" />
+            </Link>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <Link href={`/profil/${a.username}`} className="text-sm font-semibold text-fg hover:text-purple-300 transition-colors">
+                  {a.display_name || a.username}
+                </Link>
+                <span className="text-xs text-fg-subtle">@{a.username}</span>
+                <span className="text-xs text-fg-subtle">· {timeAgo(a.created_at)}</span>
+              </div>
+              <p className="text-sm text-fg-muted leading-relaxed">{a.content}</p>
+              <div className="flex items-center gap-3 mt-2">
+                <span className="flex items-center gap-1 text-xs text-fg-subtle">
+                  <Star size={11} className="text-amber-400" />
+                  {a.vote_count} oy
+                </span>
+                {a.scenario_id && (
+                  <Link href={`/arsiv/${a.scenario_id}`} className="text-xs text-purple-400 hover:text-purple-300 transition-colors">
+                    Cevaplara bak →
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        </Card>
+      ))}
+    </div>
+  )
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function KesfetPage() {
-  const [tab, setTab] = useState<'feed' | 'users'>('feed')
+  const [tab, setTab] = useState<'feed' | 'friends' | 'users'>('feed')
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
@@ -349,18 +419,28 @@ export default function KesfetPage() {
           Akış
         </button>
         <button
+          onClick={() => setTab('friends')}
+          className={cn(
+            'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all',
+            tab === 'friends' ? 'bg-purple-600 text-white shadow-sm' : 'text-fg-subtle hover:text-fg'
+          )}
+        >
+          <Users size={14} />
+          Arkadaşlar
+        </button>
+        <button
           onClick={() => setTab('users')}
           className={cn(
             'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all',
             tab === 'users' ? 'bg-purple-600 text-white shadow-sm' : 'text-fg-subtle hover:text-fg'
           )}
         >
-          <Users size={14} />
-          Oyuncular
+          <Search size={14} />
+          Keşfet
         </button>
       </div>
 
-      {tab === 'feed' ? <FeedTab /> : <UsersTab />}
+      {tab === 'feed' ? <FeedTab /> : tab === 'friends' ? <FriendsTab /> : <UsersTab />}
     </div>
   )
 }

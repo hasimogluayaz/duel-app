@@ -21,6 +21,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import DailyMissions from '@/components/missions/DailyMissions'
 
 function useNextScenarioCountdown() {
   const [countdown, setCountdown] = useState('')
@@ -291,6 +292,9 @@ export function OyunClient({
           </div>
         </div>
       )}
+
+      {/* ── Daily Missions ───────────────────────────── */}
+      {userId && <DailyMissions />}
 
       {/* ── Today's scenario ─────────────────────────── */}
       {!scenario ? (

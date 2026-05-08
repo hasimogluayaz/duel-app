@@ -18,7 +18,14 @@
       "Bash(Find /c/duel-app/.claude/worktrees/elastic-knuth-3a344d -path \"*/node_modules\" -prune -o -name \"validation.ts\" -o -name \"validation.js\" -print)",
       "Bash(Find /c/duel-app/.claude/worktrees/elastic-knuth-3a344d -path \"*/node_modules\" -prune -o -name \"types.ts\" -print)",
       "Bash(Find /c/duel-app/.claude/worktrees/elastic-knuth-3a344d -path \"*/node_modules\" -prune -o -type f \\\\\\( -name \"*hook*\" -o -name \"*auth*\" \\\\\\) -print)",
-      "Bash(npx next *)"
+      "Bash(npx next *)",
+      "Bash(git remote *)",
+      "Bash(git merge *)",
+      "Bash(git stash *)",
+      "Bash(git clean *)",
+      "Bash(grep -v \"^$\")",
+      "Bash(npx vercel *)",
+      "Bash(mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\app\\\\api\\\\scenarios\" && mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\app\\\\api\\\\missions\" && mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\app\\\\arsiv\" && mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\app\\\\arsiv\\\\[id]\" && mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\components\\\\missions\")"
     ]
   }
 }
