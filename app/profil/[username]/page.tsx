@@ -11,7 +11,7 @@ import { formatDate, formatPoints } from '@/lib/utils/formatting'
 import { getTier, getTierProgress, getAllTiers } from '@/lib/utils/tier'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { Settings, Trophy, Swords, Flame, Star, Calendar, Target, TrendingUp, Zap, Users } from 'lucide-react'
+import { Settings, Trophy, Swords, Flame, Star, Calendar, Target, TrendingUp, Zap, Users, Crown } from 'lucide-react'
 import { FollowButton } from '@/components/profile/FollowButton'
 
 interface Props { params: { username: string } }
@@ -128,6 +128,12 @@ export default async function ProfilPage({ params }: Props) {
                     <span className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full border ${tier.bg} ${tier.color}`}>
                       {tier.emoji} {tier.label}
                     </span>
+                    {/* Premium badge */}
+                    {(profile as any).is_premium && (
+                      <span className="inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full border border-amber-500/40 bg-amber-500/10 text-amber-300">
+                        <Crown size={10} className="fill-amber-400" /> Premium
+                      </span>
+                    )}
                   </div>
                   <p className="text-fg-subtle text-sm">@{profile.username}</p>
                 </div>

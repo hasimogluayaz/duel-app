@@ -8,10 +8,6 @@
       "path": "/api/cron/weekly-reset",
       "schedule": "0 0 * * 1"
     },
-    {
-      "path": "/api/cron/daily-email",
-      "schedule": "5 3 * * *"
-    }
   ],
   "functions": {
     "app/api/duel/[id]/result/route.ts": {

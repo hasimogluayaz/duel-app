@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Avatar } from '@/components/ui/Avatar'
@@ -20,16 +20,39 @@ export default function MesajlarPage() {
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [loading, setLoading] = useState(true)
   const [query, setQuery] = useState('')
+  const myIdRef = useRef<string | null>(null)
+
+  const refreshConversations = async () => {
+    const res = await fetch('/api/messages')
+    const json = await res.json()
+    setConversations(json.conversations ?? [])
+  }
 
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/giris'); return }
+      myIdRef.current = user.id
 
-      const res = await fetch('/api/messages')
-      const json = await res.json()
-      setConversations(json.conversations ?? [])
+      await refreshConversations()
       setLoading(false)
+
+      // Realtime: listen for new messages where I'm the receiver
+      const channel = supabase
+        .channel('messages-list')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` },
+          () => { refreshConversations() }
+        )
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'messages', filter: `receiver_id=eq.${user.id}` },
+          () => { refreshConversations() }
+        )
+        .subscribe()
+
+      return () => { supabase.removeChannel(channel) }
     }
     load()
   }, [])

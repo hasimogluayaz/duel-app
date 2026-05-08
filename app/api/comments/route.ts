@@ -1,5 +1,6 @@
 import { createApiClient } from '@/lib/supabase/typed'
 import { NextResponse } from 'next/server'
+import { checkRateLimit } from '@/lib/redis/ratelimit'
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -30,13 +31,9 @@ export async function POST(req: Request) {
     if (!duel_id || !content?.trim()) return NextResponse.json({ error: 'Eksik alan.' }, { status: 400 })
     if (content.trim().length > 300) return NextResponse.json({ error: 'Yorum en fazla 300 karakter olabilir.' }, { status: 400 })
 
-    // Rate limit: 20 comments/hour
-    const oneHourAgo = new Date(Date.now() - 3_600_000).toISOString()
-    const { count } = await (supabase.from('comments' as any) as any)
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', user.id)
-      .gte('created_at', oneHourAgo)
-    if ((count ?? 0) >= 20) {
+    // Rate limit: 20 comments/hour (Redis sliding window)
+    const rl = await checkRateLimit('comment', user.id)
+    if (!rl.success) {
       return NextResponse.json({ error: 'Saatlik yorum limitine ulaştınız.' }, { status: 429 })
     }
 

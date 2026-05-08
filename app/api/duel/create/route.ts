@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { generateShareToken } from '@/lib/utils/formatting'
 import { sendDuelInviteEmail } from '@/lib/email/resend'
 import { pushToUser } from '@/lib/push/notify'
+import { checkRateLimit } from '@/lib/redis/ratelimit'
 
 // Rate limit: max 5 duels per day per user
 async function checkDuelRateLimit(supabase: any, userId: string): Promise<boolean> {
@@ -35,7 +36,13 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Kendinizi düelloya çağıramazsınız.' }, { status: 400 })
     }
 
-    // Rate limit check
+    // Redis rate limit (hourly sliding window)
+    const rl = await checkRateLimit('duel', user.id)
+    if (!rl.success) {
+      return NextResponse.json({ error: 'Çok fazla düello isteği. Biraz bekle.' }, { status: 429 })
+    }
+
+    // DB-based daily rate limit check
     const canCreate = await checkDuelRateLimit(supabase, user.id)
     if (!canCreate) {
       return NextResponse.json({ error: 'Günlük düello limitine ulaştınız (5/gün).' }, { status: 429 })

@@ -12,7 +12,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { useToast } from '@/components/ui/Toast'
 import { formatPoints } from '@/lib/utils/formatting'
 import type { Profile } from '@/types'
-import { User, Lock, Trash2, CheckCircle, Star, Flame, Swords, Camera, Gift, Copy, Check } from 'lucide-react'
+import { User, Lock, Trash2, CheckCircle, Star, Flame, Swords, Camera, Gift, Copy, Check, Crown } from 'lucide-react'
 
 export default function AyarlarPage() {
   const router = useRouter()
@@ -320,19 +320,27 @@ export default function AyarlarPage() {
               <p className="text-xs text-fg-subtle">Profilin ve oyun sayfaları</p>
             </div>
           </div>
-          <div className="flex gap-3">
-            <a href={`/profil/${profile.username}`} className="flex-1">
+          <div className="flex gap-3 flex-wrap">
+            <a href={`/profil/${profile.username}`} className="flex-1 min-w-[120px]">
               <Button variant="secondary" className="w-full" size="sm">
                 <User size={14} />
                 Profilimi Gör
               </Button>
             </a>
-            <a href="/oyun" className="flex-1">
+            <a href="/oyun" className="flex-1 min-w-[120px]">
               <Button className="w-full btn-gradient" size="sm">
                 <Swords size={14} />
                 Oynamaya Git
               </Button>
             </a>
+            {!(profile as any).is_premium && (
+              <a href="/premium" className="flex-1 min-w-[120px]">
+                <Button variant="secondary" className="w-full border-amber-500/30 hover:border-amber-500/60 text-amber-300" size="sm">
+                  <Crown size={14} />
+                  Premium'a Geç
+                </Button>
+              </a>
+            )}
           </div>
         </Card>
       )}

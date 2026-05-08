@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
+import { checkRateLimit } from '@/lib/redis/ratelimit'
 
 // GET /api/messages/[username] — fetch conversation
 export async function GET(_: Request, { params }: { params: { username: string } }) {
@@ -44,6 +45,11 @@ export async function POST(request: Request, { params }: { params: { username: s
 
   if (!content || content.length > 500) {
     return NextResponse.json({ error: 'Mesaj 1-500 karakter olmalı.' }, { status: 400 })
+  }
+
+  const rl = await checkRateLimit('message', user.id)
+  if (!rl.success) {
+    return NextResponse.json({ error: 'Çok hızlı mesaj gönderiyorsun. Biraz bekle.' }, { status: 429 })
   }
 
   const { data: partner } = await supabase
