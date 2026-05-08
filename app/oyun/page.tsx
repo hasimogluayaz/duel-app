@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
 import { OyunClient } from './OyunClient'
+import { OnboardingModal } from '@/components/onboarding/OnboardingModal'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Oyna' }
@@ -91,15 +92,23 @@ export default async function OyunPage() {
     activeDuels = duels ?? []
   }
 
+  // Detect new user: onboarding_done = false (or not set)
+  const isNewUser = !!user && !!(profile) && !(profile as any).onboarding_done
+
   return (
-    <OyunClient
-      scenario={scenario}
-      profile={profile}
-      userAnswer={userAnswer}
-      activeDuels={activeDuels}
-      userId={user?.id ?? null}
-      communityAnswers={(communityAnswers ?? []) as any[]}
-      recentDuels={(recentDuels ?? []) as any[]}
-    />
+    <>
+      <OyunClient
+        scenario={scenario}
+        profile={profile}
+        userAnswer={userAnswer}
+        activeDuels={activeDuels}
+        userId={user?.id ?? null}
+        communityAnswers={(communityAnswers ?? []) as any[]}
+        recentDuels={(recentDuels ?? []) as any[]}
+      />
+      {user && isNewUser && (
+        <OnboardingModal userId={user.id} isNewUser={isNewUser} />
+      )}
+    </>
   )
 }

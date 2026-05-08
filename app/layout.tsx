@@ -1,10 +1,14 @@
 import type { Metadata, Viewport } from 'next'
+import { Suspense } from 'react'
 import './globals.css'
 import { Navbar } from '@/components/layout/Navbar'
 import { Footer } from '@/components/layout/Footer'
 import { CookieBanner } from '@/components/layout/CookieBanner'
 import { ToastProvider } from '@/components/ui/Toast'
 import { ServiceWorkerRegister } from '@/components/layout/ServiceWorkerRegister'
+import { PushSubscriber } from '@/components/push/PushSubscriber'
+import { PostHogProvider } from '@/components/analytics/PostHogProvider'
+import { PostHogPageView } from '@/components/analytics/PostHogPageView'
 import { ThemeProvider } from '@/components/layout/ThemeProvider'
 import { createClient } from '@/lib/supabase/server'
 import { Analytics } from '@vercel/analytics/next'
@@ -63,6 +67,7 @@ export default async function RootLayout({
   return (
     <html lang="tr" suppressHydrationWarning>
       <body className="flex flex-col min-h-screen bg-bg text-fg">
+        <PostHogProvider>
         <ThemeProvider>
           <ToastProvider>
             <Navbar initialProfile={initialProfile} />
@@ -72,9 +77,12 @@ export default async function RootLayout({
             <Footer />
             <CookieBanner />
             <ServiceWorkerRegister />
+            {initialProfile && <PushSubscriber />}
+            <Suspense fallback={null}><PostHogPageView /></Suspense>
             <Analytics />
           </ToastProvider>
         </ThemeProvider>
+        </PostHogProvider>
       </body>
     </html>
   )

@@ -1,6 +1,8 @@
 import { createApiClient } from '@/lib/supabase/typed'
 import { NextResponse } from 'next/server'
 import { generateShareToken } from '@/lib/utils/formatting'
+import { sendDuelInviteEmail } from '@/lib/email/resend'
+import { pushToUser } from '@/lib/push/notify'
 
 // Rate limit: max 5 duels per day per user
 async function checkDuelRateLimit(supabase: any, userId: string): Promise<boolean> {
@@ -88,7 +90,7 @@ export async function POST(req: Request) {
       .eq('id', user.id)
       .single()
 
-    // Send notification to challenged user
+    // Send in-app notification to challenged user
     await supabase.from('notifications').insert({
       user_id: challenged_id,
       type: 'duel_invite',
@@ -96,6 +98,32 @@ export async function POST(req: Request) {
       message: `${challenger?.display_name || challenger?.username} seni düelloya çağırdı!`,
       data: { duel_id: duel.id, share_token: shareToken, challenger_id: user.id },
     })
+
+    // Push notification to challenged user (fire-and-forget)
+    pushToUser(challenged_id, {
+      title: '⚔️ Düello Daveti!',
+      body: `${challenger?.display_name || challenger?.username} seni düelloya çağırdı!`,
+      url: `${process.env.NEXT_PUBLIC_APP_URL}/duel/${shareToken}`,
+    }).catch(() => {})
+
+    // Send email to challenged user (fire-and-forget)
+    const { data: challengedUser } = await supabase
+      .from('profiles').select('username').eq('id', challenged_id).single()
+    const { data: { user: authUser } } = await supabase.auth.admin
+      ? { data: { user: null } }
+      : { data: { user: null } }
+    // Get email via service role
+    supabase.auth.admin?.getUserById?.(challenged_id)
+      .then(({ data }: { data: { user: { email?: string } | null } | null }) => {
+        if (data?.user?.email && challengedUser) {
+          sendDuelInviteEmail({
+            to: data.user.email,
+            username: challengedUser.username,
+            challengerName: challenger?.display_name || challenger?.username || '?',
+            duelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/duel/${shareToken}`,
+          }).catch(() => {})
+        }
+      }).catch(() => {})
 
     return NextResponse.json({ duel })
   } catch (_err) {

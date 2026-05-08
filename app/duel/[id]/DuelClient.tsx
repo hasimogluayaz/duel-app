@@ -10,8 +10,10 @@ import { useToast } from '@/components/ui/Toast'
 import { timeUntil } from '@/lib/utils/formatting'
 import { getTier } from '@/lib/utils/tier'
 import { ShareCard } from '@/components/share/ShareCard'
-import { Share2, Clock, Users, ExternalLink, Swords, Trophy, Zap } from 'lucide-react'
+import { Share2, Clock, Users, ExternalLink, Swords, Trophy, Zap, RotateCcw } from 'lucide-react'
 import Link from 'next/link'
+import { CommentsSection } from '@/components/duel/CommentsSection'
+import { ReportButton } from '@/components/ui/ReportButton'
 
 interface Props {
   duel: any
@@ -32,6 +34,7 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
   const [showShare, setShowShare] = useState(false)
   const [timeLeft, setTimeLeft] = useState('')
   const [currentDuel, setCurrentDuel] = useState(duel)
+  const [rematchLoading, setRematchLoading] = useState(false)
 
   const totalVotes = votesA + votesB
   const percentA = totalVotes > 0 ? Math.round((votesA / totalVotes) * 100) : 50
@@ -110,6 +113,67 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
   function copyLink() {
     navigator.clipboard.writeText(window.location.href)
     toast('Bağlantı kopyalandı!', 'success')
+  }
+
+  async function requestRematch() {
+    if (!userId || !isParticipant) return
+    setRematchLoading(true)
+
+    // Find today's scenario to build a fresh duel
+    const today = new Date().toISOString().split('T')[0]
+    const supabaseClient = createClient()
+
+    // Get today's scenario
+    const { data: todayScenario } = await supabaseClient
+      .from('scenarios')
+      .select('id')
+      .eq('active_date', today)
+      .single()
+
+    if (!todayScenario) {
+      toast('Rövanş için bugünkü senaryoya cevap vermelisin.', 'error')
+      setRematchLoading(false)
+      return
+    }
+
+    // Get current user's answer for today
+    const { data: myAnswer } = await supabaseClient
+      .from('answers')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('scenario_id', todayScenario.id)
+      .single()
+
+    if (!myAnswer) {
+      toast('Rövanş için önce bugünkü senaryoya cevap ver!', 'error')
+      setRematchLoading(false)
+      return
+    }
+
+    const opponentId = userId === currentDuel.challenger_id
+      ? currentDuel.challenged_id
+      : currentDuel.challenger_id
+
+    const res = await fetch('/api/duel/create', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        challenged_id: opponentId,
+        scenario_id: todayScenario.id,
+        challenger_answer_id: myAnswer.id,
+      }),
+    })
+
+    const json = await res.json()
+    setRematchLoading(false)
+
+    if (!res.ok) {
+      toast(json.error || 'Rövanş oluşturulamadı.', 'error')
+      return
+    }
+
+    toast('Rövanş daveti gönderildi! ⚔️', 'success')
+    window.location.href = `/duel/${json.duel.share_token}`
   }
 
   const sides = [
@@ -458,6 +522,17 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
                   Bugün oyna
                 </Button>
               </Link>
+              {isParticipant && (
+                <Button
+                  variant="secondary"
+                  className="flex-1"
+                  loading={rematchLoading}
+                  onClick={requestRematch}
+                >
+                  <RotateCcw size={14} />
+                  Rövanş İste
+                </Button>
+              )}
               <button
                 onClick={() => setShowShare(true)}
                 className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 text-white text-sm font-bold hover:opacity-90 transition-opacity"
@@ -468,6 +543,16 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
             </div>
           )}
         </>
+      )}
+
+      {/* ── Report + Comments ────────────────────────── */}
+      {isCompleted && (
+        <div className="flex justify-end mb-1">
+          <ReportButton targetType="duel" targetId={currentDuel.id} userId={userId} />
+        </div>
+      )}
+      {(isCompleted || isActive) && (
+        <CommentsSection duelId={currentDuel.id} userId={userId} />
       )}
 
       {/* ── Share modal ──────────────────────────────── */}

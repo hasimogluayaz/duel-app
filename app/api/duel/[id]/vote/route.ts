@@ -67,19 +67,22 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
     if (voteError) return NextResponse.json({ error: 'Oy kaydedilemedi.' }, { status: 500 })
 
-    // Add points to voted user
-    const { data: votedProfile } = await supabase
-      .from('profiles')
-      .select('total_points, weekly_points')
-      .eq('id', voted_for_id)
-      .single()
+    // Add points to voted-for user AND to voter
+    const [{ data: votedProfile }, { data: voterProfile }] = await Promise.all([
+      supabase.from('profiles').select('total_points, weekly_points').eq('id', voted_for_id).single(),
+      supabase.from('profiles').select('total_points, weekly_points').eq('id', user.id).single(),
+    ])
 
-    if (votedProfile) {
-      await supabase.from('profiles').update({
+    await Promise.all([
+      votedProfile && supabase.from('profiles').update({
         total_points: (votedProfile.total_points || 0) + POINTS.VOTE_RECEIVED,
         weekly_points: (votedProfile.weekly_points || 0) + POINTS.VOTE_RECEIVED,
-      } as any).eq('id', voted_for_id)
-    }
+      } as any).eq('id', voted_for_id),
+      voterProfile && supabase.from('profiles').update({
+        total_points: (voterProfile.total_points || 0) + POINTS.VOTE_CAST,
+        weekly_points: (voterProfile.weekly_points || 0) + POINTS.VOTE_CAST,
+      } as any).eq('id', user.id),
+    ])
 
     // Check vote milestones
     const { count: totalVotes } = await supabase

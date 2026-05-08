@@ -319,9 +319,11 @@ export const POINTS = {
   DUEL_WIN: 50,
   DUEL_LOSE: 10,
   VOTE_RECEIVED: 2,
+  VOTE_CAST: 1,        // oy kullanan kullanıcı da puan kazanır
   DAILY_ANSWER: 5,
   STREAK_7: 100,
   STREAK_30: 500,
+  REFERRAL: 100,       // davet eden kullanıcı için
 } as const
 
 // Achievement labels

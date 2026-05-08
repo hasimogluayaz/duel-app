@@ -11,7 +11,8 @@ import { formatDate, formatPoints } from '@/lib/utils/formatting'
 import { getTier, getTierProgress, getAllTiers } from '@/lib/utils/tier'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { Settings, Trophy, Swords, Flame, Star, Calendar, Target, TrendingUp, Zap } from 'lucide-react'
+import { Settings, Trophy, Swords, Flame, Star, Calendar, Target, TrendingUp, Zap, Users } from 'lucide-react'
+import { FollowButton } from '@/components/profile/FollowButton'
 
 interface Props { params: { username: string } }
 
@@ -30,6 +31,13 @@ export default async function ProfilPage({ params }: Props) {
     .single()
 
   if (!profile || (profile.is_admin && user?.id !== profile.id)) notFound()
+
+  // Check if current user follows this profile
+  const isFollowing = user ? await (async () => {
+    const { data } = await (supabase.from('followers' as any) as any)
+      .select('id').eq('follower_id', user.id).eq('following_id', profile.id).maybeSingle()
+    return !!data
+  })() : false
 
   const [
     { count: duelCount },
@@ -123,14 +131,20 @@ export default async function ProfilPage({ params }: Props) {
                   </div>
                   <p className="text-fg-subtle text-sm">@{profile.username}</p>
                 </div>
-                {/* Challenge CTA */}
+                {/* Follow + Challenge CTAs */}
                 {!isOwnProfile && user && (
-                  <Link href="/oyun">
-                    <Button size="sm" className="btn-gradient shrink-0">
-                      <Swords size={13} />
-                      Düelloya Çağır
-                    </Button>
-                  </Link>
+                  <div className="flex items-center gap-2 shrink-0 flex-wrap">
+                    <FollowButton
+                      targetId={profile.id}
+                      initialFollowing={isFollowing}
+                    />
+                    <Link href="/oyun">
+                      <Button size="sm" className="btn-gradient">
+                        <Swords size={13} />
+                        Düelloya Çağır
+                      </Button>
+                    </Link>
+                  </div>
                 )}
               </div>
 
@@ -218,6 +232,18 @@ export default async function ProfilPage({ params }: Props) {
           ))}
         </div>
       </Card>
+
+      {/* ── Follower/Following counts ──────────────────── */}
+      {((profile as any).follower_count > 0 || (profile as any).following_count > 0) && (
+        <div className="flex items-center gap-4 mb-4 px-1 text-sm">
+          <span className="text-fg-subtle">
+            <span className="font-black text-fg">{(profile as any).follower_count ?? 0}</span> takipçi
+          </span>
+          <span className="text-fg-subtle">
+            <span className="font-black text-fg">{(profile as any).following_count ?? 0}</span> takip
+          </span>
+        </div>
+      )}
 
       {/* ── Stats grid ─────────────────────────────────── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">

@@ -61,7 +61,7 @@ export const POST = withAuth(async (req, { userId }) => {
 async function updateProfileAsync(supabase: any, userId: string): Promise<void> {
   const { data: profile } = await supabase
     .from('profiles')
-    .select('total_points, weekly_points, streak_count, last_played_at')
+    .select('total_points, weekly_points, streak_count, last_played_at, streak_freeze_count')
     .eq('id', userId)
     .single()
 
@@ -71,15 +71,24 @@ async function updateProfileAsync(supabase: any, userId: string): Promise<void> 
   const today = new Date()
   const yesterday = new Date(today)
   yesterday.setDate(yesterday.getDate() - 1)
+  const twoDaysAgo = new Date(today)
+  twoDaysAgo.setDate(twoDaysAgo.getDate() - 2)
 
   const isYesterday = lastPlayed?.toDateString() === yesterday.toDateString()
   const isToday = lastPlayed?.toDateString() === today.toDateString()
+  // Missed exactly 1 day — eligible for auto-freeze
+  const missedOneDay = lastPlayed?.toDateString() === twoDaysAgo.toDateString()
+
+  const freezeCount = (profile as any).streak_freeze_count ?? 0
+  const usedFreeze = missedOneDay && freezeCount > 0
 
   const newStreak = isYesterday
     ? (profile.streak_count ?? 0) + 1
     : isToday
       ? profile.streak_count
-      : 1
+      : usedFreeze
+        ? (profile.streak_count ?? 0) + 1  // freeze preserved streak
+        : 1
 
   let bonusPoints = 0
   if (newStreak === 7) bonusPoints = POINTS.STREAK_7
@@ -90,7 +99,19 @@ async function updateProfileAsync(supabase: any, userId: string): Promise<void> 
     weekly_points: (profile.weekly_points ?? 0) + POINTS.DAILY_ANSWER + bonusPoints,
     streak_count: newStreak,
     last_played_at: today.toISOString(),
+    ...(usedFreeze ? { streak_freeze_count: Math.max(freezeCount - 1, 0) } : {}),
   }).eq('id', userId)
+
+  // Streak freeze notification
+  if (usedFreeze) {
+    await supabase.from('notifications').insert({
+      user_id: userId,
+      type: 'streak_reminder',
+      title: '🧊 Streak Freeze Kullanıldı!',
+      message: `Dün oynamadın ama serin kaldın! Sertin korundu. Kalan dondurma: ${Math.max(freezeCount - 1, 0)}`,
+      data: { freeze_used: true },
+    })
+  }
 
   // Streak achievements
   if (newStreak === 7 || newStreak === 30) {

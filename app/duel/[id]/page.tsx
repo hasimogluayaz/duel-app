@@ -27,15 +27,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const a = challenger?.display_name || challenger?.username || '?'
   const b = challenged?.display_name || challenged?.username || '?'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://kapisio.com'
+  const title = `⚔️ ${a} vs ${b} · Kapisio Düello`
+  const description = scenario?.content
+    ? `"${scenario.content.slice(0, 140)}" — Kim haklı? Oy ver ve kazananı belirle!`
+    : `${a} ile ${b} arasındaki düelloda oy kullan ve kazananı belirle!`
 
   return {
-    title: `${a} vs ${b} · Kapisio Düello`,
-    description: scenario?.content
-      ? `"${scenario.content.slice(0, 120)}" — Kim haklı? Oy ver ve kazananı belirle!`
-      : `${a} ile ${b} arasındaki düelloda oy kullan ve kazananı belirle!`,
+    title,
+    description,
     openGraph: {
-      title: `${a} vs ${b} · Kapisio`,
-      description: scenario?.content ? `"${scenario.content.slice(0, 120)}"` : 'Düelloda oy ver!',
+      title,
+      description,
+      type: 'website',
+      siteName: 'Kapisio',
+      images: [{ url: `${appUrl}/og-default.png`, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [`${appUrl}/og-default.png`],
+      site: '@kapisio',
     },
   }
 }

@@ -12,7 +12,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { useToast } from '@/components/ui/Toast'
 import { formatPoints } from '@/lib/utils/formatting'
 import type { Profile } from '@/types'
-import { User, Lock, Trash2, CheckCircle, Star, Flame, Swords } from 'lucide-react'
+import { User, Lock, Trash2, CheckCircle, Star, Flame, Swords, Camera, Gift, Copy, Check } from 'lucide-react'
 
 export default function AyarlarPage() {
   const router = useRouter()
@@ -23,20 +23,37 @@ export default function AyarlarPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [pwLoading, setPwLoading] = useState(false)
+  const [avatarUploading, setAvatarUploading] = useState(false)
   const [form, setForm] = useState({ display_name: '', bio: '', avatar_url: '' })
   const [pwForm, setPwForm] = useState({ current: '', next: '', confirm: '' })
   const [deleteConfirm, setDeleteConfirm] = useState('')
+  const [referralCode, setReferralCode] = useState<string | null>(null)
+  const [referralCount, setReferralCount] = useState(0)
+  const [referralInput, setReferralInput] = useState('')
+  const [referralLoading, setReferralLoading] = useState(false)
+  const [codeCopied, setCodeCopied] = useState(false)
 
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/giris'); return }
 
-      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
-      if (data) {
-        setProfile(data)
-        setForm({ display_name: data.display_name ?? '', bio: data.bio ?? '', avatar_url: data.avatar_url ?? '' })
+      const [profileRes, referralRes] = await Promise.all([
+        supabase.from('profiles').select('*').eq('id', user.id).single(),
+        fetch('/api/referral'),
+      ])
+
+      if (profileRes.data) {
+        setProfile(profileRes.data)
+        setForm({ display_name: profileRes.data.display_name ?? '', bio: profileRes.data.bio ?? '', avatar_url: profileRes.data.avatar_url ?? '' })
       }
+
+      if (referralRes.ok) {
+        const rd = await referralRes.json()
+        setReferralCode(rd.referral_code)
+        setReferralCount(rd.referral_count)
+      }
+
       setLoading(false)
     }
     load()
@@ -60,6 +77,30 @@ export default function AyarlarPage() {
     else toast('Profil güncellendi! ✨', 'success')
 
     setSaving(false)
+  }
+
+  async function uploadAvatar(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file || !profile) return
+
+    const maxSize = 2 * 1024 * 1024 // 2MB
+    if (file.size > maxSize) { toast('Dosya en fazla 2MB olabilir.', 'error'); return }
+    if (!file.type.startsWith('image/')) { toast('Sadece resim dosyası yükleyebilirsin.', 'error'); return }
+
+    setAvatarUploading(true)
+    const ext = file.name.split('.').pop() ?? 'jpg'
+    const path = `avatars/${profile.id}.${ext}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(path, file, { upsert: true, contentType: file.type })
+
+    if (uploadError) { toast('Yükleme başarısız: ' + uploadError.message, 'error'); setAvatarUploading(false); return }
+
+    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
+    setForm(f => ({ ...f, avatar_url: publicUrl + '?t=' + Date.now() }))
+    toast('Fotoğraf yüklendi! Kaydetmeyi unutma.', 'success')
+    setAvatarUploading(false)
   }
 
   async function changePassword(e: React.FormEvent) {
@@ -89,6 +130,31 @@ export default function AyarlarPage() {
     if (!res.ok) { toast('Hesap silinemedi.', 'error'); return }
     await supabase.auth.signOut()
     router.push('/')
+  }
+
+  async function applyReferral() {
+    if (!referralInput.trim()) return
+    setReferralLoading(true)
+    const res = await fetch('/api/referral', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: referralInput.trim() }),
+    })
+    const data = await res.json()
+    if (res.ok) {
+      toast(`Referans kodu uygulandı! ${data.reward} puan kazandınız 🎉`, 'success')
+      setReferralInput('')
+    } else {
+      toast(data.error || 'Referans kodu uygulanamadı.', 'error')
+    }
+    setReferralLoading(false)
+  }
+
+  function copyReferralCode() {
+    if (!referralCode) return
+    navigator.clipboard.writeText(referralCode)
+    setCodeCopied(true)
+    setTimeout(() => setCodeCopied(false), 2000)
   }
 
   if (loading) return (
@@ -164,13 +230,38 @@ export default function AyarlarPage() {
             charCount={form.bio.length}
             maxChars={160}
           />
-          <Input
-            label="Avatar URL"
-            placeholder="https://... (bir resim linki)"
-            value={form.avatar_url}
-            onChange={e => setForm(f => ({ ...f, avatar_url: e.target.value }))}
-            type="url"
-          />
+          {/* Avatar upload */}
+          <div>
+            <label className="block text-sm font-medium text-fg mb-2">Profil Fotoğrafı</label>
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                <Avatar src={form.avatar_url || profile?.avatar_url} username={profile?.username || '?'} size="lg" />
+                <label className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center cursor-pointer hover:bg-purple-500 transition-colors shadow-lg">
+                  {avatarUploading ? (
+                    <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
+                  ) : (
+                    <Camera size={11} className="text-white" />
+                  )}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="sr-only"
+                    onChange={uploadAvatar}
+                    disabled={avatarUploading}
+                  />
+                </label>
+              </div>
+              <div className="flex-1">
+                <Input
+                  placeholder="ya da resim URL'si yapıştır..."
+                  value={form.avatar_url}
+                  onChange={e => setForm(f => ({ ...f, avatar_url: e.target.value }))}
+                  type="url"
+                />
+                <p className="text-xs text-fg-subtle mt-1">Max 2MB · JPG, PNG, GIF, WebP</p>
+              </div>
+            </div>
+          </div>
           <Button type="submit" loading={saving} className="btn-gradient">
             <CheckCircle size={16} />
             Değişiklikleri Kaydet
@@ -245,6 +336,82 @@ export default function AyarlarPage() {
           </div>
         </Card>
       )}
+
+      {/* ── Referral system ─────────────────────────── */}
+      <Card className="mb-5">
+        <div className="flex items-center gap-2.5 mb-5">
+          <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+            <Gift size={16} className="text-amber-400" />
+          </div>
+          <div>
+            <h2 className="text-base font-bold text-fg">Arkadaşını Davet Et</h2>
+            <p className="text-xs text-fg-subtle">Her başarılı davet için her ikiniz de 100 puan kazanır</p>
+          </div>
+        </div>
+
+        {referralCode && (
+          <div className="mb-5">
+            <p className="text-sm text-fg-subtle mb-2">Referans kodun</p>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 bg-surface-raised border border-border rounded-xl px-4 py-3 font-mono text-lg font-black text-purple-300 tracking-widest text-center">
+                {referralCode}
+              </div>
+              <button
+                onClick={copyReferralCode}
+                className="p-3 rounded-xl bg-purple-600 hover:bg-purple-500 transition-colors text-white"
+                title="Kodu kopyala"
+              >
+                {codeCopied ? <Check size={18} /> : <Copy size={18} />}
+              </button>
+            </div>
+            <div className="mt-3">
+              <p className="text-xs text-fg-subtle mb-1">Davet linkin</p>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 bg-surface-raised border border-border rounded-lg px-3 py-2 text-xs text-fg-subtle truncate font-mono">
+                  {typeof window !== 'undefined' ? `${window.location.origin}/giris?ref=${referralCode}` : `/giris?ref=${referralCode}`}
+                </div>
+                <button
+                  onClick={() => {
+                    const url = `${window.location.origin}/giris?ref=${referralCode}`
+                    navigator.clipboard.writeText(url)
+                    setCodeCopied(true)
+                    setTimeout(() => setCodeCopied(false), 2000)
+                  }}
+                  className="p-2 rounded-lg bg-purple-600 hover:bg-purple-500 transition-colors text-white shrink-0"
+                >
+                  {codeCopied ? <Check size={14} /> : <Copy size={14} />}
+                </button>
+              </div>
+            </div>
+            {referralCount > 0 && (
+              <p className="text-xs text-fg-subtle mt-2 text-center">
+                🎉 Şimdiye kadar <strong className="text-amber-400">{referralCount}</strong> kişiyi davet ettin
+              </p>
+            )}
+          </div>
+        )}
+
+        <div>
+          <p className="text-sm text-fg-subtle mb-2">Bir referans koduyla mı katıldın?</p>
+          <div className="flex gap-2">
+            <Input
+              placeholder="Referans kodunu gir"
+              value={referralInput}
+              onChange={e => setReferralInput(e.target.value.toUpperCase())}
+              className="flex-1 font-mono tracking-widest"
+              maxLength={8}
+            />
+            <Button
+              onClick={applyReferral}
+              loading={referralLoading}
+              disabled={!referralInput.trim()}
+              variant="secondary"
+            >
+              Uygula
+            </Button>
+          </div>
+        </div>
+      </Card>
 
       {/* ── Danger zone ──────────────────────────────── */}
       <Card className="border-red-500/20">

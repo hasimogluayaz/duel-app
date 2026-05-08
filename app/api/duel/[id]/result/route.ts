@@ -2,6 +2,8 @@ import { createApiClient } from '@/lib/supabase/typed'
 import { NextResponse } from 'next/server'
 import { generateVerdict } from '@/lib/anthropic/verdict'
 import { POINTS } from '@/types'
+import { pushToUser } from '@/lib/push/notify'
+import { sendDuelResultEmail } from '@/lib/email/resend'
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
@@ -93,7 +95,9 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       } as any)
     }
 
-    // Notifications
+    const duelUrl = `${process.env.NEXT_PUBLIC_APP_URL}/duel/${duel.share_token}`
+
+    // In-app notifications
     await Promise.all([
       supabase.from('notifications').insert({
         user_id: winnerId,
@@ -110,6 +114,35 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
         data: { duel_id: duel.id, share_token: duel.share_token },
       } as any),
     ])
+
+    // Push notifications (fire-and-forget)
+    const [{ data: winnerProf }, { data: loserProf }] = await Promise.all([
+      supabase.from('profiles').select('username').eq('id', winnerId).single(),
+      supabase.from('profiles').select('username').eq('id', loserId).single(),
+    ])
+
+    Promise.all([
+      pushToUser(winnerId, { title: '🏆 Düelloyu Kazandın!', body: `AI: "${verdict.verdict.slice(0, 80)}"`, url: duelUrl }),
+      pushToUser(loserId, { title: '😅 Düelloyu Kaybettin', body: `AI: "${verdict.roast.slice(0, 80)}"`, url: duelUrl }),
+    ]).catch(() => {})
+
+    // Email notifications (fire-and-forget)
+    ;(async () => {
+      try {
+        const [{ data: winnerAuth }, { data: loserAuth }] = await Promise.all([
+          (supabase.auth as any).admin.getUserById(winnerId),
+          (supabase.auth as any).admin.getUserById(loserId),
+        ])
+        const tasks: Promise<unknown>[] = []
+        if (winnerAuth?.user?.email && winnerProf) {
+          tasks.push(sendDuelResultEmail({ to: winnerAuth.user.email, username: winnerProf.username, won: true, verdict: verdict.verdict, duelUrl }))
+        }
+        if (loserAuth?.user?.email && loserProf) {
+          tasks.push(sendDuelResultEmail({ to: loserAuth.user.email, username: loserProf.username, won: false, verdict: verdict.roast, duelUrl }))
+        }
+        await Promise.allSettled(tasks)
+      } catch {}
+    })()
 
     return NextResponse.json({ verdict, winnerId })
   } catch (_err) {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
@@ -21,6 +21,28 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+
+function useNextScenarioCountdown() {
+  const [countdown, setCountdown] = useState('')
+  useEffect(() => {
+    function calc() {
+      const now = new Date()
+      // Next scenario at 03:00 Turkey time = 00:00 UTC
+      const next = new Date(now)
+      next.setUTCHours(0, 0, 0, 0)
+      if (next <= now) next.setUTCDate(next.getUTCDate() + 1)
+      const diff = next.getTime() - now.getTime()
+      const h = Math.floor(diff / 3_600_000)
+      const m = Math.floor((diff % 3_600_000) / 60_000)
+      const s = Math.floor((diff % 60_000) / 1_000)
+      setCountdown(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`)
+    }
+    calc()
+    const t = setInterval(calc, 1000)
+    return () => clearInterval(t)
+  }, [])
+  return countdown
+}
 
 interface Props {
   scenario: Scenario | null
@@ -60,6 +82,7 @@ export function OyunClient({
   const [submitting, setSubmitting] = useState(false)
   const [userAnswer, setUserAnswer] = useState(initialAnswer)
   const [duelModal, setDuelModal] = useState(false)
+  const [directChallengeTarget, setDirectChallengeTarget] = useState<{ id: string; username: string } | null>(null)
   const [joinModal, setJoinModal] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchResults, setSearchResults] = useState<Profile[]>([])
@@ -69,6 +92,8 @@ export function OyunClient({
   const [tipIdx] = useState(() => Math.floor(Math.random() * WRITING_TIPS.length))
   const [justSubmitted, setJustSubmitted] = useState(false)
   const [answerSort, setAnswerSort] = useState<'top' | 'new'>('top')
+
+  const nextScenarioCountdown = useNextScenarioCountdown()
 
   const isGuest = !userId
 
@@ -138,8 +163,15 @@ export function OyunClient({
     if (!res.ok) { toast(json.error || 'Davet gönderilemedi.', 'error'); setInviting(null); return }
     toast('Düello daveti gönderildi! ⚔️', 'success')
     setDuelModal(false)
+    setDirectChallengeTarget(null)
     setInviting(null)
     router.push(`/duel/${json.duel.share_token}`)
+  }
+
+  function challengeFromAnswer(targetId: string, username: string) {
+    if (isGuest) { setJoinModal(true); return }
+    if (!userAnswer) { toast('Önce bugünkü senaryoya cevap ver!', 'error'); return }
+    setDirectChallengeTarget({ id: targetId, username })
   }
 
   const charCount = answer.length
@@ -214,10 +246,13 @@ export function OyunClient({
                   </div>
                 </div>
                 {profile.streak_count > 0 && (
-                  <div className="text-center">
+                  <div className="text-center" title={(profile as any).streak_freeze_count > 0 ? `${(profile as any).streak_freeze_count} streak freeze hakkın var 🧊` : 'Streak freeze hakkın kalmadı'}>
                     <div className="text-base font-black text-amber-400">{profile.streak_count}</div>
                     <div className="flex items-center gap-0.5 justify-center text-xs text-fg-subtle">
                       <Flame size={9} className="text-amber-400" /> seri
+                      {(profile as any).streak_freeze_count > 0 && (
+                        <span className="ml-0.5 text-blue-400">🧊{(profile as any).streak_freeze_count}</span>
+                      )}
                     </div>
                   </div>
                 )}
@@ -263,6 +298,9 @@ export function OyunClient({
           <p className="text-5xl mb-4">🌙</p>
           <h2 className="text-xl font-bold text-fg mb-2">Bugünkü senaryo hazırlanıyor</h2>
           <p className="text-fg-subtle text-sm">Birazdan yeni senaryo yayınlanacak.</p>
+          {nextScenarioCountdown && (
+            <p className="text-xs text-purple-400 mt-2 font-mono font-bold">{nextScenarioCountdown}</p>
+          )}
         </Card>
       ) : (
         <Card glow>
@@ -284,6 +322,13 @@ export function OyunClient({
             </div>
           </div>
           <p className="text-xl font-bold text-fg leading-relaxed">{scenario.content}</p>
+          {userAnswer && nextScenarioCountdown && (
+            <div className="mt-3 flex items-center gap-1.5 text-xs text-fg-subtle">
+              <Clock size={11} className="text-purple-400" />
+              <span>Yeni senaryo: </span>
+              <span className="font-mono font-bold text-purple-400">{nextScenarioCountdown}</span>
+            </div>
+          )}
         </Card>
       )}
 
@@ -565,6 +610,15 @@ export function OyunClient({
                               {a.vote_count}
                             </span>
                           )}
+                          {!isOwn && !shouldBlur && userAnswer && p?.id && (
+                            <button
+                              onClick={() => challengeFromAnswer(p.id, p.username)}
+                              className="flex items-center gap-1 text-xs text-purple-400 hover:text-purple-300 font-semibold px-2 py-0.5 rounded-lg hover:bg-purple-500/10 transition-all border border-purple-500/20 hover:border-purple-400/40"
+                            >
+                              <Swords size={10} />
+                              Meydan Oku
+                            </button>
+                          )}
                         </div>
                       </div>
                       <p className="text-sm text-fg-muted leading-relaxed line-clamp-3">{a.content}</p>
@@ -676,6 +730,31 @@ export function OyunClient({
         <p className="text-center text-xs text-fg-subtle mt-4">
           Kredi kartı gerekmez · Tamamen ücretsiz
         </p>
+      </Modal>
+
+      {/* ── Direct challenge confirm modal ───────────── */}
+      <Modal
+        open={!!directChallengeTarget}
+        onClose={() => setDirectChallengeTarget(null)}
+        title="Meydan Okuma ⚔️"
+      >
+        <p className="text-sm text-fg-muted mb-5 text-center">
+          <span className="font-bold text-fg">@{directChallengeTarget?.username}</span> adlı kullanıcıyı
+          <br />bugünkü senaryo için düelloya çağıracaksın.
+        </p>
+        <div className="flex gap-2">
+          <Button
+            className="flex-1 btn-gradient"
+            loading={inviting === directChallengeTarget?.id}
+            onClick={() => directChallengeTarget && inviteUser(directChallengeTarget.id)}
+          >
+            <Swords size={14} />
+            Çağır!
+          </Button>
+          <Button variant="secondary" className="flex-1" onClick={() => setDirectChallengeTarget(null)}>
+            Vazgeç
+          </Button>
+        </div>
       </Modal>
 
       {/* ── Duel invite modal ────────────────────────── */}
