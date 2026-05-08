@@ -91,22 +91,11 @@ export default function PremiumPage() {
           ))}
         </div>
 
-        {isPremium ? (
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-center gap-2 py-3 rounded-xl bg-amber-500/10 border border-amber-500/30">
-              <Crown size={16} className="text-amber-400" />
-              <span className="text-sm font-bold text-amber-300">Premium üyesiniz ✓</span>
-            </div>
-            <Button variant="secondary" loading={portalLoading} onClick={openPortal} className="w-full">
-              Aboneliği Yönet
-            </Button>
-          </div>
-        ) : (
-          <Button loading={loading} onClick={startCheckout} className="w-full btn-gradient text-base py-3">
-            <Crown size={18} />
-            Premium'a Geç
-          </Button>
-        )}
+        <div className="flex flex-col items-center gap-2 py-4 rounded-xl bg-surface border border-stroke text-center">
+          <span className="text-2xl">🚧</span>
+          <p className="text-sm font-bold text-fg">Çok Yakında</p>
+          <p className="text-xs text-fg-subtle">Premium özellikler hazırlanıyor. Yakında burada olacak!</p>
+        </div>
       </Card>
 
       {/* FAQ */}

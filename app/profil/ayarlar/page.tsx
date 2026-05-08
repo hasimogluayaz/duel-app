@@ -333,14 +333,14 @@ export default function AyarlarPage() {
                 Oynamaya Git
               </Button>
             </a>
-            {!(profile as any).is_premium && (
+            {/* Premium button — aktif edilecek: {!(profile as any).is_premium && (
               <a href="/premium" className="flex-1 min-w-[120px]">
                 <Button variant="secondary" className="w-full border-amber-500/30 hover:border-amber-500/60 text-amber-300" size="sm">
                   <Crown size={14} />
                   Premium'a Geç
                 </Button>
               </a>
-            )}
+            )} */}
           </div>
         </Card>
       )}
