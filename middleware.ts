@@ -32,6 +32,16 @@ export async function middleware(request: NextRequest) {
 
   const isProtected = protectedRoutes.some(route => pathname.startsWith(route))
   const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
+  const isProfileCompletion = pathname.startsWith('/auth/tamamla')
+
+  // Logged-in user with incomplete Google profile → force them to /auth/tamamla
+  // profile_complete is stored in user_metadata to avoid extra DB calls
+  if (user && !isProfileCompletion) {
+    const profileComplete = user.user_metadata?.profile_complete !== false
+    if (!profileComplete) {
+      return NextResponse.redirect(new URL('/auth/tamamla', request.url))
+    }
+  }
 
   if (isProtected && !user) {
     const redirectUrl = new URL('/giris', request.url)

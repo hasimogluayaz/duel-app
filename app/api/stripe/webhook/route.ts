@@ -3,7 +3,7 @@ import { stripe } from '@/lib/stripe/client'
 import { createClient } from '@/lib/supabase/server'
 import type Stripe from 'stripe'
 
-export const config = { api: { bodyParser: false } }
+export const runtime = 'nodejs'
 
 async function updatePremiumStatus(
   supabase: ReturnType<typeof createClient>,

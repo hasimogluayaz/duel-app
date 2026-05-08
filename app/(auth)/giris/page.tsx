@@ -30,10 +30,14 @@ function GirisForm() {
   const supabase = createClient()
   const toast = useToast()
   const redirect = searchParams.get('redirect') || '/oyun'
+  const callbackError = searchParams.get('error')
 
   const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
+  const [unconfirmedEmail, setUnconfirmedEmail] = useState('')
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendSent, setResendSent] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -45,15 +49,27 @@ function GirisForm() {
     })
 
     if (error) {
-      toast(error.message === 'Invalid login credentials'
-        ? 'Email veya şifre hatalı.'
-        : 'Giriş yapılamadı. Tekrar dene.', 'error')
+      if (error.message.toLowerCase().includes('email not confirmed')) {
+        setUnconfirmedEmail(form.email)
+      } else {
+        toast(error.message === 'Invalid login credentials'
+          ? 'Email veya şifre hatalı.'
+          : 'Giriş yapılamadı. Tekrar dene.', 'error')
+      }
       setLoading(false)
       return
     }
 
     router.push(redirect)
     router.refresh()
+  }
+
+  async function handleResendConfirmation() {
+    setResendLoading(true)
+    const { error } = await supabase.auth.resend({ type: 'signup', email: unconfirmedEmail })
+    setResendLoading(false)
+    if (!error) setResendSent(true)
+    else toast('Email gönderilemedi. Biraz bekle ve tekrar dene.', 'error')
   }
 
   async function handleGoogle() {
@@ -133,6 +149,11 @@ function GirisForm() {
           <div className="mb-8">
             <h1 className="text-2xl font-black text-fg mb-1">Hoş geldin! 👋</h1>
             <p className="text-fg-muted text-sm">Hesabına giriş yap ve düelloya katıl</p>
+            {callbackError === 'auth_callback' && (
+              <div className="mt-3 bg-red-500/10 border border-red-500/25 rounded-xl px-3 py-2.5 text-xs text-red-400">
+                Giriş sırasında bir hata oluştu. Tekrar dene.
+              </div>
+            )}
           </div>
 
           {/* Google button */}
@@ -183,6 +204,27 @@ function GirisForm() {
               Giriş Yap
             </Button>
           </form>
+
+          {/* Email not confirmed banner */}
+          {unconfirmedEmail && (
+            <div className="mt-4 bg-amber-500/10 border border-amber-500/25 rounded-xl px-4 py-3">
+              <p className="text-sm font-semibold text-amber-400 mb-1">📧 Email doğrulanmadı</p>
+              <p className="text-xs text-fg-subtle mb-3">
+                <strong className="text-fg">{unconfirmedEmail}</strong> adresine gönderilen doğrulama emailini kontrol et. Spam klasörüne düşmüş olabilir.
+              </p>
+              {resendSent ? (
+                <p className="text-xs text-green-400 font-medium">✓ Doğrulama emaili tekrar gönderildi!</p>
+              ) : (
+                <button
+                  onClick={handleResendConfirmation}
+                  disabled={resendLoading}
+                  className="text-xs text-amber-400 hover:text-amber-300 font-semibold underline underline-offset-2 disabled:opacity-50"
+                >
+                  {resendLoading ? 'Gönderiliyor...' : 'Doğrulama emailini tekrar gönder →'}
+                </button>
+              )}
+            </div>
+          )}
 
           <p className="text-center text-sm text-fg-subtle mt-6">
             Hesabın yok mu?{' '}

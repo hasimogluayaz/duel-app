@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\" -Recurse -Force)",
+      "Bash(Select-Object -First 100)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(npx tsc *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(npm install *)",
+      "Bash(npx web-push *)",
+      "Bash(npx supabase *)",
+      "mcp__Claude_in_Chrome__tabs_context_mcp",
+      "Bash(git commit *)",
+      "Bash(Find /c/duel-app -name \"*.ts\" -o -name \"*.tsx\")",
+      "Bash(Find /c/duel-app/.claude/worktrees/elastic-knuth-3a344d -path \"*/node_modules\" -prune -o -name \"*.ts\" -o -name \"*.tsx\")",
+      "Bash(Find /c/duel-app/.claude/worktrees/elastic-knuth-3a344d/lib -name \"*.ts\")",
+      "Bash(Find /c/duel-app/.claude/worktrees/elastic-knuth-3a344d -path \"*/node_modules\" -prune -o -name \"validation.ts\" -o -name \"validation.js\" -print)",
+      "Bash(Find /c/duel-app/.claude/worktrees/elastic-knuth-3a344d -path \"*/node_modules\" -prune -o -name \"types.ts\" -print)",
+      "Bash(Find /c/duel-app/.claude/worktrees/elastic-knuth-3a344d -path \"*/node_modules\" -prune -o -type f \\\\\\( -name \"*hook*\" -o -name \"*auth*\" \\\\\\) -print)",
+      "Bash(npx next *)"
+    ]
+  }
+}

@@ -51,6 +51,8 @@ export default function KayitPage() {
   const [googleLoading, setGoogleLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [showGoogleConsent, setShowGoogleConsent] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendCooldown, setResendCooldown] = useState(0)
 
   const allConsented = CONSENTS.every(c => consents[c.id])
 
@@ -123,14 +125,8 @@ export default function KayitPage() {
       return
     }
 
-    if (data.user) {
-      await supabase.from('profiles').insert({
-        id: data.user.id,
-        username: form.username.toLowerCase(),
-        display_name: form.display_name,
-      })
-    }
-
+    // Profile is created in /auth/callback after email confirmation
+    // Username + display_name are stored in user_metadata and used there
     setSuccess(true)
     setLoading(false)
   }
@@ -153,6 +149,25 @@ export default function KayitPage() {
     }
   }
 
+  async function handleResend() {
+    setResendLoading(true)
+    const { error } = await supabase.auth.resend({ type: 'signup', email: form.email })
+    setResendLoading(false)
+    if (error) {
+      toast('Email gönderilemedi. Biraz bekleyip tekrar dene.', 'error')
+    } else {
+      toast('Doğrulama emaili tekrar gönderildi!', 'success')
+      // 60s cooldown
+      setResendCooldown(60)
+      const interval = setInterval(() => {
+        setResendCooldown(c => {
+          if (c <= 1) { clearInterval(interval); return 0 }
+          return c - 1
+        })
+      }, 1000)
+    }
+  }
+
   if (success) {
     return (
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 bg-bg">
@@ -164,12 +179,27 @@ export default function KayitPage() {
           <p className="text-fg-muted text-sm mb-2">
             <strong className="text-fg">{form.email}</strong> adresine doğrulama emaili gönderdik.
           </p>
-          <p className="text-fg-subtle text-sm mb-8">
+          <p className="text-fg-subtle text-sm mb-6">
             Emailini kontrol edip bağlantıya tıklayarak hesabını aktif et.
           </p>
-          <Link href="/giris">
-            <Button variant="outline" className="w-full">Giriş sayfasına dön</Button>
-          </Link>
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3 mb-6 text-left">
+            <p className="text-xs text-amber-400 font-semibold mb-1">📬 Email gelmediyse</p>
+            <p className="text-xs text-fg-subtle">Spam/Gereksiz klasörünü kontrol et. Yine de gelmezse aşağıdaki butona tıkla.</p>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Button
+              variant="outline"
+              onClick={handleResend}
+              loading={resendLoading}
+              disabled={resendCooldown > 0}
+              className="w-full"
+            >
+              {resendCooldown > 0 ? `Tekrar gönder (${resendCooldown}s)` : 'Doğrulama emailini tekrar gönder'}
+            </Button>
+            <Link href="/giris">
+              <Button variant="ghost" className="w-full">Giriş sayfasına dön</Button>
+            </Link>
+          </div>
         </div>
       </div>
     )

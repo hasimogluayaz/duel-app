@@ -1,6 +1,12 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Lazy init — RESEND_API_KEY may not be set during build
+let _resend: Resend | null = null
+function getResend() {
+  if (!process.env.RESEND_API_KEY) return null
+  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY)
+  return _resend
+}
 
 const FROM = 'Kapisio <bildirim@kapisio.com>'
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://kapisio.com'
@@ -38,7 +44,8 @@ export async function sendDailyScenarioEmail(opts: {
   username: string
   scenario: string
 }) {
-  if (!process.env.RESEND_API_KEY) return
+  const resend = getResend()
+  if (!resend) return
   return resend.emails.send({
     from: FROM,
     to: opts.to,
@@ -60,7 +67,8 @@ export async function sendDuelInviteEmail(opts: {
   challengerName: string
   duelUrl: string
 }) {
-  if (!process.env.RESEND_API_KEY) return
+  const resend = getResend()
+  if (!resend) return
   return resend.emails.send({
     from: FROM,
     to: opts.to,
@@ -83,7 +91,8 @@ export async function sendDuelResultEmail(opts: {
   verdict: string
   duelUrl: string
 }) {
-  if (!process.env.RESEND_API_KEY) return
+  const resend = getResend()
+  if (!resend) return
   return resend.emails.send({
     from: FROM,
     to: opts.to,
@@ -106,7 +115,8 @@ export async function sendStreakReminderEmail(opts: {
   username: string
   streakCount: number
 }) {
-  if (!process.env.RESEND_API_KEY) return
+  const resend = getResend()
+  if (!resend) return
   return resend.emails.send({
     from: FROM,
     to: opts.to,
