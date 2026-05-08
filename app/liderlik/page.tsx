@@ -8,6 +8,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { Badge } from '@/components/ui/Badge'
 import { Spinner } from '@/components/ui/Spinner'
 import { formatPoints } from '@/lib/utils/formatting'
+import { getTier } from '@/lib/utils/tier'
 import Link from 'next/link'
 import { Trophy, Swords } from 'lucide-react'
 
@@ -114,11 +115,24 @@ export default function LiderlikPage() {
                     ${PODIUM_COLORS[i]}
                   `}>
                     <div className="text-3xl sm:text-4xl mb-2">{MEDAL[i]}</div>
-                    <Avatar src={entry.avatar_url} username={entry.username} size="md" className="mb-2" />
+                    {(() => {
+                      const t = getTier(entry.points)
+                      return (
+                        <div className={`p-0.5 rounded-full ring-2 mb-2 ${t.ringColor}`}>
+                          <Avatar src={entry.avatar_url} username={entry.username} size="md" />
+                        </div>
+                      )
+                    })()}
                     <p className="text-xs sm:text-sm font-bold text-fg truncate w-full">
                       {entry.display_name || entry.username}
                     </p>
-                    <p className="text-xs text-fg-subtle truncate w-full">@{entry.username}</p>
+                    {/* Tier badge */}
+                    {(() => {
+                      const t = getTier(entry.points)
+                      return (
+                        <span className={`text-xs font-bold ${t.color} mt-0.5`}>{t.emoji} {t.label}</span>
+                      )
+                    })()}
                     <p className={`font-black mt-2 text-sm sm:text-base ${
                       i === 0 ? 'text-amber-400' : i === 1 ? 'text-zinc-300' : 'text-orange-400'
                     }`}>
@@ -157,9 +171,12 @@ export default function LiderlikPage() {
                         <p className="font-semibold text-fg text-sm truncate group-hover:text-purple-300 transition-colors">
                           {entry.display_name || entry.username}
                         </p>
-                        {entry.personality_type && (
-                          <Badge variant="default" className="text-xs hidden sm:inline-flex">{entry.personality_type}</Badge>
-                        )}
+                        {(() => {
+                          const t = getTier(entry.points)
+                          return (
+                            <span className={`text-xs font-bold ${t.color} shrink-0`}>{t.emoji} {t.label}</span>
+                          )
+                        })()}
                       </div>
                       <p className="text-xs text-fg-subtle">@{entry.username}</p>
                     </div>

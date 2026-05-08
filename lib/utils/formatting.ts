@@ -31,7 +31,13 @@ export function formatPoints(points: number): string {
   return points.toString()
 }
 
-export function generateShareToken(): string {
-  return Math.random().toString(36).substring(2, 10) +
-    Math.random().toString(36).substring(2, 10)
+/**
+ * Generates a cryptographically secure URL-safe random token.
+ * Uses Web Crypto API (available in Node.js 18+ and all browsers).
+ */
+export function generateShareToken(length = 12): string {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  const bytes = new Uint8Array(length)
+  crypto.getRandomValues(bytes)
+  return Array.from(bytes, (b) => chars[b % chars.length]).join('')
 }

@@ -1,14 +1,17 @@
 import Groq from 'groq-sdk'
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY ?? '' })
+function getGroqClient(): Groq {
+  const apiKey = process.env.GROQ_API_KEY
+  if (!apiKey) {
+    throw new Error('[Groq] Missing GROQ_API_KEY environment variable')
+  }
+  return new Groq({ apiKey })
+}
 
 export async function generateDailyScenario(): Promise<string> {
-  const completion = await groq.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
-    messages: [
-      {
-        role: 'user',
-        content: `Sen Türkçe konuşan gençler için eğlenceli, günlük hayattan senaryolar üreten bir AI'sın.
+  const groq = getGroqClient()
+
+  const prompt = `Sen Türkçe konuşan gençler için eğlenceli, günlük hayattan senaryolar üreten bir AI'sın.
 Her gün farklı bir konu seç: iş, aşk, aile, arkadaşlık, sosyal medya, alışveriş, ulaşım, teknoloji, yemek, tatil vb.
 Senaryo komik, tartışmalı veya utandırıcı ama zararsız bir durum olmalı. Maksimum 2 cümle.
 Örnekler:
@@ -18,22 +21,28 @@ Senaryo komik, tartışmalı veya utandırıcı ama zararsız bir durum olmalı.
 - "Sokakta birini tanıdığını sandın ve selamladın ama tanımıyormuşsun. Ne yaparsın?"
 Sadece JSON formatında döndür: {"scenario": "senaryo metni"}
 
-Bugünkü senaryoyu üret.`,
-      },
-    ],
+Bugünkü senaryoyu üret.`
+
+  const completion = await groq.chat.completions.create({
+    model: 'llama-3.3-70b-versatile',
+    messages: [{ role: 'user', content: prompt }],
     temperature: 0.9,
     max_tokens: 200,
     response_format: { type: 'json_object' },
   })
 
   const text = completion.choices[0]?.message?.content ?? ''
+
   try {
     const parsed = JSON.parse(text) as { scenario: string }
-    return parsed.scenario
+    if (!parsed.scenario || typeof parsed.scenario !== 'string') {
+      throw new Error('Missing scenario field')
+    }
+    return parsed.scenario.trim()
   } catch {
     const match = text.match(/\{[\s\S]*\}/)
     if (match) return (JSON.parse(match[0]) as { scenario: string }).scenario
-    if (text.length > 10) return text
-    throw new Error('AI yanıtı geçersiz format döndürdü.')
+    if (text.length > 10) return text.trim()
+    throw new Error(`[Groq] Invalid scenario response: ${text.slice(0, 100)}`)
   }
 }

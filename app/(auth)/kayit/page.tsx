@@ -13,47 +13,24 @@ import { CheckCircle, Sparkles, Shield, Swords, AlertCircle } from 'lucide-react
 import Image from 'next/image'
 import { cn } from '@/lib/utils/cn'
 
-// Zorunlu onay kutucukları — hepsi işaretlenmeden form submit edilemiyor
 const CONSENTS = [
   {
     id: 'terms',
     text: (
       <>
         <Link href="/kullanim-kosullari" target="_blank" className="text-primary hover:underline font-medium">Kullanım Koşulları</Link>
-        &apos;nı okudum ve kabul ediyorum. Platformun yalnızca eğlence amaçlı olduğunu,
-        hakaret/ırkçılık/şiddet içeren içerik paylaşımının yasak olduğunu ve bu kurallara
-        aykırı davranmam halinde hesabımın askıya alınabileceğini anlıyorum.
-      </>
-    ),
-    required: true,
-  },
-  {
-    id: 'privacy',
-    text: (
-      <>
-        <Link href="/gizlilik" target="_blank" className="text-primary hover:underline font-medium">Gizlilik Politikası</Link>
-        &apos;nı ve{' '}
+        {', '}
+        <Link href="/gizlilik" target="_blank" className="text-primary hover:underline font-medium">Gizlilik</Link>
+        {' ve '}
         <Link href="/cerez-politikasi" target="_blank" className="text-primary hover:underline font-medium">Çerez Politikası</Link>
-        &apos;nı okudum. E-posta adresim, kullanıcı adım ve oyun içi cevaplarımın
-        Supabase (AB, Frankfurt) altyapısında saklanmasına; Vercel ve Anthropic Claude
-        (ABD) servisleri aracılığıyla işlenmesine açık rıza veriyorum.
+        &apos;nı okudum, kabul ediyorum.
       </>
     ),
     required: true,
   },
   {
-    id: 'age',
-    text: '13 yaşından büyük olduğumu beyan ederim. 18 yaşından küçüksem ebeveyn/vasi onayı aldığımı kabul ediyorum.',
-    required: true,
-  },
-  {
-    id: 'content',
-    text: 'Platform üzerinde paylaştığım içeriklerin (cevaplar, profil bilgileri) yasal sorumluluğunun tamamen bana ait olduğunu, Kapisio\'nun kullanıcı içeriklerinden sorumlu tutulamayacağını kabul ediyorum.',
-    required: true,
-  },
-  {
-    id: 'ai',
-    text: 'Yazdığım cevapların AI değerlendirmesi için Anthropic Claude API\'ye gönderileceğini, AI\'nın verdiği sonuçların (kazanan, roast, kişilik tipi) eğlence amaçlı olup hukuki bağlayıcılığı bulunmadığını anlıyorum.',
+    id: 'age_ai',
+    text: '13 yaşından büyüğüm; cevaplarımın eğlence amaçlı AI değerlendirmesine tabi olabileceğini anlıyorum.',
     required: true,
   },
 ]
@@ -389,53 +366,31 @@ interface ConsentProps {
   error?: string
 }
 
-function ConsentBlock({ consents, onToggle, onAcceptAll, error }: ConsentProps) {
-  const allChecked = CONSENTS.every(c => consents[c.id])
-
+function ConsentBlock({ consents, onToggle, error }: ConsentProps) {
   return (
     <div className="flex flex-col gap-2">
-      {/* Hepsini kabul et shortcut */}
-      {!allChecked && (
-        <button
-          type="button"
-          onClick={onAcceptAll}
-          className="w-full text-xs text-purple-400 hover:text-purple-300 border border-purple-500/30 hover:border-purple-500/60 rounded-xl py-2 px-3 transition-colors text-left flex items-center gap-2"
-        >
-          <CheckCircle size={14} />
-          Tümünü kabul et (zorunlu onaylar)
-        </button>
-      )}
-
-      <div className="flex flex-col gap-2.5 bg-surface border border-stroke rounded-xl p-3">
-        {CONSENTS.map(c => (
-          <label key={c.id} className="flex items-start gap-3 cursor-pointer group">
-            <div className={cn(
-              'mt-0.5 w-4 h-4 rounded border-2 flex-shrink-0 flex items-center justify-center transition-colors',
-              consents[c.id]
-                ? 'bg-purple-600 border-purple-600'
-                : 'border-stroke group-hover:border-purple-500/60 bg-surface-2'
-            )}>
-              {consents[c.id] && (
-                <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                  <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              )}
-              <input
-                type="checkbox"
-                className="sr-only"
-                checked={!!consents[c.id]}
-                onChange={() => onToggle(c.id)}
-                required={c.required}
-              />
-            </div>
-            <span className="text-xs text-fg-muted leading-relaxed">{c.text}</span>
-          </label>
-        ))}
-      </div>
+      {CONSENTS.map(c => (
+        <label key={c.id} className="flex items-start gap-2.5 cursor-pointer group">
+          <div className={cn(
+            'mt-0.5 w-4 h-4 rounded border-2 flex-shrink-0 flex items-center justify-center transition-colors',
+            consents[c.id]
+              ? 'bg-purple-600 border-purple-600'
+              : 'border-stroke group-hover:border-purple-400 bg-surface-2'
+          )}>
+            {consents[c.id] && (
+              <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+            <input type="checkbox" className="sr-only" checked={!!consents[c.id]} onChange={() => onToggle(c.id)} required={c.required} />
+          </div>
+          <span className="text-xs text-fg-muted leading-relaxed">{c.text}</span>
+        </label>
+      ))}
 
       {error && (
-        <div className="flex items-center gap-2 text-xs text-red-400">
-          <AlertCircle size={13} />
+        <div className="flex items-center gap-1.5 text-xs text-red-400">
+          <AlertCircle size={12} />
           {error}
         </div>
       )}
@@ -461,8 +416,8 @@ function GoogleConsentModal({
             <p className="text-xs text-fg-subtle">Lütfen aşağıdaki onayları verin</p>
           </div>
         </div>
-        <div className="px-5 py-4 max-h-[60vh] overflow-y-auto">
-          <ConsentBlock consents={consents} onToggle={onToggle} onAcceptAll={onAcceptAll} />
+        <div className="px-5 py-4">
+          <ConsentBlock consents={consents} onToggle={onToggle} onAcceptAll={() => {}} />
         </div>
         <div className="px-5 py-4 border-t border-stroke flex gap-3">
           <Button variant="ghost" size="sm" onClick={onCancel} className="flex-1">

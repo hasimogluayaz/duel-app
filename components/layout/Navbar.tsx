@@ -10,8 +10,9 @@ import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
 import { NotificationBell } from './NotificationBell'
 import { formatPoints } from '@/lib/utils/formatting'
+import { getTier } from '@/lib/utils/tier'
 import type { Profile } from '@/types'
-import { Swords, Menu, X, Trophy, User, Settings, LogOut, Sun, Moon, Star, Flame, MessageCircle, Search } from 'lucide-react'
+import { Swords, Menu, X, Trophy, User, Settings, LogOut, Sun, Moon, Star, Flame, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import Image from 'next/image'
 
@@ -51,7 +52,6 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
   const navLinks = [
     { href: '/oyun', label: 'Oyna', icon: <Swords size={15} /> },
     { href: '/liderlik', label: 'Liderlik', icon: <Trophy size={15} /> },
-    { href: '/kesfet', label: 'Keşfet', icon: <Search size={15} /> },
     { href: '/nasil-oynanir', label: 'Nasıl Oynanır', icon: null },
   ]
 
@@ -59,7 +59,7 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
     <nav className="sticky top-0 z-40 border-b border-stroke bg-surface/80 backdrop-blur-md transition-colors">
       <div className="max-w-5xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity shrink-0">
           <Image src="/logo.png" alt="Kapisio" width={32} height={32} className="w-8 h-8 object-contain" />
           <span className="font-black text-xl text-gradient">Kapisio</span>
         </Link>
@@ -84,7 +84,7 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
         </div>
 
         {/* Right side */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           {/* Theme toggle */}
           {mounted && (
             <button
@@ -99,15 +99,15 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
           {profile ? (
             <>
               <NotificationBell userId={profile.id} />
-              <MessageBell userId={profile.id} />
-              <div className="hidden md:flex items-center gap-2">
+              <div className="hidden md:flex items-center">
                 <UserMenu profile={profile} onSignOut={handleSignOut} />
               </div>
               <button
-                className="md:hidden text-fg-muted hover:text-fg"
+                className="md:hidden p-2 text-fg-muted hover:text-fg hover:bg-surface-2 rounded-xl transition-colors"
                 onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label="Menüyü aç"
               >
-                {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+                {mobileOpen ? <X size={22} /> : <Menu size={22} />}
               </button>
             </>
           ) : (
@@ -119,10 +119,11 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
                 <Button size="sm" className="btn-gradient">Kayıt Ol</Button>
               </Link>
               <button
-                className="md:hidden text-fg-muted hover:text-fg"
+                className="md:hidden p-2 text-fg-muted hover:text-fg hover:bg-surface-2 rounded-xl transition-colors"
                 onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label="Menüyü aç"
               >
-                {mobileOpen ? <X size={24} /> : <Menu size={24} />}
+                {mobileOpen ? <X size={22} /> : <Menu size={22} />}
               </button>
             </>
           )}
@@ -131,14 +132,16 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="md:hidden border-t border-stroke bg-surface px-4 py-4 flex flex-col gap-2">
+        <div className="md:hidden border-t border-stroke bg-surface/95 backdrop-blur-md px-4 py-4 flex flex-col gap-1.5">
+
+          {/* Nav links */}
           {navLinks.map(link => (
             <Link
               key={link.href}
               href={link.href}
               onClick={() => setMobileOpen(false)}
               className={cn(
-                'flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm font-medium',
+                'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors',
                 pathname === link.href
                   ? 'bg-primary/10 text-primary'
                   : 'text-fg-muted hover:text-fg hover:bg-surface-2'
@@ -148,56 +151,79 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
               {link.label}
             </Link>
           ))}
-          {profile && (
+
+          {profile ? (
             <>
-              <hr className="border-stroke my-1" />
-              {/* Mobile user card */}
-              <div className="flex items-center gap-3 px-3 py-2.5 bg-surface-2 rounded-xl mb-1">
-                <Avatar src={profile.avatar_url} username={profile.username} size="sm" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-fg truncate">{profile.display_name || profile.username}</p>
-                  <p className="text-xs text-purple-400">⭐ {formatPoints(profile.total_points)} puan</p>
-                </div>
-                {profile.streak_count > 0 && (
-                  <div className="flex items-center gap-1 text-xs text-amber-400 font-bold">
-                    <Flame size={12} />
-                    {profile.streak_count}
+              <div className="h-px bg-stroke my-1" />
+
+              {/* User card */}
+              <div className="flex items-center gap-3 px-4 py-3 bg-surface-2 rounded-xl">
+                {(() => { const t = getTier(profile.total_points); return (
+                  <div className={`p-0.5 rounded-full ring-2 ${t.ringColor}`}>
+                    <Avatar src={profile.avatar_url} username={profile.username} size="md" />
                   </div>
-                )}
+                )})()}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-fg truncate">
+                    {profile.display_name || profile.username}
+                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-xs text-fg-subtle">@{profile.username}</p>
+                    {(() => { const t = getTier(profile.total_points); return <span className={`text-xs font-bold ${t.color}`}>{t.emoji} {t.label}</span>})()}
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 shrink-0 text-right">
+                  <div>
+                    <p className="text-sm font-black text-fg flex items-center gap-0.5">
+                      <Star size={11} className="text-amber-400 fill-amber-400" />
+                      {formatPoints(profile.total_points)}
+                    </p>
+                    <p className="text-xs text-fg-subtle">puan</p>
+                  </div>
+                  {profile.streak_count > 0 && (
+                    <div>
+                      <p className="text-sm font-black text-amber-400 flex items-center gap-0.5">
+                        <Flame size={11} />
+                        {profile.streak_count}
+                      </p>
+                      <p className="text-xs text-fg-subtle">seri</p>
+                    </div>
+                  )}
+                </div>
               </div>
+
               <Link href={`/profil/${profile.username}`} onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg-muted hover:text-fg hover:bg-surface-2">
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors">
                 <User size={16} /> Profilim
               </Link>
-              <Link href="/mesajlar" onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg-muted hover:text-fg hover:bg-surface-2">
-                <MessageCircle size={16} /> Mesajlar
-              </Link>
               <Link href="/profil/ayarlar" onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-fg-muted hover:text-fg hover:bg-surface-2">
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors">
                 <Settings size={16} /> Ayarlar
               </Link>
-              {profile.is_admin && (
+              {(profile as any).is_admin && (
                 <Link href="/admin" onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-amber-400 hover:text-amber-300 hover:bg-amber-500/10">
-                  <Star size={16} /> Admin Paneli
+                  className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-purple-400 hover:bg-purple-500/10 transition-colors">
+                  <Shield size={16} /> Admin Panel
                 </Link>
               )}
-              <button onClick={handleSignOut}
-                className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm text-red-500 hover:text-red-400 hover:bg-surface-2 text-left transition-colors">
+              <div className="h-px bg-stroke my-1" />
+              <button onClick={() => { handleSignOut(); setMobileOpen(false) }}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-red-500 hover:text-red-400 hover:bg-red-500/5 transition-colors text-left">
                 <LogOut size={16} /> Çıkış Yap
               </button>
             </>
-          )}
-          {!profile && (
-            <div className="flex gap-2 mt-1">
-              <Link href="/giris" onClick={() => setMobileOpen(false)} className="flex-1">
-                <Button variant="outline" className="w-full" size="sm">Giriş Yap</Button>
-              </Link>
-              <Link href="/kayit" onClick={() => setMobileOpen(false)} className="flex-1">
-                <Button className="w-full btn-gradient" size="sm">Kayıt Ol</Button>
-              </Link>
-            </div>
+          ) : (
+            <>
+              <div className="h-px bg-stroke my-1" />
+              <div className="flex gap-2">
+                <Link href="/giris" onClick={() => setMobileOpen(false)} className="flex-1">
+                  <Button variant="outline" className="w-full">Giriş Yap</Button>
+                </Link>
+                <Link href="/kayit" onClick={() => setMobileOpen(false)} className="flex-1">
+                  <Button className="w-full btn-gradient">Kayıt Ol</Button>
+                </Link>
+              </div>
+            </>
           )}
         </div>
       )}
@@ -222,14 +248,11 @@ function UserMenu({ profile, onSignOut }: { profile: Profile; onSignOut: () => v
           <p className="text-sm font-semibold text-fg leading-tight">
             {profile.display_name || profile.username}
           </p>
-          <p className="text-xs text-purple-400 leading-tight flex items-center gap-1">
+          <p className="text-xs text-fg-subtle leading-tight flex items-center gap-1">
+            {(() => { const t = getTier(profile.total_points); return <span className={`font-bold ${t.color}`}>{t.emoji} {t.label}</span> })()}
+            <span className="text-fg-subtle">·</span>
             <Star size={9} className="fill-amber-400 text-amber-400" />
-            {formatPoints(profile.total_points)} puan
-            {profile.streak_count > 0 && (
-              <span className="text-amber-400 flex items-center gap-0.5 ml-1">
-                · <Flame size={9} /> {profile.streak_count}
-              </span>
-            )}
+            {formatPoints(profile.total_points)}
           </p>
         </div>
       </button>
@@ -238,11 +261,11 @@ function UserMenu({ profile, onSignOut }: { profile: Profile; onSignOut: () => v
         <>
           <div className="fixed inset-0 z-10" onClick={() => setOpen(false)} />
           <div className="absolute right-0 top-full mt-2 w-56 bg-surface border border-stroke rounded-xl shadow-xl z-20 overflow-hidden">
-            {/* User header in dropdown */}
+            {/* User info */}
             <div className="px-4 py-3 bg-surface-2 border-b border-stroke">
               <p className="text-xs text-fg-subtle">@{profile.username}</p>
-              {profile.personality_type && (
-                <p className="text-xs text-purple-400 mt-0.5">🧠 {profile.personality_type}</p>
+              {(profile as any).personality_type && (
+                <p className="text-xs text-purple-400 mt-0.5">🧠 {(profile as any).personality_type}</p>
               )}
             </div>
             <div className="py-1">
@@ -250,22 +273,15 @@ function UserMenu({ profile, onSignOut }: { profile: Profile; onSignOut: () => v
                 className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors">
                 <User size={15} /> Profilim
               </Link>
-              <Link href="/mesajlar" onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors">
-                <MessageCircle size={15} /> Mesajlar
-              </Link>
               <Link href="/profil/ayarlar" onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors">
                 <Settings size={15} /> Ayarlar
               </Link>
-              {profile.is_admin && (
-                <>
-                  <hr className="border-stroke my-1" />
-                  <Link href="/admin" onClick={() => setOpen(false)}
-                    className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 transition-colors">
-                    <Star size={15} /> Admin Paneli
-                  </Link>
-                </>
+              {(profile as any).is_admin && (
+                <Link href="/admin" onClick={() => setOpen(false)}
+                  className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-purple-400 hover:bg-purple-500/10 transition-colors">
+                  <Shield size={15} /> Admin Panel
+                </Link>
               )}
               <hr className="border-stroke my-1" />
               <button onClick={onSignOut}
@@ -277,43 +293,5 @@ function UserMenu({ profile, onSignOut }: { profile: Profile; onSignOut: () => v
         </>
       )}
     </div>
-  )
-}
-
-function MessageBell({ userId }: { userId: string }) {
-  const supabase = createClient()
-  const [unread, setUnread] = useState(0)
-
-  useEffect(() => {
-    const fetchUnread = async () => {
-      const { count } = await supabase
-        .from('messages')
-        .select('*', { count: 'exact', head: true })
-        .eq('receiver_id', userId)
-        .eq('is_read', false)
-      setUnread(count ?? 0)
-    }
-    fetchUnread()
-
-    const channel = supabase
-      .channel(`unread-messages-${userId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `receiver_id=eq.${userId}` },
-        () => { setUnread(c => c + 1) })
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: `receiver_id=eq.${userId}` },
-        () => { fetchUnread() })
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
-  }, [userId])
-
-  return (
-    <Link href="/mesajlar" className="relative p-2 rounded-xl text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors">
-      <MessageCircle size={18} />
-      {unread > 0 && (
-        <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-purple-500 text-white text-[10px] font-black rounded-full flex items-center justify-center">
-          {unread > 9 ? '9+' : unread}
-        </span>
-      )}
-    </Link>
   )
 }

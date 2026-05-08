@@ -13,7 +13,7 @@ export async function POST(req: Request) {
 
   const { error } = await supabase
     .from('profiles')
-    .update({ weekly_points: 0 } as never)
+    .update({ weekly_points: 0 })
     .gt('weekly_points', 0)
 
   if (error) {

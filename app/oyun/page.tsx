@@ -1,7 +1,6 @@
 export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
 import { OyunClient } from './OyunClient'
 import type { Metadata } from 'next'
 
@@ -11,7 +10,6 @@ export default async function OyunPage() {
   const supabase = createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/giris?redirect=/oyun')
 
   const today = new Date().toISOString().split('T')[0]
 
@@ -22,7 +20,7 @@ export default async function OyunPage() {
     .eq('active_date', today)
     .single()
 
-  // If no scenario today, generate one via API
+  // If no scenario, generate via API
   if (!scenario) {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/scenario/generate`, {
@@ -33,50 +31,75 @@ export default async function OyunPage() {
         const json = await res.json()
         scenario = json.scenario
       }
-    } catch {
-      // fallback scenario
-    }
+    } catch { /* ignore */ }
   }
 
-  // Get user's profile
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  // Public: top community answers for today (visible to everyone)
+  const { data: communityAnswers } = scenario ? await supabase
+    .from('answers')
+    .select('id, content, vote_count, user_id, profiles:profiles(username, display_name, avatar_url)')
+    .eq('scenario_id', scenario.id)
+    .order('vote_count', { ascending: false })
+    .limit(5) : { data: [] }
 
-  // Get user's answer for today
-  let userAnswer = null
-  if (scenario) {
-    const { data } = await supabase
-      .from('answers')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('scenario_id', scenario.id)
-      .single()
-    userAnswer = data
-  }
-
-  // Get user's active duels (pending or being voted on — not completed)
-  const { data: activeDuels } = await supabase
+  // Public: recent completed duels
+  const { data: recentDuels } = await supabase
     .from('duels')
     .select(`
-      *,
+      id, share_token, ai_verdict, created_at,
       challenger:profiles!duels_challenger_id_fkey(username, display_name, avatar_url),
       challenged:profiles!duels_challenged_id_fkey(username, display_name, avatar_url)
     `)
-    .or(`challenger_id.eq.${user.id},challenged_id.eq.${user.id}`)
-    .in('status', ['pending', 'active'])
+    .eq('status', 'completed')
     .order('created_at', { ascending: false })
-    .limit(10)
+    .limit(4)
+
+  // Logged-in user data
+  let profile = null
+  let userAnswer = null
+  let activeDuels: any[] = []
+
+  if (user) {
+    const { data: p } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single()
+    profile = p
+
+    if (scenario) {
+      const { data: a } = await supabase
+        .from('answers')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('scenario_id', scenario.id)
+        .single()
+      userAnswer = a
+    }
+
+    const { data: duels } = await supabase
+      .from('duels')
+      .select(`
+        *,
+        challenger:profiles!duels_challenger_id_fkey(username, display_name, avatar_url),
+        challenged:profiles!duels_challenged_id_fkey(username, display_name, avatar_url)
+      `)
+      .or(`challenger_id.eq.${user.id},challenged_id.eq.${user.id}`)
+      .in('status', ['pending', 'active'])
+      .order('created_at', { ascending: false })
+      .limit(10)
+    activeDuels = duels ?? []
+  }
 
   return (
     <OyunClient
       scenario={scenario}
       profile={profile}
       userAnswer={userAnswer}
-      activeDuels={activeDuels ?? []}
-      userId={user.id}
+      activeDuels={activeDuels}
+      userId={user?.id ?? null}
+      communityAnswers={(communityAnswers ?? []) as any[]}
+      recentDuels={(recentDuels ?? []) as any[]}
     />
   )
 }

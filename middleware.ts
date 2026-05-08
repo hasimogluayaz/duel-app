@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const protectedRoutes = ['/oyun', '/profil/ayarlar', '/bildirimler', '/mesajlar', '/admin']
+const protectedRoutes = ['/profil/ayarlar', '/bildirimler', '/mesajlar', '/admin']
 const authRoutes = ['/giris', '/kayit']
 
 export async function middleware(request: NextRequest) {

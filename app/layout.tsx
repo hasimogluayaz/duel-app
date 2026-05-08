@@ -7,6 +7,7 @@ import { ToastProvider } from '@/components/ui/Toast'
 import { ServiceWorkerRegister } from '@/components/layout/ServiceWorkerRegister'
 import { ThemeProvider } from '@/components/layout/ThemeProvider'
 import { createClient } from '@/lib/supabase/server'
+import { Analytics } from '@vercel/analytics/next'
 import type { Profile } from '@/types'
 
 export const metadata: Metadata = {
@@ -71,6 +72,7 @@ export default async function RootLayout({
             <Footer />
             <CookieBanner />
             <ServiceWorkerRegister />
+            <Analytics />
           </ToastProvider>
         </ThemeProvider>
       </body>
