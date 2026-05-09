@@ -86,14 +86,14 @@ export default function ScenarioCard({ scenario, userId, showAnswer = false }: P
   return (
     <div className={`rounded-2xl border transition-colors ${
       answered
-        ? 'bg-[#1a1a2e] border-green-500/20'
-        : 'bg-[#1a1a2e] border-white/10 hover:border-white/20'
+        ? 'bg-surface border-green-500/20'
+        : 'bg-surface border-stroke hover:border-stroke/80'
     }`}>
       <div className="p-4">
         {/* Header */}
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-white/50">
+            <span className="text-xs px-2 py-0.5 rounded-full bg-surface-2 text-fg-muted">
               {CATEGORY_LABELS[scenario.category] ?? scenario.category}
             </span>
             {diff && (
@@ -104,7 +104,7 @@ export default function ScenarioCard({ scenario, userId, showAnswer = false }: P
             {scenario.is_user_created && scenario.author && (
               <Link
                 href={`/profil/${scenario.author.username}`}
-                className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 transition-colors"
+                className="flex items-center gap-1.5 text-xs text-fg-subtle hover:text-fg-muted transition-colors"
               >
                 {scenario.author.avatar_url ? (
                   <Image
@@ -122,24 +122,24 @@ export default function ScenarioCard({ scenario, userId, showAnswer = false }: P
                 @{scenario.author.username}
               </Link>
             )}
-            <span className="text-xs text-white/30">{formattedDate}</span>
+            <span className="text-xs text-fg-subtle">{formattedDate}</span>
           </div>
           <div className="flex items-center gap-2 shrink-0">
             {answered && (
               <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">✓ Cevaplandı</span>
             )}
-            <span className="text-xs text-white/30">{scenario.answer_count} cevap</span>
+            <span className="text-xs text-fg-subtle">{scenario.answer_count} cevap</span>
           </div>
         </div>
 
         {/* Content */}
-        <p className="text-white font-medium leading-relaxed">{scenario.content}</p>
+        <p className="text-fg font-medium leading-relaxed">{scenario.content}</p>
 
         {/* Actions */}
         <div className="flex items-center gap-3 mt-3">
           <Link
             href={`/arsiv/${scenario.id}`}
-            className="text-xs text-white/40 hover:text-violet-400 transition-colors"
+            className="text-xs text-fg-subtle hover:text-violet-400 transition-colors"
           >
             Cevapları gör →
           </Link>
@@ -156,7 +156,7 @@ export default function ScenarioCard({ scenario, userId, showAnswer = false }: P
           {!userId && (
             <Link
               href="/giris"
-              className="ml-auto text-xs text-white/30 hover:text-violet-400 transition-colors"
+              className="ml-auto text-xs text-fg-subtle hover:text-violet-400 transition-colors"
             >
               Cevaplamak için giriş yap →
             </Link>
@@ -172,7 +172,7 @@ export default function ScenarioCard({ scenario, userId, showAnswer = false }: P
               placeholder="Cevabını yaz..."
               maxLength={500}
               rows={3}
-              className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white placeholder-white/30 text-sm resize-none focus:outline-none focus:border-violet-500"
+              className="w-full bg-surface-2 border border-stroke rounded-xl p-3 text-fg placeholder-fg-subtle text-sm resize-none focus:outline-none focus:border-violet-500"
               autoFocus
             />
 
@@ -183,7 +183,7 @@ export default function ScenarioCard({ scenario, userId, showAnswer = false }: P
               className={`flex items-center gap-2 text-xs px-3 py-1.5 rounded-lg border transition-all ${
                 isAnonymous
                   ? 'bg-violet-500/15 border-violet-500/30 text-violet-400'
-                  : 'bg-white/3 border-white/10 text-white/40 hover:text-white/60'
+                  : 'bg-surface-2 border-stroke text-fg-subtle hover:text-fg-muted'
               }`}
             >
               {isAnonymous ? <EyeOff size={12} /> : <Eye size={12} />}
@@ -191,7 +191,7 @@ export default function ScenarioCard({ scenario, userId, showAnswer = false }: P
             </button>
 
             {isAnonymous && (
-              <p className="text-xs text-white/30">
+              <p className="text-xs text-fg-subtle">
                 Cevabın anonim paylaşılır. Düello kazanırsan kimliğin açılabilir.
               </p>
             )}

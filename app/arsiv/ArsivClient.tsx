@@ -71,14 +71,14 @@ export default function ArsivClient({
   }, [nextCursor, loading, activeCategory, activeSort])
 
   return (
-    <div className="min-h-screen bg-[#0f0f1a] pb-24">
+    <div className="min-h-screen bg-bg pb-24">
       {/* Header */}
-      <div className="bg-[#0f0f1a]/80 backdrop-blur-md border-b border-white/5 sticky top-0 z-10">
+      <div className="bg-bg/80 backdrop-blur-md border-b border-stroke sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4">
           <div className="flex items-center justify-between py-4">
             <div>
-              <h1 className="text-xl font-bold text-white">📚 Senaryo Arşivi</h1>
-              <p className="text-xs text-white/40 mt-0.5">Tüm senaryolara cevap ver, puanları topla</p>
+              <h1 className="text-xl font-bold text-fg">📚 Senaryo Arşivi</h1>
+              <p className="text-xs text-fg-subtle mt-0.5">Tüm senaryolara cevap ver, puanları topla</p>
             </div>
             {userId && (
               <button
@@ -100,7 +100,7 @@ export default function ArsivClient({
                 className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   activeCategory === cat.value
                     ? 'bg-violet-600 text-white'
-                    : 'bg-white/5 text-white/60 hover:bg-white/10'
+                    : 'bg-surface-2 text-fg-muted hover:bg-stroke'
                 }`}
               >
                 {cat.label}
@@ -116,8 +116,8 @@ export default function ArsivClient({
                 onClick={() => navigate({ category: activeCategory, sort: s, filter: activeFilter })}
                 className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
                   activeSort === s
-                    ? 'bg-white/15 text-white'
-                    : 'text-white/40 hover:text-white/60'
+                    ? 'bg-surface-2 text-fg'
+                    : 'text-fg-subtle hover:text-fg-muted'
                 }`}
               >
                 {s === 'recent' ? '🕐 Yeni' : '🔥 Popüler'}
@@ -125,7 +125,7 @@ export default function ArsivClient({
             ))}
             {userId && (
               <>
-                <div className="w-px h-4 bg-white/10 mx-1" />
+                <div className="w-px h-4 bg-stroke mx-1" />
                 {([
                   { v: 'all', label: 'Hepsi' },
                   { v: 'unanswered', label: '📭 Cevaplanmamış' },
@@ -136,8 +136,8 @@ export default function ArsivClient({
                     onClick={() => navigate({ category: activeCategory, sort: activeSort, filter: f.v })}
                     className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
                       activeFilter === f.v
-                        ? 'bg-violet-600/40 text-violet-200'
-                        : 'text-white/40 hover:text-white/60'
+                        ? 'bg-violet-600/40 text-violet-300'
+                        : 'text-fg-subtle hover:text-fg-muted'
                     }`}
                   >
                     {f.label}
@@ -152,7 +152,7 @@ export default function ArsivClient({
       {/* Scenarios grid */}
       <div className="max-w-3xl mx-auto px-4 pt-4 space-y-3">
         {scenarios.length === 0 ? (
-          <div className="text-center py-20 text-white/40">
+          <div className="text-center py-20 text-fg-subtle">
             <div className="text-4xl mb-3">🤔</div>
             <p>Bu kategoride henüz senaryo yok.</p>
             {userId && (
@@ -178,7 +178,7 @@ export default function ArsivClient({
           <button
             onClick={loadMore}
             disabled={loading}
-            className="w-full py-3 text-sm text-white/50 hover:text-white/80 transition-colors"
+            className="w-full py-3 text-sm text-fg-subtle hover:text-fg-muted transition-colors"
           >
             {loading ? 'Yükleniyor...' : 'Daha fazla göster'}
           </button>
@@ -250,10 +250,10 @@ function CreateScenarioModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg bg-[#1a1a2e] rounded-2xl border border-white/10 overflow-hidden">
-        <div className="flex items-center justify-between p-4 border-b border-white/10">
-          <h2 className="font-bold text-white">✍️ Senaryo Oluştur</h2>
-          <button onClick={onClose} className="text-white/40 hover:text-white text-xl">×</button>
+      <div className="w-full max-w-lg bg-surface rounded-2xl border border-stroke overflow-hidden">
+        <div className="flex items-center justify-between p-4 border-b border-stroke">
+          <h2 className="font-bold text-fg">✍️ Senaryo Oluştur</h2>
+          <button onClick={onClose} className="text-fg-subtle hover:text-fg text-xl">×</button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
@@ -264,9 +264,9 @@ function CreateScenarioModal({
               placeholder="Bir durum yaz... (en az 20 karakter)"
               maxLength={280}
               rows={4}
-              className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white placeholder-white/30 text-sm resize-none focus:outline-none focus:border-violet-500"
+              className="w-full bg-surface-2 border border-stroke rounded-xl p-3 text-fg placeholder-fg-subtle text-sm resize-none focus:outline-none focus:border-violet-500"
             />
-            <div className={`text-right text-xs mt-1 ${content.length > 250 ? 'text-orange-400' : 'text-white/30'}`}>
+            <div className={`text-right text-xs mt-1 ${content.length > 250 ? 'text-orange-400' : 'text-fg-subtle'}`}>
               {content.length}/280
             </div>
           </div>
@@ -280,7 +280,7 @@ function CreateScenarioModal({
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                   category === cat.value
                     ? 'bg-violet-600 text-white'
-                    : 'bg-white/5 text-white/50 hover:bg-white/10'
+                    : 'bg-surface-2 text-fg-muted hover:bg-stroke'
                 }`}
               >
                 {cat.label}

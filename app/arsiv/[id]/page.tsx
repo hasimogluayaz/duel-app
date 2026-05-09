@@ -83,12 +83,12 @@ export default async function ScenarioDetailPage({ params, searchParams }: Props
     : null
 
   return (
-    <div className="min-h-screen bg-[#0f0f1a] pb-24">
+    <div className="min-h-screen bg-bg pb-24">
       <div className="max-w-2xl mx-auto px-4 pt-6">
         {/* Back */}
         <Link
           href="/arsiv"
-          className="inline-flex items-center gap-2 text-white/40 hover:text-white/70 text-sm mb-4 transition-colors"
+          className="inline-flex items-center gap-2 text-fg-subtle hover:text-fg-muted text-sm mb-4 transition-colors"
         >
           ← Arşive dön
         </Link>
@@ -110,8 +110,8 @@ export default async function ScenarioDetailPage({ params, searchParams }: Props
 
         {/* Friend challenge — shown when user has answered */}
         {user && ownAnswer && (
-          <div className="mt-3 bg-[#1a1a2e] border border-white/10 rounded-2xl p-4">
-            <p className="text-xs text-white/40 mb-2 font-semibold uppercase tracking-wider">Arkadaşına Meydan Oku</p>
+          <div className="mt-3 bg-surface border border-stroke rounded-2xl p-4">
+            <p className="text-xs text-fg-subtle mb-2 font-semibold uppercase tracking-wider">Arkadaşına Meydan Oku</p>
             <FriendChallengeButton
               scenarioId={(scenario as any).id}
               answerId={ownAnswer.id}
@@ -123,10 +123,10 @@ export default async function ScenarioDetailPage({ params, searchParams }: Props
         {/* Answers */}
         <div className="mt-6">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-sm font-semibold text-white/50 uppercase tracking-wider">
+            <h2 className="text-sm font-semibold text-fg-subtle uppercase tracking-wider">
               {(answers ?? []).length} Cevap
             </h2>
-            <div className="flex bg-white/5 rounded-lg p-0.5 gap-0.5">
+            <div className="flex bg-surface-2 rounded-lg p-0.5 gap-0.5">
               {(['popular', 'recent'] as const).map(s => (
                 <Link
                   key={s}
@@ -134,7 +134,7 @@ export default async function ScenarioDetailPage({ params, searchParams }: Props
                   className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
                     answerSort === s
                       ? 'bg-violet-600 text-white'
-                      : 'text-white/40 hover:text-white/70'
+                      : 'text-fg-subtle hover:text-fg-muted'
                   }`}
                 >
                   {s === 'popular' ? '🔥 Popüler' : '🕐 Yeni'}
@@ -144,7 +144,7 @@ export default async function ScenarioDetailPage({ params, searchParams }: Props
           </div>
 
           {(answers ?? []).length === 0 ? (
-            <div className="text-center py-12 text-white/30">
+            <div className="text-center py-12 text-fg-subtle">
               <div className="text-3xl mb-2">🤫</div>
               <p>Henüz cevap yok. İlk cevaplayan sen ol!</p>
             </div>
@@ -153,10 +153,10 @@ export default async function ScenarioDetailPage({ params, searchParams }: Props
               {(answers ?? []).map((answer: any, i: number) => (
                 <div
                   key={answer.id}
-                  className="bg-[#1a1a2e] border border-white/10 rounded-2xl p-4"
+                  className="bg-surface border border-stroke rounded-2xl p-4"
                 >
                   <div className="flex items-start gap-3">
-                    <span className="text-white/30 text-sm font-mono w-5 shrink-0 mt-0.5">
+                    <span className="text-fg-subtle text-sm font-mono w-5 shrink-0 mt-0.5">
                       #{i + 1}
                     </span>
                     <div className="flex-1">
@@ -168,18 +168,18 @@ export default async function ScenarioDetailPage({ params, searchParams }: Props
                             className="w-6 h-6 rounded-full"
                           />
                         ) : (
-                          <div className="w-6 h-6 rounded-full bg-violet-500/30 flex items-center justify-center text-xs text-white">
+                          <div className="w-6 h-6 rounded-full bg-violet-500/30 flex items-center justify-center text-xs text-fg">
                             {answer.user?.display_name?.[0] ?? '?'}
                           </div>
                         )}
                         <Link
                           href={`/profil/${answer.user?.username}`}
-                          className="text-sm font-medium text-white/80 hover:text-violet-400 transition-colors"
+                          className="text-sm font-medium text-fg-muted hover:text-violet-400 transition-colors"
                         >
                           {answer.user?.display_name ?? 'Anonim'}
                         </Link>
                       </div>
-                      <p className="text-white/90 text-sm leading-relaxed mb-2">{answer.content}</p>
+                      <p className="text-fg text-sm leading-relaxed mb-2">{answer.content}</p>
                       <div className="flex items-center gap-3 flex-wrap">
                         <ReactionBar answerId={answer.id} userId={user?.id ?? null} compact />
                         {user && <BookmarkButton type="answer" id={answer.id} size={13} showLabel />}
