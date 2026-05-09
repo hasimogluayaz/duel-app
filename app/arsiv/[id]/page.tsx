@@ -10,6 +10,7 @@ import ReactionBar from '@/components/reactions/ReactionBar'
 import FriendChallengeButton from '@/components/challenge/FriendChallengeButton'
 import BookmarkButton from '@/components/bookmarks/BookmarkButton'
 import AnswerComments from '@/components/answers/AnswerComments'
+import EditAnswerButton from '@/components/answers/EditAnswerButton'
 
 interface Props { params: { id: string } }
 
@@ -50,8 +51,8 @@ export default async function ScenarioDetailPage({ params }: Props) {
   const { data: answers } = await supabase
     .from('answers')
     .select(`
-      id, content, vote_count, created_at,
-      user:profiles!answers_user_id_fkey(username, display_name, avatar_url)
+      id, content, vote_count, created_at, edit_count,
+      user:profiles!answers_user_id_fkey(id, username, display_name, avatar_url)
     `)
     .eq('scenario_id', params.id)
     .order('vote_count', { ascending: false })
@@ -159,6 +160,14 @@ export default async function ScenarioDetailPage({ params }: Props) {
                       <div className="flex items-center gap-3 flex-wrap">
                         <ReactionBar answerId={answer.id} userId={user?.id ?? null} compact />
                         {user && <BookmarkButton type="answer" id={answer.id} size={13} showLabel />}
+                        {user && (answer as any).user?.id === user.id && (
+                          <EditAnswerButton
+                            answerId={answer.id}
+                            initialContent={answer.content}
+                            editCount={(answer as any).edit_count ?? 0}
+                            createdAt={answer.created_at}
+                          />
+                        )}
                       </div>
                       <AnswerComments answerId={answer.id} currentUserId={user?.id ?? null} />
                     </div>
