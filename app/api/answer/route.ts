@@ -4,6 +4,7 @@ import { withAuth } from '@/lib/api/auth'
 import { ApiError } from '@/lib/api/errors'
 import { parseBody, requireUuid, validateAnswerContent } from '@/lib/api/validate'
 import { POINTS } from '@/types'
+import { checkQuota } from '@/lib/quota/check'
 
 export const POST = withAuth(async (req, { userId }) => {
   const supabase = createApiClient()
@@ -11,6 +12,9 @@ export const POST = withAuth(async (req, { userId }) => {
 
   const scenarioId = requireUuid(body.scenario_id, 'Senaryo ID')
   const content = validateAnswerContent(String(body.content ?? ''))
+
+  // Quota check — daily answer limit
+  await checkQuota(supabase, userId, 'answers_per_day')
 
   // Verify scenario exists and is approved
   const { data: scenario } = await supabase

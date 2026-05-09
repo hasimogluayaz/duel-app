@@ -3,9 +3,9 @@ import { createApiClient } from '@/lib/supabase/typed'
 import { withAuth, optionalAuth } from '@/lib/api/auth'
 import { ApiError } from '@/lib/api/errors'
 import { parseBody } from '@/lib/api/validate'
+import { checkQuota } from '@/lib/quota/check'
 
 const CATEGORIES = ['genel', 'ask', 'is', 'aile', 'sosyal', 'teknoloji', 'dunya', 'mizah'] as const
-const MAX_DAILY_USER_SCENARIOS = 5
 const MIN_CONTENT_LEN = 20
 const MAX_CONTENT_LEN = 280
 
@@ -87,20 +87,8 @@ export const POST = withAuth(async (req, { userId }) => {
     throw new ApiError('Geçersiz kategori.', 400, 'VALIDATION')
   }
 
-  // Rate limit: max 5 per day
-  const todayStart = new Date()
-  todayStart.setHours(0, 0, 0, 0)
-
-  const { count } = await supabase
-    .from('scenarios')
-    .select('id', { count: 'exact', head: true })
-    .eq('user_id', userId)
-    .eq('is_user_created', true)
-    .gte('created_at', todayStart.toISOString())
-
-  if ((count ?? 0) >= MAX_DAILY_USER_SCENARIOS) {
-    throw new ApiError(`Günde en fazla ${MAX_DAILY_USER_SCENARIOS} senaryo oluşturabilirsin.`, 429, 'RATE_LIMIT')
-  }
+  // Quota check (tier-based daily limit)
+  await checkQuota(supabase, userId, 'scenarios_per_day')
 
   const { data: scenario, error } = await supabase
     .from('scenarios')

@@ -4,20 +4,7 @@ import { generateShareToken } from '@/lib/utils/formatting'
 import { sendDuelInviteEmail } from '@/lib/email/resend'
 import { pushToUser } from '@/lib/push/notify'
 import { checkRateLimit } from '@/lib/redis/ratelimit'
-
-// Rate limit: max 5 duels per day per user
-async function checkDuelRateLimit(supabase: any, userId: string): Promise<boolean> {
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-
-  const { count } = await supabase
-    .from('duels')
-    .select('*', { count: 'exact', head: true })
-    .eq('challenger_id', userId)
-    .gte('created_at', today.toISOString())
-
-  return (count ?? 0) < 5
-}
+import { checkQuota } from '@/lib/quota/check'
 
 export async function POST(req: Request) {
   try {
@@ -42,10 +29,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Çok fazla düello isteği. Biraz bekle.' }, { status: 429 })
     }
 
-    // DB-based daily rate limit check
-    const canCreate = await checkDuelRateLimit(supabase, user.id)
-    if (!canCreate) {
-      return NextResponse.json({ error: 'Günlük düello limitine ulaştınız (5/gün).' }, { status: 429 })
+    // Quota check (tier-based daily limit)
+    try {
+      await checkQuota(supabase, user.id, 'duels_per_day')
+    } catch (e: any) {
+      return NextResponse.json({ error: e.message }, { status: 429 })
     }
 
     // Check if duel already exists between these users for this scenario

@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 
 interface Mission {
   type: string
@@ -96,7 +95,6 @@ export default function DailyMissions() {
 }
 
 function MissionRow({ mission }: { mission: Mission }) {
-  const pct = mission.goal > 1 ? Math.round((mission.progress / mission.goal) * 100) : 100
 
   return (
     <div className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${

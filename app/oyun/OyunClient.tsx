@@ -22,6 +22,7 @@ import {
 import Link from 'next/link'
 import Image from 'next/image'
 import DailyMissions from '@/components/missions/DailyMissions'
+import QuotaBar from '@/components/quota/QuotaBar'
 
 function useNextScenarioCountdown() {
   const [countdown, setCountdown] = useState('')
@@ -293,8 +294,13 @@ export function OyunClient({
         </div>
       )}
 
-      {/* ── Daily Missions ───────────────────────────── */}
-      {userId && <DailyMissions />}
+      {/* ── Daily Missions + Quota ───────────────────── */}
+      {userId && (
+        <div className="space-y-3">
+          <DailyMissions />
+          <QuotaBar />
+        </div>
+      )}
 
       {/* ── Today's scenario ─────────────────────────── */}
       {!scenario ? (
