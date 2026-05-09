@@ -30,16 +30,16 @@ export default function ProfileCompletionBanner({ hasAvatar, hasBio, hasDisplayN
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
-          <p className="text-sm font-semibold text-white">Profilini Tamamla</p>
+          <p className="text-sm font-semibold text-fg">Profilini Tamamla</p>
           <span className="text-xs font-bold text-violet-400">%{pct}</span>
         </div>
-        <div className="h-1 bg-white/10 rounded-full mb-1.5">
+        <div className="h-1 bg-stroke rounded-full mb-1.5">
           <div
             className="h-full bg-violet-500 rounded-full transition-all"
             style={{ width: `${pct}%` }}
           />
         </div>
-        <p className="text-xs text-white/50">
+        <p className="text-xs text-fg-subtle">
           Eksik: {missing.join(', ')} — daha fazla takipçi çek!
         </p>
       </div>

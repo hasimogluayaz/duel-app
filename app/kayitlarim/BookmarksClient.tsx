@@ -80,13 +80,13 @@ export default function BookmarksClient() {
           <Bookmark size={18} className="text-violet-400" />
         </div>
         <div>
-          <h1 className="text-xl font-black text-white">Kaydettiklerim</h1>
-          <p className="text-xs text-white/40">Cevap ve senaryolarını buradan bulabilirsin</p>
+          <h1 className="text-xl font-black text-fg">Kaydettiklerim</h1>
+          <p className="text-xs text-fg-subtle">Cevap ve senaryolarını buradan bulabilirsin</p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-white/5 rounded-2xl p-1 mb-5">
+      <div className="flex gap-1 bg-surface-2 rounded-2xl p-1 mb-5">
         {([
           { id: 'answers' as TabType, label: 'Cevaplar', icon: <MessageSquare size={13} /> },
           { id: 'scenarios' as TabType, label: 'Senaryolar', icon: <Layers size={13} /> },
@@ -97,7 +97,7 @@ export default function BookmarksClient() {
             className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
               tab === t.id
                 ? 'bg-violet-600 text-white shadow-lg'
-                : 'text-white/40 hover:text-white/70'
+                : 'text-fg-subtle hover:text-fg-muted'
             }`}
           >
             {t.icon}
@@ -109,7 +109,7 @@ export default function BookmarksClient() {
       {/* Content */}
       {loading ? (
         <div className="space-y-3">
-          {[1,2,3].map(i => <div key={i} className="h-24 bg-white/5 rounded-2xl animate-pulse" />)}
+          {[1,2,3].map(i => <div key={i} className="h-24 bg-surface-2 rounded-2xl animate-pulse" />)}
         </div>
       ) : tab === 'answers' ? (
         answers.length === 0 ? (
@@ -117,22 +117,22 @@ export default function BookmarksClient() {
         ) : (
           <div className="space-y-3">
             {answers.map(b => b.answer && (
-              <div key={b.id} className="group bg-[#1a1a2e] border border-white/8 rounded-2xl p-4 hover:border-violet-500/30 transition-colors">
+              <div key={b.id} className="group bg-surface border border-stroke rounded-2xl p-4 hover:border-violet-500/30 transition-colors">
                 {/* Scenario context */}
                 {b.answer.scenario && (
                   <Link href={`/arsiv/${b.answer.scenario.id}`}>
-                    <p className="text-xs text-white/35 italic mb-2 hover:text-violet-400 line-clamp-1 transition-colors">
+                    <p className="text-xs text-fg-subtle italic mb-2 hover:text-violet-400 line-clamp-1 transition-colors">
                       &ldquo;{b.answer.scenario.content}&rdquo;
                     </p>
                   </Link>
                 )}
 
                 {/* Answer content */}
-                <p className="text-sm text-white/85 leading-relaxed">{b.answer.content}</p>
+                <p className="text-sm text-fg leading-relaxed">{b.answer.content}</p>
 
                 {/* Meta */}
                 <div className="flex items-center justify-between mt-3">
-                  <div className="flex items-center gap-3 text-xs text-white/30">
+                  <div className="flex items-center gap-3 text-xs text-fg-subtle">
                     {b.answer.user && (
                       <Link href={`/profil/${b.answer.user.username}`} className="hover:text-violet-400 transition-colors">
                         @{b.answer.user.username}
@@ -162,14 +162,14 @@ export default function BookmarksClient() {
           <div className="space-y-3">
             {scenarios.map(b => b.scenario && (
               <Link key={b.id} href={`/arsiv/${b.scenario.id}`}>
-                <div className="group bg-[#1a1a2e] border border-white/8 rounded-2xl p-4 hover:border-violet-500/30 transition-colors cursor-pointer">
-                  <p className="text-sm text-white/85 leading-relaxed mb-3">{b.scenario.content}</p>
+                <div className="group bg-surface border border-stroke rounded-2xl p-4 hover:border-violet-500/30 transition-colors cursor-pointer">
+                  <p className="text-sm text-fg leading-relaxed mb-3">{b.scenario.content}</p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] bg-white/5 border border-white/8 text-white/40 px-2 py-0.5 rounded-full">
+                      <span className="text-[10px] bg-surface-2 border border-stroke text-fg-subtle px-2 py-0.5 rounded-full">
                         {b.scenario.category}
                       </span>
-                      <span className="text-xs text-white/30">{b.scenario.answer_count} cevap</span>
+                      <span className="text-xs text-fg-subtle">{b.scenario.answer_count} cevap</span>
                     </div>
                     <button
                       onClick={e => { e.preventDefault(); removeScenarioBookmark(b.id, b.scenario!.id) }}
@@ -190,10 +190,10 @@ export default function BookmarksClient() {
 
 function EmptyState({ text }: { text: string }) {
   return (
-    <div className="text-center py-16 text-white/25">
-      <Bookmark size={36} className="mx-auto mb-3 opacity-25" />
+    <div className="text-center py-16 text-fg-subtle">
+      <Bookmark size={36} className="mx-auto mb-3 opacity-30" />
       <p className="text-sm">{text}</p>
-      <p className="text-xs mt-1 text-white/15">Düello ve senaryo sayfalarından kaydet butonuna bas</p>
+      <p className="text-xs mt-1 text-fg-subtle opacity-60">Düello ve senaryo sayfalarından kaydet butonuna bas</p>
     </div>
   )
 }

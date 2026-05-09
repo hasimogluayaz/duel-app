@@ -31,7 +31,7 @@ export default async function KararVerPage() {
     .gte('created_at', todayStart.toISOString())
 
   return (
-    <div className="min-h-screen bg-[#0d0d1a]">
+    <div className="min-h-screen bg-bg">
       <div className="max-w-2xl mx-auto px-4 py-8">
 
         {/* Header */}
@@ -40,37 +40,37 @@ export default async function KararVerPage() {
             <Swords size={14} className="text-violet-400" />
             <span className="text-xs font-semibold text-violet-400 uppercase tracking-wider">Karar Ver Modu</span>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">Hangisi Daha İyi?</h1>
-          <p className="text-white/50 text-sm max-w-sm mx-auto">
+          <h1 className="text-2xl font-bold text-fg mb-2">Hangisi Daha İyi?</h1>
+          <p className="text-fg-subtle text-sm max-w-sm mx-auto">
             Aynı soruya verilen iki cevabı karşılaştır. Seçimin topluluk sıralamasını şekillendirir.
           </p>
         </div>
 
         {/* Stats row */}
         <div className="grid grid-cols-2 gap-3 mb-6">
-          <div className="rounded-xl bg-[#1a1a2e] border border-white/5 p-3 text-center">
+          <div className="rounded-xl bg-surface border border-stroke p-3 text-center">
             <div className="flex items-center justify-center gap-1.5 mb-1">
               <TrendingUp size={12} className="text-violet-400" />
-              <span className="text-xs text-white/40">Toplam Karar</span>
+              <span className="text-xs text-fg-subtle">Toplam Karar</span>
             </div>
-            <p className="text-xl font-bold text-white">{(totalVerdicts ?? 0).toLocaleString('tr-TR')}</p>
+            <p className="text-xl font-bold text-fg">{(totalVerdicts ?? 0).toLocaleString('tr-TR')}</p>
           </div>
-          <div className="rounded-xl bg-[#1a1a2e] border border-white/5 p-3 text-center">
+          <div className="rounded-xl bg-surface border border-stroke p-3 text-center">
             <div className="flex items-center justify-center gap-1.5 mb-1">
               <Users size={12} className="text-green-400" />
-              <span className="text-xs text-white/40">Bugün Yargılayan</span>
+              <span className="text-xs text-fg-subtle">Bugün Yargılayan</span>
             </div>
-            <p className="text-xl font-bold text-white">{(todayJudges ?? 0).toLocaleString('tr-TR')}</p>
+            <p className="text-xl font-bold text-fg">{(todayJudges ?? 0).toLocaleString('tr-TR')}</p>
           </div>
         </div>
 
         {/* Main card */}
         <Suspense fallback={
-          <div className="rounded-2xl bg-[#1a1a2e] border border-white/10 p-6 animate-pulse">
-            <div className="h-4 bg-white/10 rounded w-48 mb-4" />
+          <div className="rounded-2xl bg-surface border border-stroke p-6 animate-pulse">
+            <div className="h-4 bg-surface-2 rounded w-48 mb-4" />
             <div className="grid grid-cols-2 gap-3">
-              <div className="h-40 bg-white/5 rounded-xl" />
-              <div className="h-40 bg-white/5 rounded-xl" />
+              <div className="h-40 bg-surface-2 rounded-xl" />
+              <div className="h-40 bg-surface-2 rounded-xl" />
             </div>
           </div>
         }>
@@ -78,9 +78,9 @@ export default async function KararVerPage() {
         </Suspense>
 
         {/* How it works */}
-        <div className="mt-8 rounded-2xl bg-[#1a1a2e] border border-white/5 p-5">
-          <h2 className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3">Nasıl Çalışır?</h2>
-          <ul className="space-y-2 text-sm text-white/60">
+        <div className="mt-8 rounded-2xl bg-surface border border-stroke p-5">
+          <h2 className="text-xs font-semibold text-fg-subtle uppercase tracking-wider mb-3">Nasıl Çalışır?</h2>
+          <ul className="space-y-2 text-sm text-fg-muted">
             <li className="flex items-start gap-2">
               <span className="text-violet-400 mt-0.5 shrink-0">①</span>
               Aynı senaryoya verilen iki cevap gösterilir.

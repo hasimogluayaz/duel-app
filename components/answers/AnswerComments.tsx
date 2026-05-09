@@ -85,7 +85,7 @@ export default function AnswerComments({ answerId, currentUserId, initialCount =
       {/* Toggle button */}
       <button
         onClick={toggle}
-        className="flex items-center gap-1.5 text-xs text-white/40 hover:text-white/70 transition-colors py-1"
+        className="flex items-center gap-1.5 text-xs text-fg-subtle hover:text-fg-muted transition-colors py-1"
       >
         <MessageSquare size={12} />
         <span>{count > 0 ? `${count} yorum` : 'Yorum yap'}</span>
@@ -99,8 +99,8 @@ export default function AnswerComments({ answerId, currentUserId, initialCount =
             <div className="space-y-2">
               {[1,2].map(i => (
                 <div key={i} className="flex gap-2 animate-pulse">
-                  <div className="w-6 h-6 rounded-full bg-white/5" />
-                  <div className="flex-1 h-8 bg-white/5 rounded-lg" />
+                  <div className="w-6 h-6 rounded-full bg-surface-2" />
+                  <div className="flex-1 h-8 bg-surface-2 rounded-lg" />
                 </div>
               ))}
             </div>
@@ -109,23 +109,23 @@ export default function AnswerComments({ answerId, currentUserId, initialCount =
               {comments.map(c => (
                 <div key={c.id} className="flex items-start gap-2 group">
                   {/* Avatar */}
-                  <div className="w-6 h-6 rounded-full bg-white/10 shrink-0 overflow-hidden">
+                  <div className="w-6 h-6 rounded-full bg-surface-2 shrink-0 overflow-hidden">
                     {c.user?.avatar_url ? (
                       <Image src={c.user.avatar_url} alt="" width={24} height={24} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-[10px] text-white/40">
+                      <div className="w-full h-full flex items-center justify-center text-[10px] text-fg-subtle">
                         {(c.user?.display_name ?? c.user?.username ?? '?')[0].toUpperCase()}
                       </div>
                     )}
                   </div>
 
                   {/* Bubble */}
-                  <div className="flex-1 bg-white/5 rounded-xl px-3 py-2 relative">
+                  <div className="flex-1 bg-surface-2 rounded-xl px-3 py-2 relative">
                     <div className="flex items-baseline gap-1.5 mb-0.5">
-                      <span className="text-xs font-semibold text-white/80">{c.user?.display_name ?? c.user?.username}</span>
-                      <span className="text-[9px] text-white/25">{timeAgo(c.created_at)}</span>
+                      <span className="text-xs font-semibold text-fg-muted">{c.user?.display_name ?? c.user?.username}</span>
+                      <span className="text-[9px] text-fg-subtle">{timeAgo(c.created_at)}</span>
                     </div>
-                    <p className="text-xs text-white/70 leading-relaxed">{c.content}</p>
+                    <p className="text-xs text-fg-muted leading-relaxed">{c.content}</p>
 
                     {/* Delete (own comment) */}
                     {currentUserId && (
@@ -152,7 +152,7 @@ export default function AnswerComments({ answerId, currentUserId, initialCount =
                 onKeyDown={e => e.key === 'Enter' && submit()}
                 placeholder="Yorum ekle..."
                 maxLength={300}
-                className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white placeholder-white/25 focus:outline-none focus:border-violet-500/50"
+                className="flex-1 bg-surface border border-stroke rounded-xl px-3 py-2 text-xs text-fg placeholder-fg-subtle focus:outline-none focus:border-violet-500/50"
               />
               <button
                 onClick={submit}

@@ -74,23 +74,23 @@ export default function AraPage() {
   const DIFFICULTY_EMOJIS: Record<string, string> = { easy: '🟢', medium: '🟡', hard: '🔴' }
 
   return (
-    <div className="min-h-screen bg-[#0d0d1a]">
+    <div className="min-h-screen bg-bg">
       <div className="max-w-2xl mx-auto px-4 pt-6 pb-20">
 
         {/* Search bar */}
         <div className="relative mb-4">
-          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none" />
+          <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-fg-subtle pointer-events-none" />
           <input
             ref={inputRef}
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Kullanıcı veya senaryo ara..."
-            className="w-full bg-[#1a1a2e] border border-white/10 rounded-2xl pl-10 pr-10 py-3.5 text-white placeholder-white/30 focus:outline-none focus:border-violet-500/50 text-sm transition-colors"
+            className="w-full bg-surface border border-stroke rounded-2xl pl-10 pr-10 py-3.5 text-fg placeholder-fg-subtle focus:outline-none focus:border-violet-500/50 text-sm transition-colors"
           />
           {query && (
             <button
               onClick={() => setQuery('')}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-fg-subtle hover:text-fg-muted transition-colors"
             >
               <X size={14} />
             </button>
@@ -98,7 +98,7 @@ export default function AraPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex bg-[#1a1a2e] border border-white/10 rounded-xl p-1 mb-5 gap-1">
+        <div className="flex bg-surface border border-stroke rounded-xl p-1 mb-5 gap-1">
           {(['users', 'scenarios'] as Tab[]).map(t => (
             <button
               key={t}
@@ -106,7 +106,7 @@ export default function AraPage() {
               className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-1.5 ${
                 tab === t
                   ? 'bg-violet-600 text-white shadow-sm'
-                  : 'text-white/40 hover:text-white/70 hover:bg-white/5'
+                  : 'text-fg-subtle hover:text-fg-muted hover:bg-surface-2'
               }`}
             >
               {t === 'users' ? <><User size={13} /> Kullanıcılar</> : <><BookOpen size={13} /> Senaryolar</>}
@@ -123,21 +123,21 @@ export default function AraPage() {
 
         {/* Empty state */}
         {!loading && !query && (
-          <div className="text-center py-16 text-white/30">
+          <div className="text-center py-16 text-fg-subtle">
             <Search size={36} className="mx-auto mb-3 opacity-30" />
             <p className="text-sm">Kullanıcı adı, isim veya senaryo içeriği ara</p>
           </div>
         )}
 
         {!loading && query && tab === 'users' && users.length === 0 && (
-          <div className="text-center py-10 text-white/30">
-            <p className="text-sm">"{query}" için kullanıcı bulunamadı</p>
+          <div className="text-center py-10 text-fg-subtle">
+            <p className="text-sm">&ldquo;{query}&rdquo; için kullanıcı bulunamadı</p>
           </div>
         )}
 
         {!loading && query && tab === 'scenarios' && scenarios.length === 0 && (
-          <div className="text-center py-10 text-white/30">
-            <p className="text-sm">"{query}" için senaryo bulunamadı</p>
+          <div className="text-center py-10 text-fg-subtle">
+            <p className="text-sm">&ldquo;{query}&rdquo; için senaryo bulunamadı</p>
           </div>
         )}
 
@@ -148,19 +148,19 @@ export default function AraPage() {
               const tier = getTier(u.total_points)
               return (
                 <Link key={u.id} href={`/profil/${u.username}`}>
-                  <div className="flex items-center gap-3 bg-[#1a1a2e] border border-white/8 hover:border-violet-500/30 hover:bg-violet-500/5 rounded-2xl p-3 transition-all cursor-pointer">
+                  <div className="flex items-center gap-3 bg-surface border border-stroke hover:border-violet-500/30 hover:bg-violet-500/5 rounded-2xl p-3 transition-all cursor-pointer">
                     <Avatar src={u.avatar_url} username={u.username} size="md" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <p className="text-sm font-semibold text-white truncate">
+                        <p className="text-sm font-semibold text-fg truncate">
                           {u.display_name || u.username}
                         </p>
                         <span className={`text-xs font-bold shrink-0 ${tier.color}`}>{tier.emoji}</span>
                       </div>
-                      <p className="text-xs text-white/40">@{u.username}</p>
+                      <p className="text-xs text-fg-subtle">@{u.username}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-xs text-white/30">{u.follower_count ?? 0} takipçi</p>
+                      <p className="text-xs text-fg-subtle">{u.follower_count ?? 0} takipçi</p>
                     </div>
                   </div>
                 </Link>
@@ -174,9 +174,9 @@ export default function AraPage() {
           <div className="space-y-2">
             {scenarios.map(s => (
               <Link key={s.id} href={`/arsiv/${s.id}`}>
-                <div className="bg-[#1a1a2e] border border-white/8 hover:border-violet-500/30 hover:bg-violet-500/5 rounded-2xl p-4 transition-all cursor-pointer">
-                  <p className="text-sm text-white leading-relaxed mb-2">{s.content}</p>
-                  <div className="flex items-center gap-2 text-xs text-white/30">
+                <div className="bg-surface border border-stroke hover:border-violet-500/30 hover:bg-violet-500/5 rounded-2xl p-4 transition-all cursor-pointer">
+                  <p className="text-sm text-fg leading-relaxed mb-2">{s.content}</p>
+                  <div className="flex items-center gap-2 text-xs text-fg-subtle">
                     <span>{s.category}</span>
                     {s.difficulty && (
                       <span className={DIFFICULTY_COLORS[s.difficulty]}>

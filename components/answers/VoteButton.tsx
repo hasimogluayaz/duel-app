@@ -45,8 +45,8 @@ export default function VoteButton({ answerId, initialVotes, userId }: Props) {
         voted
           ? 'text-violet-400 bg-violet-500/10'
           : userId
-            ? 'text-white/30 hover:text-violet-400 hover:bg-violet-500/10'
-            : 'text-white/20 cursor-default'
+            ? 'text-fg-subtle hover:text-violet-400 hover:bg-violet-500/10'
+            : 'text-fg-subtle opacity-60 cursor-default'
       }`}
       title={!userId ? 'Oy vermek için giriş yap' : voted ? 'Oylandı' : 'Oyla'}
     >

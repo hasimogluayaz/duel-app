@@ -10,6 +10,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       defaultTheme="light"
       enableSystem={false}
       disableTransitionOnChange={false}
+      storageKey="kapisio-theme"
     >
       {children}
     </NextThemesProvider>

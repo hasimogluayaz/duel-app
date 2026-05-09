@@ -66,7 +66,7 @@ export default function ReactionBar({ answerId, userId, compact = false }: Props
   if (loading) return (
     <div className={`flex gap-1 ${compact ? '' : 'flex-wrap'}`}>
       {EMOJIS.map(e => (
-        <div key={e} className={`h-7 bg-white/5 rounded-full animate-pulse ${compact ? 'w-10' : 'w-14'}`} />
+        <div key={e} className={`h-7 bg-surface-2 rounded-full animate-pulse ${compact ? 'w-10' : 'w-14'}`} />
       ))}
     </div>
   )
@@ -85,15 +85,15 @@ export default function ReactionBar({ answerId, userId, compact = false }: Props
             title={!userId ? 'Tepki vermek için giriş yap' : undefined}
             className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm transition-all duration-150 select-none ${
               ismine
-                ? 'bg-violet-500/20 border border-violet-500/40 text-white scale-105'
+                ? 'bg-violet-500/20 border border-violet-500/40 text-fg scale-105'
                 : count > 0
-                  ? 'bg-white/5 border border-white/10 text-white/70 hover:bg-white/10 hover:scale-105'
-                  : 'bg-white/3 border border-white/5 text-white/40 hover:bg-white/8 hover:text-white/60 hover:scale-105'
+                  ? 'bg-surface-2 border border-stroke text-fg-muted hover:bg-stroke hover:scale-105'
+                  : 'bg-surface-2 border border-stroke text-fg-subtle hover:bg-stroke hover:text-fg-muted hover:scale-105'
             } ${!userId ? 'cursor-default' : 'cursor-pointer'} ${isPend ? 'opacity-60' : ''}`}
           >
             <span>{emoji}</span>
             {count > 0 && (
-              <span className={`text-xs font-medium tabular-nums ${ismine ? 'text-violet-300' : 'text-white/50'}`}>
+              <span className={`text-xs font-medium tabular-nums ${ismine ? 'text-violet-400' : 'text-fg-subtle'}`}>
                 {count}
               </span>
             )}
@@ -101,7 +101,7 @@ export default function ReactionBar({ answerId, userId, compact = false }: Props
         )
       })}
       {!compact && totalReactions > 0 && (
-        <span className="text-xs text-white/20 ml-1">{totalReactions} tepki</span>
+        <span className="text-xs text-fg-subtle ml-1">{totalReactions} tepki</span>
       )}
     </div>
   )
