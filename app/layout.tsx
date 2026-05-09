@@ -6,6 +6,7 @@ import { Footer } from '@/components/layout/Footer'
 import { CookieBanner } from '@/components/layout/CookieBanner'
 import { ToastProvider } from '@/components/ui/Toast'
 import { ServiceWorkerRegister } from '@/components/layout/ServiceWorkerRegister'
+import InstallPrompt from '@/components/pwa/InstallPrompt'
 import { PushSubscriber } from '@/components/push/PushSubscriber'
 import { PostHogProvider } from '@/components/analytics/PostHogProvider'
 import { PostHogPageView } from '@/components/analytics/PostHogPageView'
@@ -77,6 +78,7 @@ export default async function RootLayout({
             <Footer />
             <CookieBanner />
             <ServiceWorkerRegister />
+            <InstallPrompt />
             {initialProfile && <PushSubscriber />}
             <Suspense fallback={null}><PostHogPageView /></Suspense>
             <Analytics />

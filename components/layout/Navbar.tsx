@@ -12,7 +12,7 @@ import { NotificationBell } from './NotificationBell'
 import { formatPoints } from '@/lib/utils/formatting'
 import { getTier } from '@/lib/utils/tier'
 import type { Profile } from '@/types'
-import { Swords, Menu, X, Trophy, User, Settings, LogOut, Sun, Moon, Star, Flame, Shield } from 'lucide-react'
+import { Swords, Menu, X, Trophy, User, Settings, LogOut, Sun, Moon, Star, Flame, Shield, Search } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import Image from 'next/image'
 
@@ -87,6 +87,11 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
 
         {/* Right side */}
         <div className="flex items-center gap-1.5">
+          {/* Search button */}
+          <Link href="/ara" className="p-2 rounded-xl text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors" aria-label="Ara">
+            <Search size={18} />
+          </Link>
+
           {/* Theme toggle */}
           {mounted && (
             <button

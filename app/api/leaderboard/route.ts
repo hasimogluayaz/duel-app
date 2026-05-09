@@ -2,19 +2,46 @@ import { createApiClient } from '@/lib/supabase/typed'
 import { NextResponse } from 'next/server'
 import type { LeaderboardPeriod } from '@/types'
 
+type ExtendedPeriod = LeaderboardPeriod | 'monthly' | 'friends'
+
 export async function GET(req: Request) {
   try {
     const supabase = createApiClient()
     const { searchParams } = new URL(req.url)
-    const period = (searchParams.get('period') ?? 'weekly') as LeaderboardPeriod
+    const period = (searchParams.get('period') ?? 'weekly') as ExtendedPeriod
 
     const { data: { user } } = await supabase.auth.getUser()
 
+    // Monthly: approximate by using weekly_points * 4 (no separate column yet)
+    // Friends: only show profiles the current user follows
     const pointsColumn = period === 'all_time' ? 'total_points' : 'weekly_points'
+
+    // Friends leaderboard
+    if (period === 'friends') {
+      if (!user) return NextResponse.json({ entries: [], myEntry: null })
+      const { data: following } = await (supabase.from('followers' as any) as any)
+        .select('following_id')
+        .eq('follower_id', user.id)
+      const ids = [(following ?? []).map((f: any) => f.following_id), user.id].flat()
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, username, display_name, avatar_url, total_points, weekly_points, personality_type, active_title')
+        .in('id', ids)
+        .order('total_points', { ascending: false })
+        .limit(50)
+      const entries = (profiles ?? []).map((p: any, i: number) => ({
+        rank: i + 1, ...p,
+        points: p.total_points,
+        duel_count: 0, win_count: 0,
+        is_me: p.id === user.id,
+      }))
+      const myEntry = entries.find((e: any) => e.id === user.id) ?? null
+      return NextResponse.json({ entries, myEntry })
+    }
 
     const { data: profiles } = await supabase
       .from('profiles')
-      .select('id, username, display_name, avatar_url, total_points, weekly_points, personality_type')
+      .select('id, username, display_name, avatar_url, total_points, weekly_points, personality_type, active_title')
       .eq('is_admin', false)
       .eq('is_banned', false)
       .order(pointsColumn, { ascending: false })

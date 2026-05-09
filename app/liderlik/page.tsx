@@ -12,7 +12,7 @@ import { getTier } from '@/lib/utils/tier'
 import Link from 'next/link'
 import { Trophy, Swords } from 'lucide-react'
 
-type Period = 'weekly' | 'all_time'
+type Period = 'weekly' | 'monthly' | 'all_time' | 'friends'
 
 interface Entry {
   rank: number
@@ -22,13 +22,24 @@ interface Entry {
   avatar_url: string | null
   points: number
   personality_type: string | null
+  active_title?: string | null
   win_count: number
   duel_count: number
+  is_me?: boolean
 }
 
 const PERIOD_LABELS: Record<Period, string> = {
   weekly: 'Bu Hafta',
+  monthly: 'Bu Ay',
   all_time: 'Tüm Zamanlar',
+  friends: 'Arkadaşlar',
+}
+
+const PERIOD_ICONS: Record<Period, string> = {
+  weekly: '🔥',
+  monthly: '📅',
+  all_time: '👑',
+  friends: '👥',
 }
 
 const MEDAL = ['🥇', '🥈', '🥉']
@@ -75,18 +86,20 @@ export default function LiderlikPage() {
       </div>
 
       {/* Period tabs */}
-      <div className="flex bg-surface border border-stroke rounded-xl p-1 mb-6 gap-1">
+      <div className="flex bg-surface border border-stroke rounded-xl p-1 mb-6 gap-1 overflow-x-auto">
         {(Object.keys(PERIOD_LABELS) as Period[]).map(p => (
           <button
             key={p}
             onClick={() => setPeriod(p)}
-            className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all ${
+            className={`flex-1 min-w-max py-2 px-3 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-1.5 ${
               period === p
                 ? 'bg-purple-600 text-white shadow-sm'
                 : 'text-fg-muted hover:text-fg hover:bg-surface-2'
             }`}
           >
-            {PERIOD_LABELS[p]}
+            <span>{PERIOD_ICONS[p]}</span>
+            <span className="hidden sm:inline">{PERIOD_LABELS[p]}</span>
+            <span className="sm:hidden">{PERIOD_LABELS[p].split(' ')[1] || PERIOD_LABELS[p]}</span>
           </button>
         ))}
       </div>
@@ -168,8 +181,9 @@ export default function LiderlikPage() {
                     {/* Info */}
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-semibold text-fg text-sm truncate group-hover:text-purple-300 transition-colors">
+                        <p className={`font-semibold text-sm truncate transition-colors ${entry.is_me ? 'text-purple-300' : 'text-fg group-hover:text-purple-300'}`}>
                           {entry.display_name || entry.username}
+                          {entry.is_me && <span className="ml-1 text-xs text-purple-400 font-normal">(sen)</span>}
                         </p>
                         {(() => {
                           const t = getTier(entry.points)
@@ -178,7 +192,10 @@ export default function LiderlikPage() {
                           )
                         })()}
                       </div>
-                      <p className="text-xs text-fg-subtle">@{entry.username}</p>
+                      <p className="text-xs text-fg-subtle">
+                        @{entry.username}
+                        {entry.active_title && <span className="ml-2 text-violet-400">· {entry.active_title}</span>}
+                      </p>
                     </div>
 
                     {/* Points */}

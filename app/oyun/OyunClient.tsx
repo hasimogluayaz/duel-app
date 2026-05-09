@@ -25,6 +25,7 @@ import DailyMissions from '@/components/missions/DailyMissions'
 import QuotaBar from '@/components/quota/QuotaBar'
 import KararVerCard from '@/components/karar-ver/KararVerCard'
 import WeeklyChampionCard from '@/components/champion/WeeklyChampionCard'
+import ReferralCard from '@/components/referral/ReferralCard'
 
 function useNextScenarioCountdown() {
   const [countdown, setCountdown] = useState('')
@@ -309,6 +310,9 @@ export function OyunClient({
 
       {/* ── Haftalık Şampiyon ────────────────────────── */}
       <WeeklyChampionCard />
+
+      {/* ── Referral ─────────────────────────────────── */}
+      {userId && <ReferralCard userId={userId} />}
 
       {/* ── Today's scenario ─────────────────────────── */}
       {!scenario ? (

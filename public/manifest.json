@@ -46,10 +46,36 @@
       "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
     },
     {
+      "name": "Karar Ver",
+      "short_name": "Karar Ver",
+      "description": "İki cevabı karşılaştır",
+      "url": "/karar-ver",
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Arşiv",
+      "short_name": "Arşiv",
+      "description": "Tüm senaryolara göz at",
+      "url": "/arsiv",
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
+    },
+    {
       "name": "Liderlik",
       "short_name": "Liderlik",
-      "url": "/liderlik"
+      "url": "/liderlik",
+      "icons": [{ "src": "/android-chrome-192x192.png", "sizes": "192x192" }]
     }
   ],
-  "categories": ["games", "entertainment", "social"]
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "categories": ["games", "entertainment", "social"],
+  "screenshots": [
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Kapisio Ana Sayfa"
+    }
+  ]
 }

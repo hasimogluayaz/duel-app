@@ -13,6 +13,8 @@ import { useToast } from '@/components/ui/Toast'
 import { formatPoints } from '@/lib/utils/formatting'
 import type { Profile } from '@/types'
 import { User, Lock, Trash2, CheckCircle, Star, Flame, Swords, Camera, Gift, Copy, Check, Crown } from 'lucide-react'
+import TitleSelector from '@/components/titles/TitleSelector'
+import StreakWidget from '@/components/streak/StreakWidget'
 
 export default function AyarlarPage() {
   const router = useRouter()
@@ -343,6 +345,24 @@ export default function AyarlarPage() {
             )} */}
           </div>
         </Card>
+      )}
+
+      {/* ── Streak widget ───────────────────────────── */}
+      {profile && (
+        <div className="mb-5">
+          <StreakWidget
+            streak={profile.streak_count ?? 0}
+            freezeCount={(profile as any).streak_freeze_count ?? 0}
+            userId={profile.id}
+          />
+        </div>
+      )}
+
+      {/* ── Unvan / Title selector ───────────────────── */}
+      {profile && (
+        <div className="mb-5">
+          <TitleSelector userId={profile.id} currentTitle={(profile as any).active_title} />
+        </div>
       )}
 
       {/* ── Referral system ─────────────────────────── */}
