@@ -92,8 +92,12 @@ export default async function OyunPage() {
     activeDuels = duels ?? []
   }
 
-  // Detect new user: onboarding_done = false (or not set)
-  const isNewUser = !!user && !!(profile) && !(profile as any).onboarding_done
+  // Only show onboarding for accounts created within the last 7 days
+  const isNewUser = !!user && !!profile && (() => {
+    const created = new Date((profile as any).created_at ?? 0)
+    const ageDays = (Date.now() - created.getTime()) / (1000 * 60 * 60 * 24)
+    return ageDays < 7
+  })()
 
   return (
     <>
@@ -106,7 +110,7 @@ export default async function OyunPage() {
         communityAnswers={(communityAnswers ?? []) as any[]}
         recentDuels={(recentDuels ?? []) as any[]}
       />
-      {user && <OnboardingModal />}
+      {isNewUser && <OnboardingModal isNew />}
     </>
   )
 }

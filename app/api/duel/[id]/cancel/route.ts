@@ -1,4 +1,4 @@
-import { createApiClient } from '@/lib/supabase/typed'
+import { createApiClient, createServiceClient } from '@/lib/supabase/typed'
 import { NextResponse } from 'next/server'
 import { withAuth } from '@/lib/api/auth'
 import { ApiError } from '@/lib/api/errors'
@@ -9,12 +9,13 @@ export const POST = withAuth(async (_req, { userId, params }) => {
 
   const supabase = createApiClient()
 
-  const { data: duel } = await supabase
+  const { data: duel, error: fetchErr } = await supabase
     .from('duels')
     .select('id, status, challenger_id, challenged_id')
     .eq('id', duelId)
-    .single()
+    .maybeSingle()
 
+  if (fetchErr) throw new ApiError('Düello sorgulanamadı.', 500, 'SERVER_ERROR')
   if (!duel) throw new ApiError('Düello bulunamadı.', 404, 'NOT_FOUND')
   if ((duel as any).status !== 'pending') {
     throw new ApiError('Sadece bekleyen düellolar iptal edilebilir.', 400, 'BAD_REQUEST')
@@ -23,16 +24,22 @@ export const POST = withAuth(async (_req, { userId, params }) => {
     throw new ApiError('Sadece daveti gönderen kişi iptal edebilir.', 403, 'FORBIDDEN')
   }
 
-  await supabase.from('duels').delete().eq('id', duelId)
+  // Use service client to bypass RLS for delete
+  const service = createServiceClient()
+  const { error: deleteErr } = await service.from('duels').delete().eq('id', duelId)
+  if (deleteErr) throw new ApiError('Düello iptal edilemedi.', 500, 'SERVER_ERROR')
 
-  // Notify challenged user
-  await supabase.from('notifications').insert({
-    user_id: (duel as any).challenged_id,
-    type: 'duel_result',
-    title: '⚔️ Düello İptal Edildi',
-    message: 'Gönderilen düello daveti iptal edildi.',
-    data: { duel_id: duelId },
-  } as any).catch(() => {})
+  // Notify challenged user (if exists)
+  const challengedId = (duel as any).challenged_id
+  if (challengedId) {
+    await service.from('notifications').insert({
+      user_id: challengedId,
+      type: 'duel_result',
+      title: '⚔️ Düello İptal Edildi',
+      message: 'Gönderilen düello daveti iptal edildi.',
+      data: { duel_id: duelId },
+    } as any).catch(() => {})
+  }
 
   return NextResponse.json({ success: true })
 })

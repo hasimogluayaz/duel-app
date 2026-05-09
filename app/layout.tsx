@@ -83,7 +83,7 @@ export default async function RootLayout({
             <ServiceWorkerRegister />
             <InstallPrompt />
             {initialProfile && <PushSubscriber />}
-            {initialProfile && <OnboardingModal />}
+            {/* OnboardingModal is rendered in /oyun page with isNew check */}
             <Suspense fallback={null}><PostHogPageView /></Suspense>
             <Analytics />
           </ToastProvider>

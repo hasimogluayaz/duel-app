@@ -31,26 +31,31 @@ const STEPS = [
   },
 ]
 
-export default function OnboardingModal() {
+interface Props {
+  isNew?: boolean
+}
+
+export default function OnboardingModal({ isNew = false }: Props) {
   const [visible, setVisible] = useState(false)
   const [step, setStep] = useState(0)
   const router = useRouter()
 
   useEffect(() => {
-    const seen = localStorage.getItem('kapisio_onboarded')
-    if (!seen) {
-      const timer = setTimeout(() => setVisible(true), 800)
-      return () => clearTimeout(timer)
-    }
-  }, [])
+    // Only show for new users (account < 7 days old) AND haven't seen it
+    if (!isNew) return
+    const seen = localStorage.getItem('kapisio_onboarded_v2')
+    if (seen) return
+    const timer = setTimeout(() => setVisible(true), 1000)
+    return () => clearTimeout(timer)
+  }, [isNew])
 
   function dismiss() {
-    localStorage.setItem('kapisio_onboarded', '1')
+    localStorage.setItem('kapisio_onboarded_v2', '1')
     setVisible(false)
   }
 
   function finish() {
-    localStorage.setItem('kapisio_onboarded', '1')
+    localStorage.setItem('kapisio_onboarded_v2', '1')
     setVisible(false)
     router.push('/oyun')
   }
