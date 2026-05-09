@@ -25,6 +25,10 @@ function getNotificationUrl(n: Notification): string | null {
       return null
     case 'new_comment':
     case 'comment_reply':
+    case 'answer_comment':
+      if (data.scenario_id) return `/arsiv/${data.scenario_id}`
+      return null
+    case 'reaction_milestone':
       if (data.scenario_id) return `/arsiv/${data.scenario_id}`
       return null
     case 'streak_milestone':

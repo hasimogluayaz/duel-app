@@ -29,6 +29,7 @@ import ReferralCard from '@/components/referral/ReferralCard'
 import CheckinWidget from '@/components/checkin/CheckinWidget'
 import SeasonCard from '@/components/seasons/SeasonCard'
 import WeeklyMissions from '@/components/missions/WeeklyMissions'
+import ProfileCompletionBanner from '@/components/profile/ProfileCompletionBanner'
 
 function useNextScenarioCountdown() {
   const [countdown, setCountdown] = useState('')
@@ -192,6 +193,15 @@ export function OyunClient({
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8 space-y-5">
+
+      {/* ── Profile completion banner ────────────────── */}
+      {profile && (
+        <ProfileCompletionBanner
+          hasAvatar={!!profile.avatar_url}
+          hasBio={!!((profile as any).bio)}
+          hasDisplayName={!!(profile.display_name)}
+        />
+      )}
 
       {/* ── Guest banner ─────────────────────────────── */}
       {isGuest && (

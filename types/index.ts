@@ -210,6 +210,8 @@ export type NotificationType =
   | 'weekly_mission_complete'
   | 'tier_up'
   | 'system'
+  | 'answer_comment'
+  | 'reaction_milestone'
 
 export interface Notification {
   id: string

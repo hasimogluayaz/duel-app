@@ -33,7 +33,7 @@ export async function POST(req: Request) {
         type: 'new_follower',
         title: '👥 Yeni Takipçi!',
         message: `${followerProfile?.display_name || followerProfile?.username} seni takip etmeye başladı.`,
-        data: { follower_id: user.id },
+        data: { follower_id: user.id, follower_username: followerProfile?.username },
       } as any)
 
       pushToUser(following_id, {

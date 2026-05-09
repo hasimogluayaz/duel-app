@@ -52,7 +52,7 @@ export const POST = withAuth(async (req, { userId }) => {
 
   // Notify answer owner
   const { data: answer } = await supabase
-    .from('answers').select('user_id').eq('id', answerId).single()
+    .from('answers').select('user_id, scenario_id').eq('id', answerId).single()
   if (answer && (answer as any).user_id !== userId) {
     const { data: commenter } = await supabase
       .from('profiles').select('display_name, username').eq('id', userId).single()
@@ -61,7 +61,7 @@ export const POST = withAuth(async (req, { userId }) => {
       type: 'answer_comment',
       title: '💬 Cevabına yorum yapıldı',
       message: `${(commenter as any)?.display_name || (commenter as any)?.username}: "${content.slice(0, 60)}${content.length > 60 ? '...' : ''}"`,
-      data: { answer_id: answerId, comment_id: (comment as any).id },
+      data: { answer_id: answerId, comment_id: (comment as any).id, scenario_id: (answer as any).scenario_id },
     }).catch(() => {})
   }
 
