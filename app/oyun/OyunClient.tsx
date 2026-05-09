@@ -26,6 +26,8 @@ import QuotaBar from '@/components/quota/QuotaBar'
 import KararVerCard from '@/components/karar-ver/KararVerCard'
 import WeeklyChampionCard from '@/components/champion/WeeklyChampionCard'
 import ReferralCard from '@/components/referral/ReferralCard'
+import CheckinWidget from '@/components/checkin/CheckinWidget'
+import SeasonCard from '@/components/seasons/SeasonCard'
 
 function useNextScenarioCountdown() {
   const [countdown, setCountdown] = useState('')
@@ -304,6 +306,12 @@ export function OyunClient({
           <QuotaBar />
         </div>
       )}
+
+      {/* ── Günlük Giriş ─────────────────────────────── */}
+      {userId && <CheckinWidget />}
+
+      {/* ── Sezon Sıralaması ─────────────────────────── */}
+      <SeasonCard />
 
       {/* ── Karar Ver ────────────────────────────────── */}
       <KararVerCard userId={userId} />

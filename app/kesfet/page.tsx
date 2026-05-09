@@ -10,7 +10,8 @@ import { Spinner } from '@/components/ui/Spinner'
 import { formatPoints, timeAgo } from '@/lib/utils/formatting'
 import type { Profile } from '@/types'
 import Link from 'next/link'
-import { Search, Flame, Star, Users, TrendingUp, Swords, MessageCircle, Trophy, Zap } from 'lucide-react'
+import { Search, Flame, Star, Users, TrendingUp, Swords, MessageCircle, Trophy, Zap, Layers } from 'lucide-react'
+import BookmarkButton from '@/components/bookmarks/BookmarkButton'
 import { cn } from '@/lib/utils/cn'
 import { getTier } from '@/lib/utils/tier'
 import FollowSuggestions from '@/components/social/FollowSuggestions'
@@ -390,9 +391,127 @@ function FriendsTab() {
   )
 }
 
+// ─── Categories Tab ───────────────────────────────────────────────────────────
+const CATEGORIES = [
+  { key: 'genel',      emoji: '🌍', label: 'Genel' },
+  { key: 'ask',        emoji: '❤️', label: 'Aşk' },
+  { key: 'is',         emoji: '💼', label: 'İş' },
+  { key: 'aile',       emoji: '👨‍👩‍👧', label: 'Aile' },
+  { key: 'sosyal',     emoji: '👥', label: 'Sosyal' },
+  { key: 'teknoloji',  emoji: '💻', label: 'Teknoloji' },
+  { key: 'dunya',      emoji: '🌏', label: 'Dünya' },
+  { key: 'mizah',      emoji: '😂', label: 'Mizah' },
+  { key: 'felsefe',    emoji: '🤔', label: 'Felsefe' },
+]
+
+function CategoriesTab() {
+  const [selected, setSelected] = useState<string | null>(null)
+  const [scenarios, setScenarios] = useState<any[]>([])
+  const [loading, setLoading] = useState(false)
+  const [editorPicks, setEditorPicks] = useState<any[]>([])
+  const [picksLoading, setPicksLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/scenarios?editor_pick=true&limit=3')
+      .then(r => r.json())
+      .then(d => { setEditorPicks(d.scenarios ?? []); setPicksLoading(false) })
+      .catch(() => setPicksLoading(false))
+  }, [])
+
+  useEffect(() => {
+    if (!selected) return
+    setLoading(true)
+    fetch(`/api/scenarios?category=${selected}&limit=10`)
+      .then(r => r.json())
+      .then(d => { setScenarios(d.scenarios ?? []); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [selected])
+
+  return (
+    <div className="space-y-5">
+      {/* Editor picks */}
+      {!picksLoading && editorPicks.length > 0 && (
+        <div>
+          <p className="text-xs text-amber-400 font-bold mb-2 flex items-center gap-1.5">
+            <Star size={11} className="fill-amber-400" /> Editör Seçimleri
+          </p>
+          <div className="space-y-2">
+            {editorPicks.map(s => (
+              <Link key={s.id} href={`/arsiv/${s.id}`}>
+                <div className="bg-amber-500/6 border border-amber-500/20 rounded-xl p-3 hover:border-amber-500/40 transition-colors cursor-pointer">
+                  <div className="flex items-start justify-between gap-2">
+                    <p className="text-sm text-white/85 leading-relaxed">{s.content}</p>
+                    <BookmarkButton type="scenario" id={s.id} size={14} />
+                  </div>
+                  <div className="flex items-center gap-2 mt-2 text-xs text-white/35">
+                    <span>{s.answer_count} cevap</span>
+                    <span>·</span>
+                    <span className="capitalize">{s.category}</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Category grid */}
+      <div>
+        <p className="text-xs text-white/40 font-bold mb-3 uppercase tracking-wider">Kategoriler</p>
+        <div className="grid grid-cols-3 gap-2">
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat.key}
+              onClick={() => setSelected(s => s === cat.key ? null : cat.key)}
+              className={`flex flex-col items-center gap-1 py-3 rounded-xl border transition-all text-sm font-semibold ${
+                selected === cat.key
+                  ? 'bg-violet-600/20 border-violet-500/50 text-violet-300'
+                  : 'bg-white/3 border-white/8 text-white/60 hover:bg-white/6 hover:border-white/15'
+              }`}
+            >
+              <span className="text-xl">{cat.emoji}</span>
+              <span className="text-xs">{cat.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Category results */}
+      {selected && (
+        <div>
+          <p className="text-xs text-white/40 font-semibold mb-2">
+            {CATEGORIES.find(c => c.key === selected)?.emoji} {CATEGORIES.find(c => c.key === selected)?.label} Senaryoları
+          </p>
+          {loading ? (
+            <div className="space-y-2">
+              {[1,2,3].map(i => <div key={i} className="h-16 bg-white/5 rounded-xl animate-pulse" />)}
+            </div>
+          ) : scenarios.length === 0 ? (
+            <p className="text-center text-sm text-white/25 py-8">Bu kategoride henüz senaryo yok</p>
+          ) : (
+            <div className="space-y-2">
+              {scenarios.map(s => (
+                <Link key={s.id} href={`/arsiv/${s.id}`}>
+                  <div className="bg-white/3 border border-white/8 rounded-xl p-3 hover:border-violet-500/30 transition-colors cursor-pointer flex items-start justify-between gap-3">
+                    <p className="text-sm text-white/80 leading-relaxed flex-1">{s.content}</p>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs text-white/30">{s.answer_count}</span>
+                      <BookmarkButton type="scenario" id={s.id} size={13} />
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function KesfetPage() {
-  const [tab, setTab] = useState<'feed' | 'friends' | 'users'>('feed')
+  const [tab, setTab] = useState<'feed' | 'friends' | 'users' | 'kategoriler'>('feed')
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
@@ -438,7 +557,17 @@ export default function KesfetPage() {
           )}
         >
           <Search size={14} />
-          Keşfet
+          Ara
+        </button>
+        <button
+          onClick={() => setTab('kategoriler')}
+          className={cn(
+            'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all',
+            tab === 'kategoriler' ? 'bg-purple-600 text-white shadow-sm' : 'text-fg-subtle hover:text-fg'
+          )}
+        >
+          <Layers size={14} />
+          Kategoriler
         </button>
       </div>
 
@@ -455,6 +584,7 @@ export default function KesfetPage() {
           <UsersTab />
         </div>
       )}
+      {tab === 'kategoriler' && <CategoriesTab />}
     </div>
   )
 }

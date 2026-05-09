@@ -12,9 +12,10 @@ import { Avatar } from '@/components/ui/Avatar'
 import { useToast } from '@/components/ui/Toast'
 import { formatPoints } from '@/lib/utils/formatting'
 import type { Profile } from '@/types'
-import { User, Lock, Trash2, CheckCircle, Star, Flame, Swords, Camera, Gift, Copy, Check, Crown } from 'lucide-react'
+import { User, Lock, Trash2, CheckCircle, Star, Flame, Swords, Camera, Gift, Copy, Check, Crown, Bell } from 'lucide-react'
 import TitleSelector from '@/components/titles/TitleSelector'
 import StreakWidget from '@/components/streak/StreakWidget'
+import NotificationPrefs from '@/components/notifications/NotificationPrefs'
 
 export default function AyarlarPage() {
   const router = useRouter()
@@ -440,6 +441,11 @@ export default function AyarlarPage() {
           </div>
         </div>
       </Card>
+
+      {/* ── Notification preferences ─────────────────── */}
+      <div className="mb-5">
+        <NotificationPrefs />
+      </div>
 
       {/* ── Danger zone ──────────────────────────────── */}
       <Card className="border-red-500/20">

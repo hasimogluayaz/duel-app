@@ -14,10 +14,12 @@ import { ACHIEVEMENT_LABELS } from '@/types'
 import {
   Settings, Trophy, Swords, Flame, Star, Calendar, Target,
   TrendingUp, Zap, Crown, MessageCircle, Share2, CheckCircle2,
-  Medal, BarChart3, Sparkles, Pin, PinOff,
+  Medal, BarChart3, Sparkles, Pin, PinOff, Activity,
 } from 'lucide-react'
+import DuelStatsPanel from '@/components/duel/DuelStatsPanel'
+import ActivityFeed from '@/components/activity/ActivityFeed'
 
-type Tab = 'vitrin' | 'genel' | 'duellolar' | 'cevaplar' | 'senaryolar' | 'basarimlar'
+type Tab = 'vitrin' | 'genel' | 'duellolar' | 'cevaplar' | 'senaryolar' | 'basarimlar' | 'istatistik' | 'aktivite'
 
 interface Props {
   profile: any
@@ -82,6 +84,8 @@ export default function ProfilClient({
     { id: 'cevaplar', label: 'Cevaplar', icon: <Star size={14} /> },
     ...(userScenarios.length > 0 ? [{ id: 'senaryolar' as Tab, label: 'Senaryolar', icon: <Sparkles size={14} /> }] : []),
     { id: 'basarimlar', label: `Başarımlar`, icon: <Medal size={14} /> },
+    { id: 'istatistik' as Tab, label: 'İstatistik', icon: <BarChart3 size={14} /> },
+    { id: 'aktivite' as Tab, label: 'Aktivite', icon: <Activity size={14} /> },
   ]
 
   return (
@@ -479,6 +483,16 @@ export default function ProfilClient({
               </Link>
             ))}
           </div>
+        )}
+
+        {/* İSTATİSTİK TAB */}
+        {activeTab === 'istatistik' && (
+          <DuelStatsPanel username={profile.username} isOwnProfile={isOwnProfile} />
+        )}
+
+        {/* AKTİVİTE TAB */}
+        {activeTab === 'aktivite' && (
+          <ActivityFeed username={profile.username} />
         )}
 
         {/* BAŞARIMLAR TAB */}

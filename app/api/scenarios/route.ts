@@ -16,6 +16,7 @@ export const GET = optionalAuth(async (req, { userId }) => {
   const cursor = url.searchParams.get('cursor') // ISO date string for pagination
   const limit = Math.min(Number(url.searchParams.get('limit') ?? 20), 50)
   const sort = url.searchParams.get('sort') ?? 'recent' // recent | popular
+  const editorPick = url.searchParams.get('editor_pick') === 'true'
 
   let query = supabase
     .from('scenarios')
@@ -27,6 +28,10 @@ export const GET = optionalAuth(async (req, { userId }) => {
 
   if (category && CATEGORIES.includes(category as typeof CATEGORIES[number])) {
     query = query.eq('category', category)
+  }
+
+  if (editorPick) {
+    query = (query as any).eq('is_editor_pick', true)
   }
 
   if (cursor) {

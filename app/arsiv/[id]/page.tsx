@@ -8,6 +8,8 @@ import ScenarioCard from '@/components/scenarios/ScenarioCard'
 import VoteButton from '@/components/answers/VoteButton'
 import ReactionBar from '@/components/reactions/ReactionBar'
 import FriendChallengeButton from '@/components/challenge/FriendChallengeButton'
+import BookmarkButton from '@/components/bookmarks/BookmarkButton'
+import AnswerComments from '@/components/answers/AnswerComments'
 
 interface Props { params: { id: string } }
 
@@ -85,11 +87,19 @@ export default async function ScenarioDetailPage({ params }: Props) {
         </Link>
 
         {/* Scenario card with answer form */}
-        <ScenarioCard
-          scenario={enrichedScenario}
-          userId={user?.id ?? null}
-          showAnswer={!userAnswer}
-        />
+        <div className="relative">
+          <ScenarioCard
+            scenario={enrichedScenario}
+            userId={user?.id ?? null}
+            showAnswer={!userAnswer}
+          />
+          {/* Bookmark scenario */}
+          {user && (
+            <div className="absolute top-3 right-3">
+              <BookmarkButton type="scenario" id={(scenario as any).id} size={15} />
+            </div>
+          )}
+        </div>
 
         {/* Friend challenge — shown when user has answered */}
         {user && ownAnswer && (
@@ -145,8 +155,12 @@ export default async function ScenarioDetailPage({ params }: Props) {
                           {answer.user?.display_name ?? 'Anonim'}
                         </Link>
                       </div>
-                      <p className="text-white/90 text-sm leading-relaxed mb-3">{answer.content}</p>
-                      <ReactionBar answerId={answer.id} userId={user?.id ?? null} compact />
+                      <p className="text-white/90 text-sm leading-relaxed mb-2">{answer.content}</p>
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <ReactionBar answerId={answer.id} userId={user?.id ?? null} compact />
+                        {user && <BookmarkButton type="answer" id={answer.id} size={13} showLabel />}
+                      </div>
+                      <AnswerComments answerId={answer.id} currentUserId={user?.id ?? null} />
                     </div>
                     <VoteButton
                       answerId={answer.id}
