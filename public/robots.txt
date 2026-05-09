@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /auth/
+Disallow: /profil/ayarlar
+Disallow: /mesajlar
+Disallow: /kayitlarim
+Disallow: /bildirimler
+
+Sitemap: https://kapisio.com/sitemap.xml

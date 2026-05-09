@@ -43,7 +43,7 @@ function FeedCard({ duel }: { duel: FeedDuel }) {
 
   return (
     <Link href={`/duel/${duel.share_token}`}>
-      <Card className="hover:border-purple-500/30 hover:bg-purple-500/5 transition-all cursor-pointer group">
+      <Card className="hover:bg-surface-2 transition-all cursor-pointer group">
 
         {/* Scenario */}
         {duel.scenario?.content && (
@@ -65,7 +65,7 @@ function FeedCard({ duel }: { duel: FeedDuel }) {
             <div className="min-w-0 flex-1">
               <p className="text-xs font-bold text-fg truncate">
                 {duel.challenger.display_name || duel.challenger.username}
-                <span className="ml-1">{challengerTier.emoji}</span>
+                <span className={`ml-1 ${challengerTier.color}`}>{challengerTier.emoji}</span>
               </p>
               {duel.challenger_answer && (
                 <p className="text-[11px] text-fg-subtle line-clamp-1 mt-0.5">{duel.challenger_answer.content}</p>
@@ -74,7 +74,7 @@ function FeedCard({ duel }: { duel: FeedDuel }) {
             {duel.status === 'completed' && duel.winner_id === duel.challenger_id && (
               <Trophy size={12} className="text-yellow-400 shrink-0" />
             )}
-            <span className="text-xs font-black text-purple-300 shrink-0">
+            <span className="text-xs font-black text-fg-muted shrink-0">
               {duel.challenger_answer?.vote_count ?? 0}
             </span>
           </div>
@@ -92,7 +92,7 @@ function FeedCard({ duel }: { duel: FeedDuel }) {
             <div className="min-w-0 flex-1">
               <p className="text-xs font-bold text-fg truncate">
                 {duel.challenged.display_name || duel.challenged.username}
-                <span className="ml-1">{challengedTier.emoji}</span>
+                <span className={`ml-1 ${challengedTier.color}`}>{challengedTier.emoji}</span>
               </p>
               {duel.challenged_answer && (
                 <p className="text-[11px] text-fg-subtle line-clamp-1 mt-0.5">{duel.challenged_answer.content}</p>
@@ -101,7 +101,7 @@ function FeedCard({ duel }: { duel: FeedDuel }) {
             {duel.status === 'completed' && duel.winner_id === duel.challenged_id && (
               <Trophy size={12} className="text-yellow-400 shrink-0" />
             )}
-            <span className="text-xs font-black text-purple-300 shrink-0">
+            <span className="text-xs font-black text-fg-muted shrink-0">
               {duel.challenged_answer?.vote_count ?? 0}
             </span>
           </div>
@@ -123,9 +123,9 @@ function FeedCard({ duel }: { duel: FeedDuel }) {
           </div>
           <div className="flex items-center gap-2">
             {duel.status === 'active' ? (
-              <Badge variant="info" className="text-[10px] py-0">⚡ Aktif</Badge>
+              <Badge variant="info" className="text-[10px] py-0">Aktif</Badge>
             ) : (
-              <Badge variant="success" className="text-[10px] py-0">✓ Bitti</Badge>
+              <Badge variant="success" className="text-[10px] py-0">Bitti</Badge>
             )}
             <span>{timeAgo(duel.created_at)}</span>
           </div>
@@ -175,14 +175,14 @@ function SearchTab() {
   return (
     <>
       {/* Mode toggle */}
-      <div className="flex gap-1.5 mb-3">
+      <div className="flex border-b border-stroke mb-4">
         <button
           onClick={() => setMode('users')}
           className={cn(
-            'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold transition-all',
+            'flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px',
             mode === 'users'
-              ? 'bg-purple-600 text-white'
-              : 'bg-surface border border-stroke text-fg-subtle hover:border-purple-500/40'
+              ? 'border-fg text-fg'
+              : 'border-transparent text-fg-subtle hover:text-fg-muted'
           )}
         >
           <Users size={13} />
@@ -191,10 +191,10 @@ function SearchTab() {
         <button
           onClick={() => setMode('scenarios')}
           className={cn(
-            'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold transition-all',
+            'flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px',
             mode === 'scenarios'
-              ? 'bg-purple-600 text-white'
-              : 'bg-surface border border-stroke text-fg-subtle hover:border-purple-500/40'
+              ? 'border-fg text-fg'
+              : 'border-transparent text-fg-subtle hover:text-fg-muted'
           )}
         >
           <FileText size={13} />
@@ -238,23 +238,23 @@ function SearchTab() {
         <div className="flex justify-center py-20"><Spinner size="lg" /></div>
       ) : mode === 'users' ? (
         users.length === 0 ? (
-          <Card className="text-center py-14 border-dashed">
-            <Users size={32} className="text-fg-subtle opacity-30 mx-auto mb-3" />
-            <p className="text-fg font-semibold">Kullanıcı bulunamadı</p>
+          <div className="text-center py-16">
+            <Users size={28} className="text-fg-subtle opacity-25 mx-auto mb-3" />
+            <p className="text-fg-muted font-semibold">Kullanıcı bulunamadı</p>
             <p className="text-fg-subtle text-sm mt-1">Farklı bir arama dene</p>
-          </Card>
+          </div>
         ) : (
           <div className="flex flex-col gap-2">
             {users.map((user, idx) => (
               <Link key={user.id} href={`/profil/${user.username}`}>
-                <div className="flex items-center gap-3.5 px-4 py-3.5 rounded-xl bg-surface border border-stroke hover:border-purple-500/40 hover:bg-purple-500/5 transition-all cursor-pointer group">
+                <div className="flex items-center gap-3.5 px-4 py-3.5 rounded-xl bg-surface border border-stroke hover:bg-surface-2 transition-all cursor-pointer group">
                   {!query && (
                     <span className="text-sm font-bold text-fg-subtle w-5 text-center flex-shrink-0">{idx + 1}</span>
                   )}
                   <Avatar src={user.avatar_url} username={user.username} size="md" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-semibold text-fg text-sm group-hover:text-purple-300 transition-colors truncate">
+                      <p className="font-semibold text-fg text-sm truncate">
                         {user.display_name || user.username}
                       </p>
                       {user.personality_type && (
@@ -297,12 +297,12 @@ function SearchTab() {
           <div className="flex flex-col gap-2">
             {scenarios.map((s: any) => (
               <Link key={s.id} href={`/arsiv/${s.id}`}>
-                <div className="flex items-start gap-3 px-4 py-3.5 rounded-xl bg-surface border border-stroke hover:border-purple-500/40 hover:bg-purple-500/5 transition-all cursor-pointer group">
+                <div className="flex items-start gap-3 px-4 py-3.5 rounded-xl bg-surface border border-stroke hover:bg-surface-2 transition-all cursor-pointer group">
                   <div className="w-8 h-8 rounded-lg bg-purple-500/15 flex items-center justify-center shrink-0 mt-0.5">
                     <FileText size={14} className="text-purple-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-fg group-hover:text-purple-300 transition-colors leading-relaxed line-clamp-2">
+                    <p className="text-sm text-fg leading-relaxed line-clamp-2">
                       {s.content}
                     </p>
                     <div className="flex items-center gap-3 mt-1.5 text-xs text-fg-subtle">
@@ -321,7 +321,7 @@ function SearchTab() {
                             s.difficulty === 'medium' ? 'text-amber-400' :
                             'text-green-400'
                           }>
-                            {s.difficulty === 'hard' ? '🔥 Zor' : s.difficulty === 'medium' ? '⚡ Orta' : '✅ Kolay'}
+                            {s.difficulty === 'hard' ? 'Zor' : s.difficulty === 'medium' ? 'Orta' : 'Kolay'}
                           </span>
                         </>
                       )}
@@ -372,19 +372,19 @@ function FeedTab() {
   return (
     <>
       {/* Period toggle */}
-      <div className="flex gap-2 mb-4">
+      <div className="flex border-b border-stroke mb-4">
         {(['today', 'week'] as const).map(p => (
           <button
             key={p}
             onClick={() => setPeriod(p)}
             className={cn(
-              'flex-1 py-2 rounded-xl text-sm font-semibold transition-all',
+              'flex-1 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px',
               period === p
-                ? 'bg-purple-600 text-white'
-                : 'bg-surface border border-stroke text-fg-subtle hover:border-purple-500/40'
+                ? 'border-fg text-fg'
+                : 'border-transparent text-fg-subtle hover:text-fg-muted'
             )}
           >
-            {p === 'today' ? '⚡ Bugün' : '📅 Bu Hafta'}
+            {p === 'today' ? 'Bugün' : 'Bu Hafta'}
           </button>
         ))}
       </div>
@@ -392,17 +392,16 @@ function FeedTab() {
       {loading ? (
         <div className="flex justify-center py-20"><Spinner size="lg" /></div>
       ) : duels.length === 0 ? (
-        <Card className="text-center py-16 border-dashed">
-          <Swords size={32} className="text-fg-subtle opacity-30 mx-auto mb-3" />
-          <p className="text-fg font-semibold mb-1">Henüz düello yok</p>
+        <div className="text-center py-16">
+          <Swords size={28} className="text-fg-subtle opacity-25 mx-auto mb-3" />
+          <p className="text-fg-muted font-semibold mb-1">Henüz düello yok</p>
           <p className="text-fg-subtle text-sm">
             {period === 'today' ? 'Bugün henüz düello başlamadı.' : 'Bu hafta henüz düello yok.'}
           </p>
-          <Link href="/oyun" className="inline-flex items-center gap-1.5 mt-4 text-sm text-purple-400 hover:text-purple-300 font-semibold transition-colors">
-            <Zap size={14} />
-            İlk düelloyu sen başlat
+          <Link href="/oyun" className="inline-flex items-center gap-1.5 mt-4 text-sm text-fg-muted hover:text-fg font-semibold transition-colors">
+            İlk düelloyu sen başlat →
           </Link>
-        </Card>
+        </div>
       ) : (
         <>
           <div className="flex flex-col gap-3">
@@ -413,7 +412,7 @@ function FeedTab() {
             <button
               onClick={() => load(period)}
               disabled={loadingMore}
-              className="w-full mt-4 py-3 rounded-xl border border-stroke text-sm text-fg-subtle hover:border-purple-500/40 hover:text-fg transition-all disabled:opacity-50"
+              className="w-full mt-4 py-3 rounded-xl border border-stroke text-sm text-fg-subtle hover:bg-surface-2 hover:text-fg transition-all disabled:opacity-50"
             >
               {loadingMore ? <Spinner size="sm" className="mx-auto" /> : 'Daha fazla yükle'}
             </button>
@@ -443,23 +442,23 @@ function FriendsTab() {
 
   if (answers.length === 0) {
     return (
-      <Card className="text-center py-16 border-dashed">
-        <Users size={32} className="text-fg-subtle opacity-30 mx-auto mb-3" />
-        <p className="text-fg font-semibold mb-1">Takip ettiğin kimse yok</p>
+      <div className="text-center py-16">
+        <Users size={28} className="text-fg-subtle opacity-25 mx-auto mb-3" />
+        <p className="text-fg-muted font-semibold mb-1">Takip ettiğin kimse yok</p>
         <p className="text-fg-subtle text-sm">
           Oyuncular sekmesinden insanları takip et — cevaplarını burada gör.
         </p>
-      </Card>
+      </div>
     )
   }
 
   return (
     <div className="space-y-3">
       {answers.map((a: any) => (
-        <Card key={a.id} className="hover:border-purple-500/30 transition-colors">
+        <div key={a.id} className="border border-stroke rounded-xl p-4 bg-surface hover:bg-surface-2 transition-colors">
           {a.scenario_content && (
-            <p className="text-xs text-fg-subtle italic mb-2 border-l-2 border-purple-500/40 pl-2 line-clamp-2">
-              &ldquo;{a.scenario_content}&rdquo;
+            <p className="text-xs text-fg-subtle italic mb-2 border-l-2 border-stroke pl-2 line-clamp-2">
+              {a.scenario_content}
             </p>
           )}
           <div className="flex items-start gap-3">
@@ -468,7 +467,7 @@ function FriendsTab() {
             </Link>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 mb-1">
-                <Link href={`/profil/${a.username}`} className="text-sm font-semibold text-fg hover:text-purple-300 transition-colors">
+                <Link href={`/profil/${a.username}`} className="text-sm font-semibold text-fg hover:text-fg-muted transition-colors">
                   {a.display_name || a.username}
                 </Link>
                 <span className="text-xs text-fg-subtle">@{a.username}</span>
@@ -481,14 +480,14 @@ function FriendsTab() {
                   {a.vote_count} oy
                 </span>
                 {a.scenario_id && (
-                  <Link href={`/arsiv/${a.scenario_id}`} className="text-xs text-purple-400 hover:text-purple-300 transition-colors">
+                  <Link href={`/arsiv/${a.scenario_id}`} className="text-xs text-fg-subtle hover:text-fg transition-colors">
                     Cevaplara bak →
                   </Link>
                 )}
               </div>
             </div>
           </div>
-        </Card>
+        </div>
       ))}
     </div>
   )
@@ -569,8 +568,8 @@ function CategoriesTab() {
               className={cn(
                 'flex flex-col items-center gap-1 py-3 rounded-xl border transition-all text-sm font-semibold',
                 selected === cat.key
-                  ? 'bg-violet-600/20 border-violet-500/50 text-violet-300'
-                  : 'bg-surface border-stroke text-fg-subtle hover:bg-surface-2 hover:border-purple-500/30'
+                  ? 'bg-surface-2 border-fg text-fg'
+                  : 'bg-surface border-stroke text-fg-subtle hover:bg-surface-2'
               )}
             >
               <span className="text-xl">{cat.emoji}</span>
@@ -596,7 +595,7 @@ function CategoriesTab() {
             <div className="space-y-2">
               {scenarios.map(s => (
                 <Link key={s.id} href={`/arsiv/${s.id}`}>
-                  <div className="bg-surface border border-stroke rounded-xl p-3 hover:border-violet-500/30 transition-colors cursor-pointer flex items-start justify-between gap-3">
+                  <div className="bg-surface border border-stroke rounded-xl p-3 hover:bg-surface-2 transition-colors cursor-pointer flex items-start justify-between gap-3">
                     <p className="text-sm text-fg-muted leading-relaxed flex-1">{s.content}</p>
                     <div className="flex items-center gap-2 shrink-0">
                       <span className="text-xs text-fg-subtle">{s.answer_count}</span>
@@ -621,58 +620,32 @@ export default function KesfetPage() {
     <div className="max-w-2xl mx-auto px-4 py-8">
 
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
-          <TrendingUp size={22} className="text-blue-400" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-black text-fg">Keşfet</h1>
-          <p className="text-sm text-fg-subtle">Topluluk akışı ve oyuncular</p>
-        </div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-black text-fg">Keşfet</h1>
+        <p className="text-sm text-fg-subtle mt-1">Topluluk akışı ve oyuncular</p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-surface border border-stroke rounded-xl p-1 mb-6">
-        <button
-          onClick={() => setTab('feed')}
-          className={cn(
-            'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all',
-            tab === 'feed' ? 'bg-purple-600 text-white shadow-sm' : 'text-fg-subtle hover:text-fg'
-          )}
-        >
-          <Swords size={14} />
-          Akış
-        </button>
-        <button
-          onClick={() => setTab('friends')}
-          className={cn(
-            'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all',
-            tab === 'friends' ? 'bg-purple-600 text-white shadow-sm' : 'text-fg-subtle hover:text-fg'
-          )}
-        >
-          <Users size={14} />
-          Arkadaşlar
-        </button>
-        <button
-          onClick={() => setTab('users')}
-          className={cn(
-            'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all',
-            tab === 'users' ? 'bg-purple-600 text-white shadow-sm' : 'text-fg-subtle hover:text-fg'
-          )}
-        >
-          <Search size={14} />
-          Ara
-        </button>
-        <button
-          onClick={() => setTab('kategoriler')}
-          className={cn(
-            'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-sm font-semibold transition-all',
-            tab === 'kategoriler' ? 'bg-purple-600 text-white shadow-sm' : 'text-fg-subtle hover:text-fg'
-          )}
-        >
-          <Layers size={14} />
-          Kategoriler
-        </button>
+      <div className="flex border-b border-stroke mb-6 overflow-x-auto scrollbar-none">
+        {([
+          { id: 'feed',        label: 'Akış' },
+          { id: 'friends',     label: 'Arkadaşlar' },
+          { id: 'users',       label: 'Ara' },
+          { id: 'kategoriler', label: 'Kategoriler' },
+        ] as const).map(t => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={cn(
+              'shrink-0 px-4 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px whitespace-nowrap',
+              tab === t.id
+                ? 'border-fg text-fg'
+                : 'border-transparent text-fg-subtle hover:text-fg-muted hover:border-stroke'
+            )}
+          >
+            {t.label}
+          </button>
+        ))}
       </div>
 
       {tab === 'feed' && (

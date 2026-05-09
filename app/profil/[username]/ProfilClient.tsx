@@ -366,6 +366,31 @@ export default function ProfilClient({
               </div>
             </div>
 
+            {/* Points guide — own profile only */}
+            {isOwnProfile && (
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs font-semibold text-fg-subtle uppercase tracking-wider">Puan Kazan</span>
+                  <span className="text-xs text-fg-subtle">Nasıl puan birikir?</span>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {[
+                    { label: 'Düello kazan', pts: '+50' },
+                    { label: 'Düelloya katıl', pts: '+10' },
+                    { label: 'Günlük cevap', pts: '+5' },
+                    { label: 'Oy aldığında', pts: '+2' },
+                    { label: '7 günlük seri', pts: '+100' },
+                    { label: '30 günlük seri', pts: '+500' },
+                  ].map(p => (
+                    <div key={p.label} className="flex items-center justify-between px-3 py-2 bg-surface border border-stroke rounded-lg">
+                      <span className="text-xs text-fg-subtle">{p.label}</span>
+                      <span className="text-xs font-bold text-amber-400">{p.pts}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Top answers */}
             {(recentAnswers ?? []).filter((a: any) => a.vote_count > 0).length > 0 && (
               <div>
