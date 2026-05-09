@@ -64,7 +64,7 @@ export default function BlockButton({ targetUserId, initialBlocked = false }: Pr
         </button>
         <button
           onClick={() => setConfirming(false)}
-          className="text-xs text-white/30 hover:text-white/60 border border-white/10 px-2 py-1 rounded-lg"
+          className="text-xs text-fg-subtle hover:text-fg-muted border border-stroke px-2 py-1 rounded-lg"
         >
           Hayır
         </button>
@@ -75,7 +75,7 @@ export default function BlockButton({ targetUserId, initialBlocked = false }: Pr
   return (
     <button
       onClick={() => setConfirming(true)}
-      className="flex items-center gap-1.5 text-xs text-white/30 hover:text-red-400 border border-white/10 hover:border-red-500/30 px-2.5 py-1.5 rounded-lg transition-colors"
+      className="flex items-center gap-1.5 text-xs text-fg-subtle hover:text-red-400 border border-stroke hover:border-red-500/30 px-2.5 py-1.5 rounded-lg transition-colors"
     >
       <ShieldOff size={12} />
       Engelle

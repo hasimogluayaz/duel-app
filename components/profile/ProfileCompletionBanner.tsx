@@ -51,7 +51,7 @@ export default function ProfileCompletionBanner({ hasAvatar, hasBio, hasDisplayN
       </Link>
       <button
         onClick={() => setDismissed(true)}
-        className="shrink-0 p-1 text-white/30 hover:text-white/60 transition-colors"
+        className="shrink-0 p-1 text-fg-subtle hover:text-fg-muted transition-colors"
       >
         <X size={14} />
       </button>

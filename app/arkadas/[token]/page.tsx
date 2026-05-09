@@ -64,17 +64,17 @@ export default function ArkadasChallengePage() {
   }
 
   if (phase === 'loading') return (
-    <div className="min-h-screen bg-[#0d0d1a] flex items-center justify-center">
+    <div className="min-h-screen bg-bg flex items-center justify-center">
       <Loader2 size={32} className="text-violet-400 animate-spin" />
     </div>
   )
 
   if (phase === 'error') return (
-    <div className="min-h-screen bg-[#0d0d1a] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-bg flex items-center justify-center px-4">
       <div className="text-center max-w-sm">
         <AlertCircle size={48} className="text-red-400 mx-auto mb-4" />
-        <h1 className="text-white font-bold text-xl mb-2">Meydan Okuma Bulunamadı</h1>
-        <p className="text-white/50 text-sm mb-6">{errorMsg}</p>
+        <h1 className="text-fg font-bold text-xl mb-2">Meydan Okuma Bulunamadı</h1>
+        <p className="text-fg-muted text-sm mb-6">{errorMsg}</p>
         <Link href="/" className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl px-6 py-3 text-sm font-semibold transition-colors">
           Ana Sayfaya Dön
         </Link>
@@ -87,13 +87,13 @@ export default function ArkadasChallengePage() {
   const expiresIn = Math.max(0, Math.floor((new Date(challenge.expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
 
   return (
-    <div className="min-h-screen bg-[#0d0d1a]">
+    <div className="min-h-screen bg-bg">
       <div className="max-w-lg mx-auto px-4 py-8">
 
         {/* Brand header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-flex items-center gap-2">
-            <span className="text-2xl font-black text-white">DUEL</span>
+            <span className="text-2xl font-black text-fg">DUEL</span>
           </Link>
           <div className="flex items-center justify-center gap-1.5 mt-2">
             <Users size={12} className="text-violet-400" />
@@ -102,29 +102,29 @@ export default function ArkadasChallengePage() {
         </div>
 
         {/* Challenger card */}
-        <div className="rounded-2xl bg-[#1a1a2e] border border-violet-500/20 p-5 mb-4">
+        <div className="rounded-2xl bg-surface border border-violet-500/20 p-5 mb-4">
           <div className="flex items-center gap-3 mb-4">
             <Avatar src={challenge.challenger.avatar_url} username={challenge.challenger.username} size="md" />
             <div>
-              <p className="text-white font-semibold">{challenge.challenger.display_name || challenge.challenger.username}</p>
-              <p className="text-xs text-white/40">{tier.emoji} {tier.label} • sana meydan okuyor</p>
+              <p className="text-fg font-semibold">{challenge.challenger.display_name || challenge.challenger.username}</p>
+              <p className="text-xs text-fg-subtle">{tier.emoji} {tier.label} • sana meydan okuyor</p>
             </div>
           </div>
 
-          <div className="bg-white/5 rounded-xl p-3 mb-3">
-            <p className="text-xs text-white/40 mb-1">Senaryo</p>
-            <p className="text-sm text-white/80 italic leading-relaxed">&ldquo;{challenge.scenario.content}&rdquo;</p>
+          <div className="bg-surface-2 rounded-xl p-3 mb-3">
+            <p className="text-xs text-fg-subtle mb-1">Senaryo</p>
+            <p className="text-sm text-fg-muted italic leading-relaxed">&ldquo;{challenge.scenario.content}&rdquo;</p>
           </div>
 
           <div className="bg-violet-500/8 rounded-xl p-3 border border-violet-500/15">
             <p className="text-xs text-violet-400 mb-1">
               {challenge.challenger.display_name || challenge.challenger.username} şöyle dedi:
             </p>
-            <p className="text-sm text-white leading-relaxed">{challenge.challenger_answer.content}</p>
+            <p className="text-sm text-fg leading-relaxed">{challenge.challenger_answer.content}</p>
           </div>
 
           {expiresIn > 0 && phase !== 'result' && (
-            <div className="flex items-center gap-1.5 mt-3 text-xs text-white/30">
+            <div className="flex items-center gap-1.5 mt-3 text-xs text-fg-subtle">
               <Clock size={10} />
               <span>{expiresIn} gün içinde sona eriyor</span>
             </div>
@@ -133,9 +133,9 @@ export default function ArkadasChallengePage() {
 
         {/* Phase: intro */}
         {phase === 'intro' && (
-          <div className="rounded-2xl bg-[#1a1a2e] border border-white/10 p-5">
-            <h2 className="text-white font-bold mb-1">Senin Cevabın Neydi?</h2>
-            <p className="text-white/50 text-sm mb-4">
+          <div className="rounded-2xl bg-surface border border-stroke p-5">
+            <h2 className="text-fg font-bold mb-1">Senin Cevabın Neydi?</h2>
+            <p className="text-fg-muted text-sm mb-4">
               Aynı senaryoya sen ne cevap verirdin? Yaz, karşılaştıralım.
             </p>
             <textarea
@@ -143,7 +143,7 @@ export default function ArkadasChallengePage() {
               onChange={e => setContent(e.target.value)}
               placeholder="Cevabını buraya yaz..."
               rows={4}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-white/30 resize-none focus:outline-none focus:border-violet-500/50 transition-colors"
+              className="w-full bg-surface-2 border border-stroke rounded-xl px-4 py-3 text-sm text-fg placeholder-fg-subtle resize-none focus:outline-none focus:border-violet-500/50 transition-colors"
             />
             {content.trim().length > 0 && content.trim().length < 10 && (
               <p className="text-xs text-red-400 mt-1">En az 10 karakter gerekli.</p>
@@ -158,14 +158,14 @@ export default function ArkadasChallengePage() {
             >
               {submitting ? <><Loader2 size={14} className="animate-spin" /> Kaydediliyor...</> : <><Zap size={14} /> Cevapla & Karşılaştır</>}
             </button>
-            <p className="text-xs text-white/30 text-center mt-3">Hesap gerekmez — ama üye olursan kendi profilinde görünür.</p>
+            <p className="text-xs text-fg-subtle text-center mt-3">Hesap gerekmez — ama üye olursan kendi profilinde görünür.</p>
           </div>
         )}
 
         {/* Phase: result */}
         {phase === 'result' && friendAnswer && (
           <div className="space-y-4">
-            <div className="rounded-2xl bg-[#1a1a2e] border border-green-500/20 p-5">
+            <div className="rounded-2xl bg-surface border border-green-500/20 p-5">
               <div className="flex items-center gap-2 mb-4">
                 <CheckCircle size={16} className="text-green-400" />
                 <span className="text-sm font-semibold text-green-400">Cevabın kaydedildi!</span>
@@ -188,11 +188,11 @@ export default function ArkadasChallengePage() {
                       />
                     </svg>
                     <div className="absolute inset-0 flex flex-col items-center justify-center">
-                      <span className="text-3xl font-black text-white">%{compatibility}</span>
-                      <span className="text-[10px] text-white/40">uyum</span>
+                      <span className="text-3xl font-black text-fg">%{compatibility}</span>
+                      <span className="text-[10px] text-fg-subtle">uyum</span>
                     </div>
                   </div>
-                  <p className="text-sm text-white/60">
+                  <p className="text-sm text-fg-muted">
                     {compatibility >= 80 ? '🔥 İnanılmaz uyum! Aynı dalga boyundasınız.' :
                      compatibility >= 60 ? '✨ Benzer düşünüyorsunuz.' :
                      compatibility >= 40 ? '🤔 İlginç farklılıklar var.' :
@@ -207,18 +207,18 @@ export default function ArkadasChallengePage() {
                   <p className="text-[10px] text-violet-400 font-semibold mb-1 uppercase tracking-wider">
                     {challenge.challenger.display_name || challenge.challenger.username}
                   </p>
-                  <p className="text-xs text-white/70 leading-relaxed">{challenge.challenger_answer.content}</p>
+                  <p className="text-xs text-fg-muted leading-relaxed">{challenge.challenger_answer.content}</p>
                 </div>
                 <div className="bg-green-500/8 rounded-xl p-3 border border-green-500/15">
                   <p className="text-[10px] text-green-400 font-semibold mb-1 uppercase tracking-wider">Sen</p>
-                  <p className="text-xs text-white/70 leading-relaxed">{friendAnswer.content}</p>
+                  <p className="text-xs text-fg-muted leading-relaxed">{friendAnswer.content}</p>
                 </div>
               </div>
             </div>
 
             {/* CTA */}
-            <div className="rounded-2xl bg-[#1a1a2e] border border-white/5 p-5 text-center">
-              <p className="text-sm text-white/60 mb-4">Sen de arkadaşlarına meydan oku!</p>
+            <div className="rounded-2xl bg-surface border border-stroke p-5 text-center">
+              <p className="text-sm text-fg-muted mb-4">Sen de arkadaşlarına meydan oku!</p>
               <Link
                 href="/kayit"
                 className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl px-6 py-3 text-sm font-semibold transition-colors"
@@ -226,7 +226,7 @@ export default function ArkadasChallengePage() {
                 <Zap size={14} />
                 Ücretsiz Katıl
               </Link>
-              <p className="text-xs text-white/30 mt-3">Kendi meydan okumalarını oluştur, liderlik tablosuna gir.</p>
+              <p className="text-xs text-fg-subtle mt-3">Kendi meydan okumalarını oluştur, liderlik tablosuna gir.</p>
             </div>
           </div>
         )}

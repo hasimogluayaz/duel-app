@@ -46,7 +46,7 @@ export default function DeleteAnswerButton({ answerId, onDeleted }: Props) {
         </button>
         <button
           onClick={() => setConfirming(false)}
-          className="text-xs text-white/30 hover:text-white/60"
+          className="text-xs text-fg-subtle hover:text-fg-muted"
         >
           Vazgeç
         </button>
@@ -57,7 +57,7 @@ export default function DeleteAnswerButton({ answerId, onDeleted }: Props) {
   return (
     <button
       onClick={() => setConfirming(true)}
-      className="flex items-center gap-1 text-xs text-white/30 hover:text-red-400 transition-colors"
+      className="flex items-center gap-1 text-xs text-fg-subtle hover:text-red-400 transition-colors"
       title="Cevabı sil"
     >
       <Trash2 size={12} />

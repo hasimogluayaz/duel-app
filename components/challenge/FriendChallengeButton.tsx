@@ -55,7 +55,7 @@ export default function FriendChallengeButton({ scenarioId, answerId, userId }: 
     <div className="mt-3">
       {link ? (
         <div className="flex items-center gap-2">
-          <div className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs text-white/60 truncate font-mono">
+          <div className="flex-1 bg-surface-2 border border-stroke rounded-xl px-3 py-2 text-xs text-fg-muted truncate font-mono">
             {link}
           </div>
           <button
@@ -81,7 +81,7 @@ export default function FriendChallengeButton({ scenarioId, answerId, userId }: 
         </>
       )}
       {link && (
-        <p className="text-xs text-white/30 text-center mt-2">
+        <p className="text-xs text-fg-subtle text-center mt-2">
           Bu link 7 gün geçerli. Arkadaşın cevaplayınca uyum skorunu görürsün.
         </p>
       )}

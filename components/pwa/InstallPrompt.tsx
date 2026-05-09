@@ -40,13 +40,13 @@ export default function InstallPrompt() {
 
   return (
     <div className="fixed bottom-20 left-4 right-4 z-40 max-w-sm mx-auto">
-      <div className="bg-[#1a1a2e] border border-violet-500/30 rounded-2xl p-4 shadow-2xl shadow-black/50 flex items-center gap-3">
+      <div className="bg-surface border border-violet-500/30 rounded-2xl p-4 shadow-2xl shadow-black/50 flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center shrink-0">
           <Download size={18} className="text-violet-400" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-white">Uygulamayı Yükle</p>
-          <p className="text-xs text-white/50">Ana ekrana ekle, daha hızlı aç</p>
+          <p className="text-sm font-semibold text-fg">Uygulamayı Yükle</p>
+          <p className="text-xs text-fg-muted">Ana ekrana ekle, daha hızlı aç</p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button
@@ -55,7 +55,7 @@ export default function InstallPrompt() {
           >
             Yükle
           </button>
-          <button onClick={dismiss} className="text-white/30 hover:text-white/60 transition-colors">
+          <button onClick={dismiss} className="text-fg-subtle hover:text-fg-muted transition-colors">
             <X size={16} />
           </button>
         </div>

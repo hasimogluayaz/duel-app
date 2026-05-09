@@ -136,7 +136,7 @@ function AxisLabels({ data, days }: { data: DayData[]; days: number }) {
       {labelPositions.map(({ pct, label }, i) => (
         <span
           key={i}
-          className="absolute text-[10px] text-white/25 transform -translate-x-1/2"
+          className="absolute text-[10px] text-fg-subtle transform -translate-x-1/2"
           style={{ left: `${pct}%` }}
         >
           {label}

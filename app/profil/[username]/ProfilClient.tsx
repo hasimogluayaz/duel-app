@@ -271,7 +271,7 @@ export default function ProfilClient({
                       <button
                         onClick={() => togglePin(a)}
                         disabled={pinning === a.id}
-                        className="shrink-0 p-1.5 rounded-lg hover:bg-red-500/10 text-white/30 hover:text-red-400 transition-all"
+                        className="shrink-0 p-1.5 rounded-lg hover:bg-red-500/10 text-fg-subtle hover:text-red-400 transition-all"
                         title="Sabitlemeden kaldır"
                       >
                         {pinning === a.id ? <Zap size={14} className="animate-pulse" /> : <PinOff size={14} />}
@@ -301,7 +301,7 @@ export default function ProfilClient({
                             <button
                               onClick={() => togglePin(a)}
                               disabled={pinning === a.id}
-                              className="shrink-0 p-1.5 rounded-lg hover:bg-violet-500/10 text-white/30 hover:text-violet-400 transition-all"
+                              className="shrink-0 p-1.5 rounded-lg hover:bg-violet-500/10 text-fg-subtle hover:text-violet-400 transition-all"
                               title="Sabitle"
                             >
                               {pinning === a.id ? <Zap size={14} className="animate-pulse" /> : <Pin size={14} />}

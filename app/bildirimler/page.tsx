@@ -267,7 +267,7 @@ export default function BildirimlerPage() {
             return (
               <div key={n.id}>
                 {showGroupLabel && idx > 0 && (
-                  <p className="text-[10px] text-white/25 font-bold uppercase tracking-widest mt-3 mb-1 px-1">
+                  <p className="text-[10px] text-fg-subtle font-bold uppercase tracking-widest mt-3 mb-1 px-1">
                     {thisGroup}
                   </p>
                 )}

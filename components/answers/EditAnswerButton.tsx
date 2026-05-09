@@ -57,7 +57,7 @@ export default function EditAnswerButton({ answerId, initialContent, editCount =
   if (!editing) return (
     <button
       onClick={() => setEditing(true)}
-      className="flex items-center gap-1 text-xs text-white/30 hover:text-violet-400 transition-colors"
+      className="flex items-center gap-1 text-xs text-fg-subtle hover:text-violet-400 transition-colors"
       title={`Düzenle (${editsLeft} hak kaldı)`}
     >
       <Pencil size={11} />
@@ -72,7 +72,7 @@ export default function EditAnswerButton({ answerId, initialContent, editCount =
         onChange={e => setContent(e.target.value)}
         rows={3}
         maxLength={500}
-        className="w-full bg-white/5 border border-violet-500/40 rounded-xl px-3 py-2 text-sm text-white placeholder-white/25 focus:outline-none focus:border-violet-400 resize-none"
+        className="w-full bg-surface-2 border border-violet-500/40 rounded-xl px-3 py-2 text-sm text-fg placeholder-fg-subtle focus:outline-none focus:border-violet-400 resize-none"
         autoFocus
       />
       <div className="flex items-center justify-between">
@@ -87,12 +87,12 @@ export default function EditAnswerButton({ answerId, initialContent, editCount =
           </button>
           <button
             onClick={() => { setEditing(false); setContent(initialContent); setError('') }}
-            className="flex items-center gap-1 text-xs text-white/40 hover:text-white/70 px-2 py-1.5 rounded-lg transition-colors"
+            className="flex items-center gap-1 text-xs text-fg-subtle hover:text-fg-muted px-2 py-1.5 rounded-lg transition-colors"
           >
             <X size={11} /> İptal
           </button>
         </div>
-        <div className="flex items-center gap-1 text-[10px] text-white/25">
+        <div className="flex items-center gap-1 text-[10px] text-fg-subtle">
           <span>{content.length}/500</span>
           <span>·</span>
           <span>{editsLeft} düzenleme hakkı</span>

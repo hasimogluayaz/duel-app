@@ -543,10 +543,10 @@ function CategoriesTab() {
               <Link key={s.id} href={`/arsiv/${s.id}`}>
                 <div className="bg-amber-500/6 border border-amber-500/20 rounded-xl p-3 hover:border-amber-500/40 transition-colors cursor-pointer">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm text-white/85 leading-relaxed">{s.content}</p>
+                    <p className="text-sm text-fg leading-relaxed">{s.content}</p>
                     <BookmarkButton type="scenario" id={s.id} size={14} />
                   </div>
-                  <div className="flex items-center gap-2 mt-2 text-xs text-white/35">
+                  <div className="flex items-center gap-2 mt-2 text-xs text-fg-subtle">
                     <span>{s.answer_count} cevap</span>
                     <span>·</span>
                     <span className="capitalize">{s.category}</span>
@@ -583,12 +583,12 @@ function CategoriesTab() {
       {/* Category results */}
       {selected && (
         <div>
-          <p className="text-xs text-white/40 font-semibold mb-2">
+          <p className="text-xs text-fg-subtle font-semibold mb-2">
             {CATEGORIES.find(c => c.key === selected)?.emoji} {CATEGORIES.find(c => c.key === selected)?.label} Senaryoları
           </p>
           {loading ? (
             <div className="space-y-2">
-              {[1,2,3].map(i => <div key={i} className="h-16 bg-white/5 rounded-xl animate-pulse" />)}
+              {[1,2,3].map(i => <div key={i} className="h-16 bg-surface-2 rounded-xl animate-pulse" />)}
             </div>
           ) : scenarios.length === 0 ? (
             <p className="text-center text-sm text-fg-subtle py-8">Bu kategoride henüz senaryo yok</p>

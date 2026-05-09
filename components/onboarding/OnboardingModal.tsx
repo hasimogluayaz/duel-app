@@ -62,7 +62,7 @@ export default function OnboardingModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div className="w-full max-w-sm bg-[#14142a] border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+      <div className="w-full max-w-sm bg-surface border border-stroke rounded-3xl overflow-hidden shadow-2xl">
         <div className={`bg-gradient-to-br ${current.color} p-8 text-center relative`}>
           <button
             onClick={dismiss}
@@ -84,14 +84,14 @@ export default function OnboardingModal() {
         </div>
 
         <div className="p-6">
-          <h2 className="text-xl font-black text-white mb-2">{current.title}</h2>
-          <p className="text-white/60 text-sm leading-relaxed mb-6">{current.desc}</p>
+          <h2 className="text-xl font-black text-fg mb-2">{current.title}</h2>
+          <p className="text-fg-muted text-sm leading-relaxed mb-6">{current.desc}</p>
 
           <div className="flex gap-3">
             {step > 0 && (
               <button
                 onClick={() => setStep(s => s - 1)}
-                className="flex-1 py-2.5 rounded-xl border border-white/10 text-white/50 hover:text-white text-sm font-medium transition-colors"
+                className="flex-1 py-2.5 rounded-xl border border-stroke text-fg-subtle hover:text-fg text-sm font-medium transition-colors"
               >
                 Geri
               </button>
@@ -111,7 +111,7 @@ export default function OnboardingModal() {
           {step === 0 && (
             <button
               onClick={dismiss}
-              className="w-full mt-3 text-xs text-white/30 hover:text-white/50 transition-colors"
+              className="w-full mt-3 text-xs text-fg-subtle hover:text-fg-muted transition-colors"
             >
               Tanıtımı atla
             </button>

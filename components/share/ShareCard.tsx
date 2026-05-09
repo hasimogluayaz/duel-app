@@ -122,15 +122,15 @@ export function ShareCard({ duel, winnerProfile, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80 backdrop-blur-md">
-      <div className="bg-[#0f0d1f] border border-purple-500/20 rounded-2xl w-full max-w-lg max-h-[95vh] overflow-y-auto shadow-2xl shadow-purple-900/30">
+      <div className="bg-surface border border-stroke rounded-2xl w-full max-w-lg max-h-[95vh] overflow-y-auto shadow-2xl shadow-purple-900/30">
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
           <div>
-            <h3 className="font-black text-white text-lg">Düelloyu Paylaş</h3>
-            <p className="text-xs text-purple-300/60 mt-0.5">Arkadaşlarını düelloya davet et</p>
+            <h3 className="font-black text-fg text-lg">Düelloyu Paylaş</h3>
+            <p className="text-xs text-purple-400/70 mt-0.5">Arkadaşlarını düelloya davet et</p>
           </div>
-          <button onClick={onClose} className="text-white/40 hover:text-white/80 transition-colors">
+          <button onClick={onClose} className="text-fg-subtle hover:text-fg transition-colors">
             <X size={20} />
           </button>
         </div>
@@ -144,7 +144,7 @@ export function ShareCard({ duel, winnerProfile, onClose }: Props) {
               className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
                 format === f
                   ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/40'
-                  : 'bg-white/5 text-white/50 hover:bg-white/10'
+                  : 'bg-surface-2 text-fg-subtle hover:bg-stroke'
               }`}
             >
               {f === 'square' ? '⬛ Kare (1:1)' : '📱 Story (9:16)'}
@@ -240,7 +240,7 @@ export function ShareCard({ duel, winnerProfile, onClose }: Props) {
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border transition-all ${
                 copied
                   ? 'bg-green-500/20 border-green-500/40 text-green-400'
-                  : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10'
+                  : 'bg-surface-2 border-stroke text-fg-muted hover:bg-stroke'
               }`}
             >
               {copied ? <Check size={15} /> : <Link2 size={15} />}
@@ -266,7 +266,7 @@ export function ShareCard({ duel, winnerProfile, onClose }: Props) {
           {typeof navigator !== 'undefined' && 'share' in navigator && (
             <button
               onClick={shareNative}
-              className="w-full py-2.5 rounded-xl bg-white/5 border border-white/10 text-white/60 text-sm font-medium hover:bg-white/10 transition-all"
+              className="w-full py-2.5 rounded-xl bg-surface-2 border border-stroke text-fg-muted text-sm font-medium hover:bg-stroke transition-all"
             >
               📤 Cihazda Paylaş
             </button>

@@ -115,7 +115,7 @@ export default function BasarimlarPage() {
   if (loading) return (
     <div className="max-w-2xl mx-auto px-4 py-8">
       <div className="space-y-3">
-        {[1,2,3,4,5,6].map(i => <div key={i} className="h-20 bg-white/5 rounded-2xl animate-pulse" />)}
+        {[1,2,3,4,5,6].map(i => <div key={i} className="h-20 bg-surface-2 rounded-2xl animate-pulse" />)}
       </div>
     </div>
   )
@@ -132,8 +132,8 @@ export default function BasarimlarPage() {
           <Medal size={20} className="text-amber-400" />
         </div>
         <div>
-          <h1 className="text-xl font-black text-white">Başarımlar</h1>
-          <p className="text-xs text-white/40">{earnedCount}/{ORDER.length} kazanıldı · {totalPoints} puan</p>
+          <h1 className="text-xl font-black text-fg">Başarımlar</h1>
+          <p className="text-xs text-fg-subtle">{earnedCount}/{ORDER.length} kazanıldı · {totalPoints} puan</p>
         </div>
       </div>
 
