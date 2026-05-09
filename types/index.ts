@@ -198,10 +198,18 @@ export interface Vote {
 export type NotificationType =
   | 'duel_invite'
   | 'duel_result'
+  | 'duel_accepted'
   | 'vote_milestone'
   | 'streak_reminder'
+  | 'streak_milestone'
   | 'new_follower'
   | 'vote_received'
+  | 'new_comment'
+  | 'comment_reply'
+  | 'achievement'
+  | 'weekly_mission_complete'
+  | 'tier_up'
+  | 'system'
 
 export interface Notification {
   id: string

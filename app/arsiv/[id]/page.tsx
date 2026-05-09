@@ -11,6 +11,7 @@ import FriendChallengeButton from '@/components/challenge/FriendChallengeButton'
 import BookmarkButton from '@/components/bookmarks/BookmarkButton'
 import AnswerComments from '@/components/answers/AnswerComments'
 import EditAnswerButton from '@/components/answers/EditAnswerButton'
+import { ReportButton } from '@/components/ui/ReportButton'
 
 interface Props { params: { id: string } }
 
@@ -160,6 +161,9 @@ export default async function ScenarioDetailPage({ params }: Props) {
                       <div className="flex items-center gap-3 flex-wrap">
                         <ReactionBar answerId={answer.id} userId={user?.id ?? null} compact />
                         {user && <BookmarkButton type="answer" id={answer.id} size={13} showLabel />}
+                        {user && (answer as any).user?.id !== user.id && (
+                          <ReportButton targetType="answer" targetId={answer.id} userId={user.id} />
+                        )}
                         {user && (answer as any).user?.id === user.id && (
                           <EditAnswerButton
                             answerId={answer.id}

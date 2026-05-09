@@ -32,6 +32,34 @@ export async function logActivity({ supabase, userId, type, targetId, targetType
 }
 
 /**
+ * Award points to a user and check for tier-up.
+ * Returns the new total or null on failure.
+ */
+export async function awardPoints(supabase: any, userId: string, points: number): Promise<void> {
+  try {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('total_points, weekly_points')
+      .eq('id', userId)
+      .single()
+
+    const oldTotal = (profile as any)?.total_points ?? 0
+    const newTotal = oldTotal + points
+
+    await supabase.from('profiles').update({
+      total_points: newTotal,
+      weekly_points: ((profile as any)?.weekly_points ?? 0) + points,
+    } as any).eq('id', userId)
+
+    // Check tier-up (lazy import to avoid circular deps)
+    const { checkTierUp } = await import('@/lib/notifications/tier')
+    await checkTierUp(supabase, userId, oldTotal, newTotal)
+  } catch {
+    // Fire-and-forget
+  }
+}
+
+/**
  * Award season points to a user
  */
 export async function awardSeasonPoints(supabase: any, userId: string, points: number): Promise<void> {

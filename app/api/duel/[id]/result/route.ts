@@ -6,6 +6,7 @@ import { pushToUser } from '@/lib/push/notify'
 import { sendDuelResultEmail } from '@/lib/email/resend'
 import { logActivity, awardSeasonPoints } from '@/lib/activity/log'
 import { updateWeeklyMission } from '@/lib/missions/weekly'
+import { checkTierUp } from '@/lib/notifications/tier'
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
@@ -70,16 +71,25 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
       supabase.from('profiles').select('total_points, weekly_points').eq('id', loserId).single(),
     ])
 
+    const winnerOldPoints = winnerProfile?.total_points || 0
+    const loserOldPoints = loserProfile?.total_points || 0
+
     await Promise.all([
       winnerProfile && supabase.from('profiles').update({
-        total_points: (winnerProfile.total_points || 0) + POINTS.DUEL_WIN,
+        total_points: winnerOldPoints + POINTS.DUEL_WIN,
         weekly_points: (winnerProfile.weekly_points || 0) + POINTS.DUEL_WIN,
       } as any).eq('id', winnerId),
       loserProfile && supabase.from('profiles').update({
-        total_points: (loserProfile.total_points || 0) + POINTS.DUEL_LOSE,
+        total_points: loserOldPoints + POINTS.DUEL_LOSE,
         weekly_points: (loserProfile.weekly_points || 0) + POINTS.DUEL_LOSE,
       } as any).eq('id', loserId),
     ])
+
+    // Tier-up notifications (fire-and-forget)
+    Promise.all([
+      checkTierUp(supabase, winnerId, winnerOldPoints, winnerOldPoints + POINTS.DUEL_WIN),
+      checkTierUp(supabase, loserId, loserOldPoints, loserOldPoints + POINTS.DUEL_LOSE),
+    ]).catch(() => {})
 
     // Check achievements
     const { count: winCount } = await supabase

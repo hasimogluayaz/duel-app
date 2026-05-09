@@ -3,9 +3,41 @@
 import { useState, useEffect, useRef } from 'react'
 import { Bell } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { useRouter } from 'next/navigation'
 import type { Notification } from '@/types'
 import { timeAgo } from '@/lib/utils/formatting'
 import Link from 'next/link'
+
+function getNotificationUrl(n: Notification): string | null {
+  const data = (n as any).data ?? {}
+  switch (n.type) {
+    case 'duel_invite':
+    case 'duel_result':
+    case 'duel_accepted':
+      if (data.share_token) return `/duel/${data.share_token}`
+      if (data.duel_id) return `/duel/${data.duel_id}`
+      return null
+    case 'vote_milestone':
+      if (data.duel_id) return `/duel/${data.duel_id}`
+      return null
+    case 'new_follower':
+      if (data.follower_username) return `/profil/${data.follower_username}`
+      return null
+    case 'new_comment':
+    case 'comment_reply':
+      if (data.scenario_id) return `/arsiv/${data.scenario_id}`
+      return null
+    case 'streak_milestone':
+    case 'streak_reminder':
+      return '/oyun'
+    case 'achievement':
+      return '/basarimlar'
+    case 'weekly_mission_complete':
+      return '/oyun'
+    default:
+      return null
+  }
+}
 
 interface NotificationBellProps {
   userId: string
@@ -13,6 +45,7 @@ interface NotificationBellProps {
 
 export function NotificationBell({ userId }: NotificationBellProps) {
   const supabase = createClient()
+  const router = useRouter()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [open, setOpen] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -58,6 +91,20 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })))
   }
 
+  async function handleNotificationClick(n: Notification) {
+    // Mark as read
+    if (!n.is_read) {
+      await supabase.from('notifications').update({ is_read: true }).eq('id', n.id)
+      setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, is_read: true } : x))
+    }
+
+    const url = getNotificationUrl(n)
+    if (url) {
+      setOpen(false)
+      router.push(url)
+    }
+  }
+
   return (
     <div className="relative" ref={containerRef}>
       <button
@@ -92,16 +139,29 @@ export function NotificationBell({ userId }: NotificationBellProps) {
               {notifications.length === 0 ? (
                 <p className="text-center text-fg-subtle py-8 text-sm">Bildirim yok</p>
               ) : (
-                notifications.map(n => (
-                  <div
-                    key={n.id}
-                    className={`px-4 py-3 border-b border-stroke last:border-0 ${!n.is_read ? 'bg-purple-500/5' : ''}`}
-                  >
-                    <p className="text-sm text-fg font-medium">{n.title}</p>
-                    <p className="text-xs text-fg-muted mt-0.5">{n.message}</p>
-                    <p className="text-xs text-fg-subtle mt-1">{timeAgo(n.created_at)}</p>
-                  </div>
-                ))
+                notifications.map(n => {
+                  const url = getNotificationUrl(n)
+                  return (
+                    <div
+                      key={n.id}
+                      onClick={() => handleNotificationClick(n)}
+                      className={`px-4 py-3 border-b border-stroke last:border-0 transition-colors ${
+                        !n.is_read ? 'bg-purple-500/5' : ''
+                      } ${url ? 'cursor-pointer hover:bg-surface-2' : ''}`}
+                    >
+                      <div className="flex items-start gap-2">
+                        {!n.is_read && (
+                          <span className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-1.5 shrink-0" />
+                        )}
+                        <div className={!n.is_read ? '' : 'pl-3.5'}>
+                          <p className="text-sm text-fg font-medium">{n.title}</p>
+                          <p className="text-xs text-fg-muted mt-0.5">{n.message}</p>
+                          <p className="text-xs text-fg-subtle mt-1">{timeAgo(n.created_at)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })
               )}
             </div>
             <div className="p-3 border-t border-stroke">
