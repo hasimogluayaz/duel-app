@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next'
 import { Suspense } from 'react'
 import './globals.css'
 import { Navbar } from '@/components/layout/Navbar'
+import { BottomNav } from '@/components/layout/BottomNav'
 import { Footer } from '@/components/layout/Footer'
 import { CookieBanner } from '@/components/layout/CookieBanner'
 import { ToastProvider } from '@/components/ui/Toast'
@@ -72,10 +73,11 @@ export default async function RootLayout({
         <ThemeProvider>
           <ToastProvider>
             <Navbar initialProfile={initialProfile} />
-            <main className="flex-1">
+            <main className="flex-1 pb-16 md:pb-0">
               {children}
             </main>
             <Footer />
+            <BottomNav userId={initialProfile?.id ?? null} username={initialProfile?.username ?? null} />
             <CookieBanner />
             <ServiceWorkerRegister />
             <InstallPrompt />

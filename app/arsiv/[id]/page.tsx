@@ -13,7 +13,10 @@ import AnswerComments from '@/components/answers/AnswerComments'
 import EditAnswerButton from '@/components/answers/EditAnswerButton'
 import { ReportButton } from '@/components/ui/ReportButton'
 
-interface Props { params: { id: string } }
+interface Props {
+  params: { id: string }
+  searchParams: { sort?: string }
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = createClient()
@@ -33,7 +36,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function ScenarioDetailPage({ params }: Props) {
+export default async function ScenarioDetailPage({ params, searchParams }: Props) {
+  const answerSort = searchParams.sort === 'recent' ? 'recent' : 'popular'
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -56,7 +60,7 @@ export default async function ScenarioDetailPage({ params }: Props) {
       user:profiles!answers_user_id_fkey(id, username, display_name, avatar_url)
     `)
     .eq('scenario_id', params.id)
-    .order('vote_count', { ascending: false })
+    .order(answerSort === 'recent' ? 'created_at' : 'vote_count', { ascending: false })
     .limit(50)
 
   let userAnswer = null
@@ -117,9 +121,26 @@ export default async function ScenarioDetailPage({ params }: Props) {
 
         {/* Answers */}
         <div className="mt-6">
-          <h2 className="text-sm font-semibold text-white/50 mb-3 uppercase tracking-wider">
-            {(answers ?? []).length} Cevap
-          </h2>
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-sm font-semibold text-white/50 uppercase tracking-wider">
+              {(answers ?? []).length} Cevap
+            </h2>
+            <div className="flex bg-white/5 rounded-lg p-0.5 gap-0.5">
+              {(['popular', 'recent'] as const).map(s => (
+                <Link
+                  key={s}
+                  href={`/arsiv/${params.id}?sort=${s}`}
+                  className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
+                    answerSort === s
+                      ? 'bg-violet-600 text-white'
+                      : 'text-white/40 hover:text-white/70'
+                  }`}
+                >
+                  {s === 'popular' ? '🔥 Popüler' : '🕐 Yeni'}
+                </Link>
+              ))}
+            </div>
+          </div>
 
           {(answers ?? []).length === 0 ? (
             <div className="text-center py-12 text-white/30">
