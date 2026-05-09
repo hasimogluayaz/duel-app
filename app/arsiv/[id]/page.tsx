@@ -6,6 +6,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import ScenarioCard from '@/components/scenarios/ScenarioCard'
 import VoteButton from '@/components/answers/VoteButton'
+import ReactionBar from '@/components/reactions/ReactionBar'
+import FriendChallengeButton from '@/components/challenge/FriendChallengeButton'
 
 interface Props { params: { id: string } }
 
@@ -66,6 +68,11 @@ export default async function ScenarioDetailPage({ params }: Props) {
 
   const enrichedScenario = { ...scenario as any, answered: !!userAnswer }
 
+  // Find user's own answer (for friend challenge button)
+  const ownAnswer = user && userAnswer
+    ? (answers ?? []).find((a: any) => a.id === userAnswer.id) ?? null
+    : null
+
   return (
     <div className="min-h-screen bg-[#0f0f1a] pb-24">
       <div className="max-w-2xl mx-auto px-4 pt-6">
@@ -83,6 +90,18 @@ export default async function ScenarioDetailPage({ params }: Props) {
           userId={user?.id ?? null}
           showAnswer={!userAnswer}
         />
+
+        {/* Friend challenge — shown when user has answered */}
+        {user && ownAnswer && (
+          <div className="mt-3 bg-[#1a1a2e] border border-white/10 rounded-2xl p-4">
+            <p className="text-xs text-white/40 mb-2 font-semibold uppercase tracking-wider">Arkadaşına Meydan Oku</p>
+            <FriendChallengeButton
+              scenarioId={(scenario as any).id}
+              answerId={ownAnswer.id}
+              userId={user.id}
+            />
+          </div>
+        )}
 
         {/* Answers */}
         <div className="mt-6">
@@ -126,7 +145,8 @@ export default async function ScenarioDetailPage({ params }: Props) {
                           {answer.user?.display_name ?? 'Anonim'}
                         </Link>
                       </div>
-                      <p className="text-white/90 text-sm leading-relaxed">{answer.content}</p>
+                      <p className="text-white/90 text-sm leading-relaxed mb-3">{answer.content}</p>
+                      <ReactionBar answerId={answer.id} userId={user?.id ?? null} compact />
                     </div>
                     <VoteButton
                       answerId={answer.id}

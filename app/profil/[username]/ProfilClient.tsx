@@ -14,10 +14,10 @@ import { ACHIEVEMENT_LABELS } from '@/types'
 import {
   Settings, Trophy, Swords, Flame, Star, Calendar, Target,
   TrendingUp, Zap, Crown, MessageCircle, Share2, CheckCircle2,
-  Medal, BarChart3, Sparkles,
+  Medal, BarChart3, Sparkles, Pin, PinOff,
 } from 'lucide-react'
 
-type Tab = 'genel' | 'duellolar' | 'cevaplar' | 'senaryolar' | 'basarimlar'
+type Tab = 'vitrin' | 'genel' | 'duellolar' | 'cevaplar' | 'senaryolar' | 'basarimlar'
 
 interface Props {
   profile: any
@@ -29,15 +29,18 @@ interface Props {
   recentDuels: any[]
   recentAnswers: any[]
   userScenarios?: any[]
+  pinnedAnswers?: any[]
 }
 
 export default function ProfilClient({
   profile, currentUserId, isFollowing,
   duelCount, winCount, achievements, recentDuels, recentAnswers,
-  userScenarios = [],
+  userScenarios = [], pinnedAnswers = [],
 }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('genel')
   const [copied, setCopied] = useState(false)
+  const [localPinned, setLocalPinned] = useState<any[]>(pinnedAnswers)
+  const [pinning, setPinning] = useState<string | null>(null)
 
   const isOwnProfile = currentUserId === profile.id
   const tier = getTier(profile.total_points)
@@ -57,7 +60,23 @@ export default function ProfilClient({
     setTimeout(() => setCopied(false), 2000)
   }
 
+  async function togglePin(answer: any) {
+    if (!isOwnProfile) return
+    setPinning(answer.id)
+    const isPinned = localPinned.some(a => a.id === answer.id)
+    const res = await fetch('/api/profile/pin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ answer_id: answer.id, action: isPinned ? 'unpin' : 'pin' }),
+    })
+    if (res.ok) {
+      setLocalPinned(prev => isPinned ? prev.filter(a => a.id !== answer.id) : [...prev, answer])
+    }
+    setPinning(null)
+  }
+
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
+    ...(localPinned.length > 0 || isOwnProfile ? [{ id: 'vitrin' as Tab, label: 'Vitrin', icon: <Pin size={14} /> }] : []),
     { id: 'genel', label: 'Genel', icon: <BarChart3 size={14} /> },
     { id: 'duellolar', label: `Düellolar`, icon: <Swords size={14} /> },
     { id: 'cevaplar', label: 'Cevaplar', icon: <Star size={14} /> },
@@ -206,6 +225,90 @@ export default function ProfilClient({
 
       {/* ── Tab content ── */}
       <div className="px-4 py-5">
+
+        {/* VITRIN TAB */}
+        {activeTab === 'vitrin' && (
+          <div className="space-y-3">
+            {isOwnProfile && (
+              <div className="rounded-xl bg-violet-500/8 border border-violet-500/15 p-3 text-xs text-violet-300">
+                <p className="font-semibold mb-0.5">📌 Profil Vitrini</p>
+                <p className="text-violet-400/70">En iyi cevaplarından en fazla 3 tanesini buraya sabitle. Ziyaretçiler önce bunları görür.</p>
+              </div>
+            )}
+            {localPinned.length === 0 ? (
+              <EmptyState
+                icon={<Pin size={28} className="text-fg-subtle opacity-50" />}
+                text={isOwnProfile ? 'Henüz sabitlenmiş cevap yok' : 'Vitrin boş'}
+              />
+            ) : localPinned.map((a: any, i: number) => {
+              const sc = Array.isArray(a.scenario) ? a.scenario[0] : a.scenario
+              const totalVotes = (a.vote_count ?? 0) + (a.verdict_count ?? 0)
+              return (
+                <Card key={a.id} className="border-violet-500/20 bg-violet-500/3 relative">
+                  <div className="flex items-start gap-3">
+                    <div className="shrink-0 mt-0.5">
+                      <span className="text-xl">{i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      {sc?.content && (
+                        <p className="text-xs text-fg-subtle mb-1.5 line-clamp-1 italic">&ldquo;{sc.content}&rdquo;</p>
+                      )}
+                      <p className="text-sm text-fg leading-relaxed">{a.content}</p>
+                      <div className="flex items-center gap-3 mt-2 text-xs text-fg-subtle">
+                        <span className="flex items-center gap-1">
+                          <Star size={10} className="fill-amber-400 text-amber-400" />
+                          {totalVotes} puan
+                        </span>
+                      </div>
+                    </div>
+                    {isOwnProfile && (
+                      <button
+                        onClick={() => togglePin(a)}
+                        disabled={pinning === a.id}
+                        className="shrink-0 p-1.5 rounded-lg hover:bg-red-500/10 text-white/30 hover:text-red-400 transition-all"
+                        title="Sabitlemeden kaldır"
+                      >
+                        {pinning === a.id ? <Zap size={14} className="animate-pulse" /> : <PinOff size={14} />}
+                      </button>
+                    )}
+                  </div>
+                </Card>
+              )
+            })}
+            {/* Pin from answers tab */}
+            {isOwnProfile && localPinned.length < 3 && recentAnswers.length > 0 && (
+              <div className="mt-4">
+                <p className="text-xs text-fg-subtle mb-2 font-semibold">Cevaplarından sabitle:</p>
+                <div className="space-y-2">
+                  {(recentAnswers as any[])
+                    .filter(a => !localPinned.some(p => p.id === a.id))
+                    .slice(0, 5)
+                    .map((a: any) => {
+                      const sc = Array.isArray(a.scenario) ? a.scenario[0] : a.scenario
+                      return (
+                        <Card key={a.id} className="opacity-70 hover:opacity-100 transition-opacity">
+                          <div className="flex items-start gap-3">
+                            <div className="flex-1 min-w-0">
+                              {sc?.content && <p className="text-xs text-fg-subtle mb-1 line-clamp-1 italic">&ldquo;{sc.content}&rdquo;</p>}
+                              <p className="text-sm text-fg line-clamp-2">{a.content}</p>
+                            </div>
+                            <button
+                              onClick={() => togglePin(a)}
+                              disabled={pinning === a.id}
+                              className="shrink-0 p-1.5 rounded-lg hover:bg-violet-500/10 text-white/30 hover:text-violet-400 transition-all"
+                              title="Sabitle"
+                            >
+                              {pinning === a.id ? <Zap size={14} className="animate-pulse" /> : <Pin size={14} />}
+                            </button>
+                          </div>
+                        </Card>
+                      )
+                    })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* GENEL TAB */}
         {activeTab === 'genel' && (

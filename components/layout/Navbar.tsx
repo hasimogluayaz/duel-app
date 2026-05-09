@@ -52,6 +52,7 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
   const navLinks = [
     { href: '/oyun', label: 'Oyna', icon: <Swords size={15} /> },
     { href: '/arsiv', label: 'Arşiv', icon: null },
+    { href: '/karar-ver', label: 'Karar Ver', icon: null },
     { href: '/liderlik', label: 'Liderlik', icon: <Trophy size={15} /> },
     { href: '/nasil-oynanir', label: 'Nasıl Oynanır', icon: null },
   ]

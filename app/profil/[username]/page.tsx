@@ -93,6 +93,15 @@ export default async function ProfilPage({ params }: Props) {
       .limit(20),
   ])
 
+  // Fetch pinned answers (vitrin)
+  const pinnedIds: string[] = profile.pinned_answer_ids ?? []
+  const pinnedAnswers = pinnedIds.length > 0
+    ? await supabase.from('answers')
+        .select('id, content, vote_count, verdict_count, created_at, scenario:scenarios(id, content)')
+        .in('id', pinnedIds)
+        .then((r: { data: any[] | null }) => r.data ?? [])
+    : []
+
   return (
     <ProfilClient
       profile={{
@@ -108,6 +117,7 @@ export default async function ProfilPage({ params }: Props) {
       recentDuels={recentDuels ?? []}
       recentAnswers={recentAnswers ?? []}
       userScenarios={userScenarios ?? []}
+      pinnedAnswers={pinnedAnswers}
     />
   )
 }

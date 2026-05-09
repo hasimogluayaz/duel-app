@@ -23,6 +23,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import DailyMissions from '@/components/missions/DailyMissions'
 import QuotaBar from '@/components/quota/QuotaBar'
+import KararVerCard from '@/components/karar-ver/KararVerCard'
+import WeeklyChampionCard from '@/components/champion/WeeklyChampionCard'
 
 function useNextScenarioCountdown() {
   const [countdown, setCountdown] = useState('')
@@ -301,6 +303,12 @@ export function OyunClient({
           <QuotaBar />
         </div>
       )}
+
+      {/* ── Karar Ver ────────────────────────────────── */}
+      <KararVerCard userId={userId} />
+
+      {/* ── Haftalık Şampiyon ────────────────────────── */}
+      <WeeklyChampionCard />
 
       {/* ── Today's scenario ─────────────────────────── */}
       {!scenario ? (
