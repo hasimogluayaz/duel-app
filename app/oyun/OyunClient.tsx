@@ -28,6 +28,7 @@ import WeeklyChampionCard from '@/components/champion/WeeklyChampionCard'
 import ReferralCard from '@/components/referral/ReferralCard'
 import CheckinWidget from '@/components/checkin/CheckinWidget'
 import SeasonCard from '@/components/seasons/SeasonCard'
+import WeeklyMissions from '@/components/missions/WeeklyMissions'
 
 function useNextScenarioCountdown() {
   const [countdown, setCountdown] = useState('')
@@ -309,6 +310,9 @@ export function OyunClient({
 
       {/* ── Günlük Giriş ─────────────────────────────── */}
       {userId && <CheckinWidget />}
+
+      {/* ── Haftalık Görevler ────────────────────────── */}
+      {userId && <WeeklyMissions />}
 
       {/* ── Sezon Sıralaması ─────────────────────────── */}
       <SeasonCard />

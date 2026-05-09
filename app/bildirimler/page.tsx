@@ -10,9 +10,22 @@ import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { timeAgo } from '@/lib/utils/formatting'
 import type { Notification } from '@/types'
-import { Bell, CheckCheck, Swords } from 'lucide-react'
+import { Bell, CheckCheck, Swords, Settings2 } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils/cn'
+
+const TYPE_GROUP: Record<string, string> = {
+  duel_invite: 'Düello',
+  duel_result: 'Düello',
+  duel_accepted: 'Düello',
+  vote_received: 'Oylar',
+  vote_milestone: 'Oylar',
+  new_follower: 'Sosyal',
+  streak_reminder: 'Seriler',
+  streak_milestone: 'Seriler',
+  title_earned: 'Başarımlar',
+  achievement: 'Başarımlar',
+}
 
 const TYPE_ICONS: Record<string, string> = {
   duel_invite: '⚔️',
@@ -104,12 +117,19 @@ export default function BildirimlerPage() {
             </p>
           </div>
         </div>
-        {unread > 0 && (
-          <Button size="sm" variant="ghost" onClick={markAllRead}>
-            <CheckCheck size={14} />
-            Tümünü okundu işaretle
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {unread > 0 && (
+            <Button size="sm" variant="ghost" onClick={markAllRead}>
+              <CheckCheck size={14} />
+              <span className="hidden sm:inline">Tümünü okundu işaretle</span>
+            </Button>
+          )}
+          <Link href="/profil/ayarlar" title="Bildirim tercihleri">
+            <button className="w-9 h-9 rounded-xl border border-stroke bg-surface hover:bg-surface-2 flex items-center justify-center text-fg-subtle hover:text-fg transition-colors">
+              <Settings2 size={15} />
+            </button>
+          </Link>
+        </div>
       </div>
 
       {loading ? (
@@ -130,7 +150,20 @@ export default function BildirimlerPage() {
         </Card>
       ) : (
         <div className="flex flex-col gap-2">
-          {notifications.map(n => {
+          {/* Unread count chip */}
+          {unread > 0 && (
+            <div className="flex items-center gap-2 mb-1">
+              <div className="h-px flex-1 bg-stroke" />
+              <span className="text-xs text-purple-400 font-semibold px-2">{unread} yeni</span>
+              <div className="h-px flex-1 bg-stroke" />
+            </div>
+          )}
+          {notifications.map((n, idx) => {
+            // Group label between different groups
+            const thisGroup = TYPE_GROUP[n.type] ?? 'Diğer'
+            const prevGroup = idx > 0 ? (TYPE_GROUP[notifications[idx-1].type] ?? 'Diğer') : null
+            const showGroupLabel = idx === 0 || (thisGroup !== prevGroup)
+
             const link = getDuelLink(n)
             const icon = TYPE_ICONS[n.type] ?? '🔔'
             const iconColor = TYPE_COLORS[n.type] ?? 'bg-surface-2 text-fg-muted'
@@ -160,10 +193,13 @@ export default function BildirimlerPage() {
               </div>
             )
 
-            return link ? (
-              <Link key={n.id} href={link}>{inner}</Link>
-            ) : (
-              <div key={n.id}>{inner}</div>
+            return (
+              <div key={n.id}>
+                {showGroupLabel && idx > 0 && (
+                  <p className="text-[10px] text-white/25 font-bold uppercase tracking-widest mt-3 mb-1 px-1">{thisGroup}</p>
+                )}
+                {link ? <Link href={link}>{inner}</Link> : inner}
+              </div>
             )
           })}
         </div>

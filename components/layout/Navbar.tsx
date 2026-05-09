@@ -12,7 +12,7 @@ import { NotificationBell } from './NotificationBell'
 import { formatPoints } from '@/lib/utils/formatting'
 import { getTier } from '@/lib/utils/tier'
 import type { Profile } from '@/types'
-import { Swords, Menu, X, Trophy, User, Settings, LogOut, Sun, Moon, Star, Flame, Shield, Search, Bookmark } from 'lucide-react'
+import { Swords, Menu, X, Trophy, User, Settings, LogOut, Sun, Moon, Star, Flame, Shield, Search, Bookmark, Medal } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import Image from 'next/image'
 
@@ -203,6 +203,10 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
                 className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors">
                 <User size={16} /> Profilim
               </Link>
+              <Link href="/basarimlar" onClick={() => setMobileOpen(false)}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors">
+                <Medal size={16} /> Başarımlar
+              </Link>
               <Link href="/kayitlarim" onClick={() => setMobileOpen(false)}
                 className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors">
                 <Bookmark size={16} /> Kaydettiklerim
@@ -283,6 +287,10 @@ function UserMenu({ profile, onSignOut }: { profile: Profile; onSignOut: () => v
               <Link href={`/profil/${profile.username}`} onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors">
                 <User size={15} /> Profilim
+              </Link>
+              <Link href="/basarimlar" onClick={() => setOpen(false)}
+                className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors">
+                <Medal size={15} /> Başarımlar
               </Link>
               <Link href="/kayitlarim" onClick={() => setOpen(false)}
                 className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors">
