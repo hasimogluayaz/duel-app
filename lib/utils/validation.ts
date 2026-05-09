@@ -12,6 +12,12 @@ const BANNED_WHOLE_WORDS = [
   'bitch', 'bastard', 'dick', 'whore',
 ]
 
+export function validateEmojiOnly(content: string): boolean {
+  if (!content.trim()) return false
+  // Reject if any standard Latin/digit/punctuation found
+  return !/[a-zA-ZğüşıöçĞÜŞİÖÇ0-9.,!?;:()\-_"'@#$%^&*+=<>/\\[\]{}|`~]/.test(content.trim())
+}
+
 export function validateAnswer(content: string): { valid: boolean; error?: string } {
   if (!content || content.trim().length === 0) {
     return { valid: false, error: 'Cevap boş olamaz.' }

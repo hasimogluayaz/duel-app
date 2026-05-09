@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { ModeSwitcher } from '@/components/modes/ModeSwitcher'
 
 interface Props {
   scenario: Scenario | null
@@ -154,6 +155,9 @@ export function OyunClient({
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-4">
+
+      {/* ── Mode switcher ── */}
+      <ModeSwitcher />
 
       {/* ── Guest banner ── */}
       {isGuest && (
@@ -347,14 +351,14 @@ export function OyunClient({
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-bold text-fg">Bugünün Cevapları</h2>
-            <div className="flex items-center bg-surface border border-stroke rounded-lg p-0.5 text-xs gap-0.5">
+            <div className="flex border-b border-stroke text-xs">
               {(['top', 'new'] as const).map(s => (
                 <button
                   key={s}
                   onClick={() => setAnswerSort(s)}
-                  className={`px-2.5 py-1 rounded-md font-semibold transition-all ${answerSort === s ? 'bg-violet-600 text-white' : 'text-fg-subtle hover:text-fg'}`}
+                  className={`px-3 py-1.5 font-semibold transition-all border-b-2 -mb-px ${answerSort === s ? 'border-fg text-fg' : 'border-transparent text-fg-subtle hover:text-fg-muted'}`}
                 >
-                  {s === 'top' ? '⭐ Top' : '🆕 Yeni'}
+                  {s === 'top' ? 'Top' : 'Yeni'}
                 </button>
               ))}
             </div>

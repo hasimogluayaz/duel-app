@@ -66,6 +66,21 @@ const BANNED_WHOLE_WORDS = [
   'bitch', 'bastard', 'dick', 'whore',
 ]
 
+export function validateEmojiContent(content: string): string {
+  if (!content || content.trim().length === 0) {
+    throw new ApiError('En az bir emoji gir.', 400, 'VALIDATION')
+  }
+  const trimmed = content.trim()
+  if (trimmed.length > 100) {
+    throw new ApiError('Emoji cevabı 100 karakter geçemez.', 400, 'VALIDATION')
+  }
+  // Reject if any standard Latin letters, digits, or punctuation found
+  if (/[a-zA-ZğüşıöçĞÜŞİÖÇ0-9.,!?;:()\-_"'@#$%^&*+=<>/\\[\]{}|`~]/.test(trimmed)) {
+    throw new ApiError('Sadece emoji kullanılabilir — harf veya sayı yasak.', 400, 'CONTENT_VIOLATION')
+  }
+  return trimmed
+}
+
 export function validateAnswerContent(content: string): string {
   const trimmed = requireString(content, 'Cevap', { min: 10, max: 280 })
   const lower = trimmed.toLowerCase()

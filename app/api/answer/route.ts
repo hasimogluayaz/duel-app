@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createApiClient } from '@/lib/supabase/typed'
 import { withAuth } from '@/lib/api/auth'
 import { ApiError } from '@/lib/api/errors'
-import { parseBody, requireUuid, validateAnswerContent } from '@/lib/api/validate'
+import { parseBody, requireUuid, validateAnswerContent, validateEmojiContent } from '@/lib/api/validate'
 import { POINTS } from '@/types'
 import { checkQuota } from '@/lib/quota/check'
 import { logActivity } from '@/lib/activity/log'
@@ -10,10 +10,19 @@ import { updateWeeklyMission } from '@/lib/missions/weekly'
 
 export const POST = withAuth(async (req, { userId }) => {
   const supabase = createApiClient()
-  const body = await parseBody<{ scenario_id?: unknown; content?: unknown }>(req)
+  const body = await parseBody<{ scenario_id?: unknown; content?: unknown; mode?: unknown; mode_metadata?: unknown }>(req)
 
   const scenarioId = requireUuid(body.scenario_id, 'Senaryo ID')
-  const content = validateAnswerContent(String(body.content ?? ''))
+  const mode = ['scenario', 'emoji', 'character', 'debate'].includes(String(body.mode ?? ''))
+    ? String(body.mode)
+    : 'scenario'
+  const modeMetadata = body.mode_metadata && typeof body.mode_metadata === 'object'
+    ? body.mode_metadata
+    : null
+
+  const content = mode === 'emoji'
+    ? validateEmojiContent(String(body.content ?? ''))
+    : validateAnswerContent(String(body.content ?? ''))
 
   // Quota check — daily answer limit
   await checkQuota(supabase, userId, 'answers_per_day')
@@ -30,22 +39,26 @@ export const POST = withAuth(async (req, { userId }) => {
     throw new ApiError('Senaryo bulunamadı.', 404, 'NOT_FOUND')
   }
 
-  // Check if already answered (idempotent — return existing answer)
+  // Check if already answered this mode (idempotent — return existing answer)
   const { data: existing } = await supabase
     .from('answers')
     .select('*')
     .eq('user_id', userId)
     .eq('scenario_id', scenarioId)
-    .single()
+    .eq('mode', mode)
+    .maybeSingle()
 
   if (existing) {
     return NextResponse.json({ answer: existing })
   }
 
   // Insert answer
+  const insertPayload: Record<string, unknown> = { user_id: userId, scenario_id: scenarioId, content, mode }
+  if (modeMetadata) insertPayload.mode_metadata = modeMetadata
+
   const { data: answer, error: insertError } = await supabase
     .from('answers')
-    .insert({ user_id: userId, scenario_id: scenarioId, content })
+    .insert(insertPayload)
     .select()
     .single()
 

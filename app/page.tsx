@@ -56,59 +56,31 @@ export default async function HomePage() {
       desc: 'Günlük senaryoya bakış açını yaz, topluluğun oylarını topla.',
       badge: 'Aktif',
       active: true,
+      href: '/oyun',
     },
     {
       no: '02',
       title: 'Emoji Kapışması',
       desc: 'Duyguları sadece emoji ile ifade et — kelime yasak.',
-      badge: 'Yakında',
-      active: false,
+      badge: 'Aktif',
+      active: true,
+      href: '/emoji',
     },
     {
       no: '03',
       title: 'Karakter Kapışması',
       desc: 'Bir karaktere bürün ve o karakterin ağzıyla cevap ver.',
-      badge: 'Yakında',
-      active: false,
+      badge: 'Aktif',
+      active: true,
+      href: '/karakter',
     },
     {
       no: '04',
       title: 'Ateşli Tartışma',
       desc: 'Tarafını seç, görüşünü savun — topluluk hakem.',
-      badge: 'Yakında',
-      active: false,
-    },
-    {
-      no: '05',
-      title: 'Fotoğraf Kapışması',
-      desc: 'Senaryoya en iyi karşılık veren fotoğrafı çek.',
-      badge: 'Yakında',
-      active: false,
-    },
-    {
-      no: '06',
-      title: 'Sesli Kapışma',
-      desc: 'Sesini kaydet, tonun ve tarzınla fark yarat.',
-      badge: 'Yakında',
-      active: false,
-    },
-  ]
-
-  const TESTIMONIALS = [
-    {
-      quote: 'Senaryo bazen o kadar gerçekçi oluyor ki tartışma hiç bitmiyor. Her gün girip bakıyorum.',
-      name: 'Ayşegül K.',
-      sub: 'İstanbul · 127 puan',
-    },
-    {
-      quote: 'AI\'ın düello değerlendirmesi her seferinde herkesi güldürüyor. Arkadaşımla kapışmadan edemiyoruz.',
-      name: 'Mert C.',
-      sub: 'Ankara · 3 düello kazandı',
-    },
-    {
-      quote: 'Grubumuzda turnuva bile yaptık. Kapisio o kadar doğal bir format ki anlatmaya gerek kalmıyor.',
-      name: 'Zeynep T.',
-      sub: 'İzmir · 5 günlük seri',
+      badge: 'Aktif',
+      active: true,
+      href: '/tartisma',
     },
   ]
 
@@ -169,18 +141,26 @@ export default async function HomePage() {
               </Link>
             </div>
 
-            {/* Social proof stats */}
+            {/* Social proof stats — only show non-zero values */}
             <div className="flex flex-wrap items-center justify-center gap-6 text-sm text-fg-subtle">
-              <span>
-                <span className="text-fg font-bold">{(userCount ?? 0).toLocaleString('tr')}</span>
-                <span className="ml-1.5">oyuncu</span>
-              </span>
-              <span className="w-px h-3 bg-stroke" />
-              <span>
-                <span className="text-fg font-bold">{(duelCount ?? 0).toLocaleString('tr')}</span>
-                <span className="ml-1.5">düello tamamlandı</span>
-              </span>
-              <span className="w-px h-3 bg-stroke" />
+              {(userCount ?? 0) > 0 && (
+                <>
+                  <span>
+                    <span className="text-fg font-bold">{(userCount ?? 0).toLocaleString('tr')}</span>
+                    <span className="ml-1.5">oyuncu</span>
+                  </span>
+                  {(duelCount ?? 0) > 0 && <span className="w-px h-3 bg-stroke" />}
+                </>
+              )}
+              {(duelCount ?? 0) > 0 && (
+                <>
+                  <span>
+                    <span className="text-fg font-bold">{(duelCount ?? 0).toLocaleString('tr')}</span>
+                    <span className="ml-1.5">düello tamamlandı</span>
+                  </span>
+                  <span className="w-px h-3 bg-stroke" />
+                </>
+              )}
               <span className="flex items-center gap-1.5">
                 <Flame size={12} className="text-orange-400" />
                 Her gün yeni senaryo
@@ -265,29 +245,6 @@ export default async function HomePage() {
           )}
         </section>
 
-        {/* ── Testimonials ── */}
-        <section className="border-t border-stroke bg-surface/40">
-          <div className="max-w-5xl mx-auto px-4 py-16">
-            <div className="text-center mb-10">
-              <p className="text-xs font-semibold text-fg-subtle uppercase tracking-wider mb-3">Kullanıcılar Ne Diyor</p>
-              <h2 className="text-2xl sm:text-3xl font-black text-fg">Kapışmayı bırakamayanlar</h2>
-            </div>
-            <div className="grid sm:grid-cols-3 gap-4">
-              {TESTIMONIALS.map(t => (
-                <div key={t.name} className="border border-stroke rounded-2xl p-5 bg-surface">
-                  <p className="text-sm text-fg-muted leading-relaxed mb-4">
-                    &ldquo;{t.quote}&rdquo;
-                  </p>
-                  <div>
-                    <p className="text-sm font-semibold text-fg">{t.name}</p>
-                    <p className="text-xs text-fg-subtle">{t.sub}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* ── Kapışma Modları ── */}
         <section className="max-w-5xl mx-auto px-4 py-16">
           <div className="text-center mb-10">
@@ -296,7 +253,7 @@ export default async function HomePage() {
             <p className="text-fg-muted text-sm">Farklı yetenekler, farklı arenalar.</p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-3">
             {MODES.map((mode) => (
               <div
                 key={mode.title}
