@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import DuelStatsPanel from '@/components/duel/DuelStatsPanel'
 import ActivityFeed from '@/components/activity/ActivityFeed'
+import BlockButton from '@/components/profile/BlockButton'
 
 type Tab = 'vitrin' | 'genel' | 'duellolar' | 'cevaplar' | 'senaryolar' | 'basarimlar' | 'istatistik' | 'aktivite'
 
@@ -140,6 +141,7 @@ export default function ProfilClient({
                       Düello
                     </Button>
                   </Link>
+                  <BlockButton targetUserId={profile.id} />
                 </>
               )}
             </div>

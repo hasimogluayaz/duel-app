@@ -10,7 +10,7 @@ import { useToast } from '@/components/ui/Toast'
 import { timeUntil } from '@/lib/utils/formatting'
 import { getTier } from '@/lib/utils/tier'
 import { ShareCard } from '@/components/share/ShareCard'
-import { Share2, Clock, Users, ExternalLink, Swords, Trophy, Zap, RotateCcw } from 'lucide-react'
+import { Share2, Clock, Users, ExternalLink, Swords, Trophy, Zap, RotateCcw, X } from 'lucide-react'
 import Link from 'next/link'
 import { CommentsSection } from '@/components/duel/CommentsSection'
 import { ReportButton } from '@/components/ui/ReportButton'
@@ -35,6 +35,8 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
   const [timeLeft, setTimeLeft] = useState('')
   const [currentDuel, setCurrentDuel] = useState(duel)
   const [rematchLoading, setRematchLoading] = useState(false)
+  const [cancelLoading, setCancelLoading] = useState(false)
+  const isChallenger = userId === currentDuel.challenger_id
 
   const totalVotes = votesA + votesB
   const percentA = totalVotes > 0 ? Math.round((votesA / totalVotes) * 100) : 50
@@ -332,6 +334,28 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
           <div className="text-3xl mb-3">⏳</div>
           <p className="text-amber-300 font-semibold mb-1">Davet bekleniyor</p>
           <p className="text-amber-300/70 text-sm">Davet edilen kişi cevap verdikten sonra oylama başlayacak.</p>
+          {isChallenger && (
+            <button
+              onClick={async () => {
+                if (!confirm('Düello davetini iptal etmek istediğinizden emin misiniz?')) return
+                setCancelLoading(true)
+                const res = await fetch(`/api/duel/${currentDuel.id}/cancel`, { method: 'POST' })
+                setCancelLoading(false)
+                if (res.ok) {
+                  toast('Düello daveti iptal edildi.', 'success')
+                  window.location.href = '/oyun'
+                } else {
+                  const j = await res.json()
+                  toast(j.error || 'İptal edilemedi.', 'error')
+                }
+              }}
+              disabled={cancelLoading}
+              className="mt-4 flex items-center gap-1.5 mx-auto text-xs text-red-400/70 hover:text-red-400 border border-red-500/20 hover:border-red-500/40 px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
+            >
+              <X size={12} />
+              {cancelLoading ? 'İptal ediliyor...' : 'Daveti İptal Et'}
+            </button>
+          )}
         </div>
       )}
 

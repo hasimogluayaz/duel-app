@@ -66,6 +66,42 @@ export const POST = withAuth(async (req, { userId }) => {
   return NextResponse.json({ answer })
 })
 
+export const DELETE = withAuth(async (req, { userId }) => {
+  const supabase = createApiClient()
+  const url = new URL(req.url)
+  const answerId = url.searchParams.get('id')
+
+  if (!answerId) throw new ApiError('Cevap ID gerekli.', 400, 'VALIDATION')
+
+  // Verify ownership
+  const { data: answer } = await supabase
+    .from('answers')
+    .select('id, user_id, scenario_id')
+    .eq('id', answerId)
+    .single()
+
+  if (!answer) throw new ApiError('Cevap bulunamadı.', 404, 'NOT_FOUND')
+  if ((answer as any).user_id !== userId) throw new ApiError('Bu cevap size ait değil.', 403, 'FORBIDDEN')
+
+  // Check if this answer is used in a duel
+  const { count: duelCount } = await supabase
+    .from('duels')
+    .select('id', { count: 'exact', head: true })
+    .or(`challenger_answer_id.eq.${answerId},challenged_answer_id.eq.${answerId}`)
+
+  if ((duelCount ?? 0) > 0) {
+    throw new ApiError('Bu cevap bir düelloda kullanıldığı için silinemiyor.', 409, 'CONFLICT')
+  }
+
+  const { error } = await supabase.from('answers').delete().eq('id', answerId)
+  if (error) throw new ApiError('Cevap silinemedi.', 500, 'DB_ERROR')
+
+  // Decrement answer_count on scenario
+  await supabase.rpc('decrement_answer_count', { scenario_id: (answer as any).scenario_id }).catch(() => {})
+
+  return NextResponse.json({ success: true })
+})
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function updateMissionProgress(supabase: any, userId: string, missionType: string): Promise<void> {
   const today = new Date().toISOString().split('T')[0]

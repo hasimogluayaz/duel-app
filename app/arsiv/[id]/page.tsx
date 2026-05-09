@@ -12,6 +12,7 @@ import BookmarkButton from '@/components/bookmarks/BookmarkButton'
 import AnswerComments from '@/components/answers/AnswerComments'
 import EditAnswerButton from '@/components/answers/EditAnswerButton'
 import { ReportButton } from '@/components/ui/ReportButton'
+import DeleteAnswerButton from '@/components/answers/DeleteAnswerButton'
 
 interface Props {
   params: { id: string }
@@ -186,12 +187,15 @@ export default async function ScenarioDetailPage({ params, searchParams }: Props
                           <ReportButton targetType="answer" targetId={answer.id} userId={user.id} />
                         )}
                         {user && (answer as any).user?.id === user.id && (
-                          <EditAnswerButton
-                            answerId={answer.id}
-                            initialContent={answer.content}
-                            editCount={(answer as any).edit_count ?? 0}
-                            createdAt={answer.created_at}
-                          />
+                          <>
+                            <EditAnswerButton
+                              answerId={answer.id}
+                              initialContent={answer.content}
+                              editCount={(answer as any).edit_count ?? 0}
+                              createdAt={answer.created_at}
+                            />
+                            <DeleteAnswerButton answerId={answer.id} />
+                          </>
                         )}
                       </div>
                       <AnswerComments answerId={answer.id} currentUserId={user?.id ?? null} />
