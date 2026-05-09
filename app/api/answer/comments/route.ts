@@ -3,6 +3,7 @@ import { createApiClient } from '@/lib/supabase/typed'
 import { withAuth, optionalAuth } from '@/lib/api/auth'
 import { ApiError } from '@/lib/api/errors'
 import { parseBody } from '@/lib/api/validate'
+import { checkRateLimit } from '@/lib/redis/ratelimit'
 
 /**
  * GET /api/answer/comments?answer_id=xxx
@@ -38,6 +39,9 @@ export const POST = withAuth(async (req, { userId }) => {
   if (!answerId) throw new ApiError('answer_id gerekli.', 400, 'VALIDATION')
   if (!content || content.length < 1) throw new ApiError('Yorum boş olamaz.', 400, 'VALIDATION')
   if (content.length > 300) throw new ApiError('Yorum en fazla 300 karakter.', 400, 'VALIDATION')
+
+  const rl = await checkRateLimit('comment', userId)
+  if (!rl.success) throw new ApiError('Çok hızlı yorum gönderiyorsun. Biraz bekle.', 429, 'RATE_LIMIT')
 
   const { data: comment, error } = await (supabase as any)
     .from('answer_comments')

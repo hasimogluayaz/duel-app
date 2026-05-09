@@ -37,7 +37,7 @@ export default function NotificationPrefs() {
     const newVal = !prefs[key]
     setSaving(key)
     const newPrefs = { ...prefs, [key]: newVal }
-    setPrefs(newPrefs) // optimistic
+    setPrefs(newPrefs)
 
     try {
       await fetch('/api/notifications/preferences', {
@@ -48,41 +48,41 @@ export default function NotificationPrefs() {
       setSaved(key)
       setTimeout(() => setSaved(null), 1500)
     } catch {
-      setPrefs(prefs) // revert
+      setPrefs(prefs)
     } finally {
       setSaving(null)
     }
   }
 
   return (
-    <div className="bg-[#1a1a2e] border border-white/10 rounded-2xl overflow-hidden">
-      <div className="flex items-center gap-2.5 p-4 border-b border-white/8">
+    <div className="bg-surface border border-stroke rounded-2xl overflow-hidden">
+      <div className="flex items-center gap-2.5 p-4 border-b border-stroke">
         <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
           <Bell size={16} className="text-violet-400" />
         </div>
         <div>
-          <h2 className="text-sm font-bold text-white">Bildirim Tercihleri</h2>
-          <p className="text-xs text-white/40">Hangi bildirimleri almak istediğini seç</p>
+          <h2 className="text-sm font-bold text-fg">Bildirim Tercihleri</h2>
+          <p className="text-xs text-fg-subtle">Hangi bildirimleri almak istediğini seç</p>
         </div>
       </div>
 
       {loading ? (
         <div className="p-4 space-y-3">
-          {[1,2,3,4,5].map(i => <div key={i} className="h-12 bg-white/5 rounded-xl animate-pulse" />)}
+          {[1,2,3,4,5].map(i => <div key={i} className="h-12 bg-surface-2 rounded-xl animate-pulse" />)}
         </div>
       ) : prefs ? (
-        <div className="divide-y divide-white/5">
+        <div className="divide-y divide-stroke">
           {PREF_CONFIG.map(({ key, label, desc, emoji }) => {
             const isOn = prefs[key]
             const isSaving = saving === key
             const isSaved = saved === key
             return (
-              <div key={key} className="flex items-center justify-between px-4 py-3 hover:bg-white/3 transition-colors">
+              <div key={key} className="flex items-center justify-between px-4 py-3 hover:bg-surface-2 transition-colors">
                 <div className="flex items-center gap-3">
                   <span className="text-lg">{emoji}</span>
                   <div>
-                    <p className="text-sm font-semibold text-white">{label}</p>
-                    <p className="text-xs text-white/35">{desc}</p>
+                    <p className="text-sm font-semibold text-fg">{label}</p>
+                    <p className="text-xs text-fg-subtle">{desc}</p>
                   </div>
                 </div>
 
@@ -90,7 +90,7 @@ export default function NotificationPrefs() {
                   onClick={() => toggle(key)}
                   disabled={!!saving}
                   className={`relative w-11 h-6 rounded-full transition-all shrink-0 ${
-                    isOn ? 'bg-violet-600' : 'bg-white/10'
+                    isOn ? 'bg-violet-600' : 'bg-stroke'
                   } ${saving ? 'opacity-60' : ''}`}
                 >
                   <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${
@@ -104,8 +104,8 @@ export default function NotificationPrefs() {
           })}
         </div>
       ) : (
-        <div className="p-4 text-center text-sm text-white/30">
-          <BellOff size={24} className="mx-auto mb-2 opacity-30" />
+        <div className="p-4 text-center text-sm text-fg-subtle">
+          <BellOff size={24} className="mx-auto mb-2 opacity-40" />
           Tercihler yüklenemedi
         </div>
       )}

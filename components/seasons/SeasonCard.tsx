@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Trophy, Clock, TrendingUp, Crown } from 'lucide-react'
+import { Trophy, Clock, TrendingUp } from 'lucide-react'
 import { getTier } from '@/lib/utils/tier'
 
 interface SeasonData {
@@ -32,13 +32,13 @@ export default function SeasonCard() {
       .catch(() => setLoading(false))
   }, [])
 
-  if (loading) return <div className="h-40 bg-white/5 rounded-2xl animate-pulse" />
+  if (loading) return <div className="h-40 bg-surface-2 rounded-2xl animate-pulse" />
   if (!data?.season) return null
 
   const RANK_MEDALS = ['🥇', '🥈', '🥉']
 
   return (
-    <div className="bg-[#1a1a2e] border border-amber-500/20 rounded-2xl overflow-hidden">
+    <div className="bg-surface border border-amber-500/20 rounded-2xl overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-r from-amber-600/20 to-yellow-500/10 border-b border-amber-500/15 px-4 py-3">
         <div className="flex items-center justify-between">
@@ -46,7 +46,7 @@ export default function SeasonCard() {
             <Trophy size={14} className="text-amber-400" />
             <span className="text-sm font-bold text-amber-300">{data.season.name}</span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-white/40">
+          <div className="flex items-center gap-1.5 text-xs text-fg-subtle">
             <Clock size={11} />
             <span>{data.days_left} gün kaldı</span>
           </div>
@@ -59,23 +59,23 @@ export default function SeasonCard() {
         )}
       </div>
 
-      {/* Top 3 */}
-      <div className="p-3 space-y-2">
+      {/* Top 5 */}
+      <div className="p-3 space-y-1">
         {data.top.slice(0, 5).map((p, i) => {
           const tier = getTier(p.total_points)
           return (
             <Link key={p.username} href={`/profil/${p.username}`}>
-              <div className={`flex items-center gap-3 px-2 py-1.5 rounded-xl transition-colors hover:bg-white/5 ${i < 3 ? '' : 'opacity-70'}`}>
+              <div className={`flex items-center gap-3 px-2 py-1.5 rounded-xl transition-colors hover:bg-surface-2 ${i < 3 ? '' : 'opacity-70'}`}>
                 <span className="text-base w-5 text-center shrink-0">
                   {i < 3 ? RANK_MEDALS[i] : `#${i + 1}`}
                 </span>
 
                 {/* Avatar */}
-                <div className="w-7 h-7 rounded-full bg-white/10 overflow-hidden shrink-0">
+                <div className="w-7 h-7 rounded-full bg-surface-2 overflow-hidden shrink-0">
                   {p.avatar_url ? (
                     <Image src={p.avatar_url} alt="" width={28} height={28} className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-xs text-white/40">
+                    <div className="w-full h-full flex items-center justify-center text-xs text-fg-subtle">
                       {(p.display_name ?? p.username)[0].toUpperCase()}
                     </div>
                   )}
@@ -84,18 +84,18 @@ export default function SeasonCard() {
                 {/* Name */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1">
-                    <span className="text-xs font-semibold text-white truncate">{p.display_name ?? p.username}</span>
+                    <span className="text-xs font-semibold text-fg truncate">{p.display_name ?? p.username}</span>
                     <span className="text-xs shrink-0">{tier.emoji}</span>
                   </div>
                   {p.active_title && (
-                    <span className="text-[9px] text-white/35">{p.active_title}</span>
+                    <span className="text-[9px] text-fg-subtle">{p.active_title}</span>
                   )}
                 </div>
 
                 {/* Points */}
                 <div className="text-right shrink-0">
                   <p className="text-xs font-black text-amber-400">{p.season_points.toLocaleString('tr-TR')}</p>
-                  <p className="text-[9px] text-white/30">puan</p>
+                  <p className="text-[9px] text-fg-subtle">puan</p>
                 </div>
               </div>
             </Link>

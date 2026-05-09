@@ -40,13 +40,13 @@ export default function WeeklyChampionCard() {
   }
 
   if (loading) return (
-    <div className="rounded-2xl bg-[#1a1a2e] border border-white/10 p-5 animate-pulse">
-      <div className="h-4 bg-white/10 rounded w-40 mb-3" />
+    <div className="rounded-2xl bg-surface border border-stroke p-5 animate-pulse">
+      <div className="h-4 bg-surface-2 rounded w-40 mb-3" />
       <div className="flex gap-3">
-        <div className="w-10 h-10 rounded-full bg-white/10" />
+        <div className="w-10 h-10 rounded-full bg-surface-2" />
         <div className="flex-1 space-y-2">
-          <div className="h-3 bg-white/10 rounded w-32" />
-          <div className="h-3 bg-white/5 rounded w-full" />
+          <div className="h-3 bg-surface-2 rounded w-32" />
+          <div className="h-3 bg-surface-2 rounded w-full" />
         </div>
       </div>
     </div>
@@ -63,15 +63,15 @@ export default function WeeklyChampionCard() {
   })()
 
   return (
-    <div className="rounded-2xl overflow-hidden border border-yellow-500/20 bg-gradient-to-br from-yellow-500/5 via-[#1a1a2e] to-[#1a1a2e]">
+    <div className="rounded-2xl overflow-hidden border border-yellow-500/20 bg-gradient-to-br from-yellow-500/5 via-surface to-surface">
       {/* Header */}
-      <div className="px-4 pt-4 pb-3 border-b border-white/5">
+      <div className="px-4 pt-4 pb-3 border-b border-stroke">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Trophy size={14} className="text-yellow-400" />
             <span className="text-xs font-semibold text-yellow-400 uppercase tracking-wider">Haftanın Şampiyonu</span>
           </div>
-          <span className="text-[10px] text-white/30">{weekLabel}</span>
+          <span className="text-[10px] text-fg-subtle">{weekLabel}</span>
         </div>
       </div>
 
@@ -86,28 +86,28 @@ export default function WeeklyChampionCard() {
           <div className="min-w-0">
             <Link
               href={`/profil/${champion.user?.username}`}
-              className="text-sm font-semibold text-white hover:text-violet-300 transition-colors"
+              className="text-sm font-semibold text-fg hover:text-violet-400 transition-colors"
             >
               {champion.user?.display_name || champion.user?.username}
             </Link>
-            <p className="text-xs text-white/40">{tier.emoji} {tier.label}</p>
+            <p className="text-xs text-fg-subtle">{tier.emoji} {tier.label}</p>
           </div>
           <div className="ml-auto text-right shrink-0">
             <p className="text-lg font-black text-yellow-400">{totalVotes}</p>
-            <p className="text-[10px] text-white/30">toplam puan</p>
+            <p className="text-[10px] text-fg-subtle">toplam oy</p>
           </div>
         </div>
 
         {/* Scenario context */}
         {champion.scenario_content && (
-          <p className="text-xs text-white/40 italic leading-relaxed">
+          <p className="text-xs text-fg-subtle italic leading-relaxed">
             &ldquo;{champion.scenario_content}&rdquo;
           </p>
         )}
 
         {/* Answer */}
         <div className="bg-yellow-500/5 border border-yellow-500/10 rounded-xl p-3">
-          <p className="text-sm text-white/80 leading-relaxed line-clamp-4">
+          <p className="text-sm text-fg-muted leading-relaxed line-clamp-4">
             {champion.answer?.content}
           </p>
         </div>
@@ -116,13 +116,13 @@ export default function WeeklyChampionCard() {
         <div className="flex items-center gap-2">
           <Link
             href={`/arsiv/${champion.answer?.scenario_id}`}
-            className="flex-1 flex items-center justify-center gap-1.5 bg-white/5 hover:bg-white/10 rounded-xl py-2 text-xs text-white/60 hover:text-white transition-all"
+            className="flex-1 flex items-center justify-center gap-1.5 bg-surface-2 hover:bg-stroke rounded-xl py-2 text-xs text-fg-muted hover:text-fg transition-all"
           >
             Cevabı Gör <ChevronRight size={12} />
           </Link>
           <button
             onClick={share}
-            className="flex items-center gap-1.5 bg-white/5 hover:bg-white/10 rounded-xl px-3 py-2 text-xs text-white/60 hover:text-white transition-all"
+            className="flex items-center gap-1.5 bg-surface-2 hover:bg-stroke rounded-xl px-3 py-2 text-xs text-fg-muted hover:text-fg transition-all"
           >
             <Share2 size={12} />
             {shared ? 'Kopyalandı!' : 'Paylaş'}

@@ -36,11 +36,11 @@ export default function DailyMissions() {
 
   if (loading) {
     return (
-      <div className="rounded-2xl bg-[#1a1a2e] border border-white/10 p-4 animate-pulse">
-        <div className="h-4 bg-white/10 rounded w-32 mb-3" />
+      <div className="rounded-2xl bg-surface border border-stroke p-4 animate-pulse">
+        <div className="h-4 bg-surface-2 rounded w-32 mb-3" />
         <div className="space-y-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-10 bg-white/5 rounded-xl" />
+            <div key={i} className="h-10 bg-surface-2 rounded-xl" />
           ))}
         </div>
       </div>
@@ -53,16 +53,16 @@ export default function DailyMissions() {
   const totalPoints = data.missions.reduce((sum, m) => sum + m.points, 0)
 
   return (
-    <div className="rounded-2xl bg-[#1a1a2e] border border-white/10 overflow-hidden">
+    <div className="rounded-2xl bg-surface border border-stroke overflow-hidden">
       <button
         onClick={() => setExpanded(!expanded)}
-        className="w-full p-4 flex items-center justify-between hover:bg-white/5 transition-colors"
+        className="w-full p-4 flex items-center justify-between hover:bg-surface-2 transition-colors"
       >
         <div className="flex items-center gap-3">
           <span className="text-xl">🎯</span>
           <div className="text-left">
-            <div className="font-semibold text-sm text-white">Günlük Görevler</div>
-            <div className="text-xs text-white/50">
+            <div className="font-semibold text-sm text-fg">Günlük Görevler</div>
+            <div className="text-xs text-fg-subtle">
               {completed}/{data.missions.length} tamamlandı · {data.totalEarned}/{totalPoints} puan
             </div>
           </div>
@@ -71,12 +71,12 @@ export default function DailyMissions() {
           {data.allCompleted && (
             <span className="text-xs bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full">Hepsi tamam!</span>
           )}
-          <span className="text-white/40 text-sm">{expanded ? '▲' : '▼'}</span>
+          <span className="text-fg-subtle text-sm">{expanded ? '▲' : '▼'}</span>
         </div>
       </button>
 
       {/* Progress bar */}
-      <div className="h-1 bg-white/5 mx-4 rounded-full overflow-hidden">
+      <div className="h-1 bg-surface-2 mx-4 rounded-full overflow-hidden">
         <div
           className="h-full bg-gradient-to-r from-violet-500 to-pink-500 transition-all duration-500"
           style={{ width: `${(completed / data.missions.length) * 100}%` }}
@@ -95,22 +95,23 @@ export default function DailyMissions() {
 }
 
 function MissionRow({ mission }: { mission: Mission }) {
-
   return (
     <div className={`flex items-center gap-3 p-3 rounded-xl transition-colors ${
-      mission.completed ? 'bg-green-500/10 border border-green-500/20' : 'bg-white/5 border border-white/5'
+      mission.completed
+        ? 'bg-green-500/10 border border-green-500/20'
+        : 'bg-surface-2 border border-stroke'
     }`}>
       <span className="text-xl shrink-0">{mission.icon}</span>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <span className={`text-sm font-medium ${mission.completed ? 'text-green-400' : 'text-white'}`}>
+          <span className={`text-sm font-medium ${mission.completed ? 'text-green-400' : 'text-fg'}`}>
             {mission.title}
           </span>
           {mission.completed && <span className="text-xs text-green-400">✓</span>}
         </div>
-        <div className="text-xs text-white/40">{mission.description}</div>
+        <div className="text-xs text-fg-subtle">{mission.description}</div>
         {mission.goal > 1 && !mission.completed && (
-          <div className="mt-1.5 h-1 bg-white/10 rounded-full overflow-hidden">
+          <div className="mt-1.5 h-1 bg-stroke rounded-full overflow-hidden">
             <div
               className="h-full bg-violet-500 transition-all"
               style={{ width: `${(mission.progress / mission.goal) * 100}%` }}
@@ -119,11 +120,11 @@ function MissionRow({ mission }: { mission: Mission }) {
         )}
       </div>
       <div className="text-right shrink-0">
-        <div className={`text-sm font-bold ${mission.completed ? 'text-green-400' : 'text-white/40'}`}>
+        <div className={`text-sm font-bold ${mission.completed ? 'text-green-400' : 'text-fg-subtle'}`}>
           +{mission.points}
         </div>
         {mission.goal > 1 && (
-          <div className="text-xs text-white/30">{mission.progress}/{mission.goal}</div>
+          <div className="text-xs text-fg-subtle">{mission.progress}/{mission.goal}</div>
         )}
       </div>
     </div>

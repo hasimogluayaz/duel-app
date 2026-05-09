@@ -12,10 +12,10 @@ interface Props {
 const ALL_TITLES = Object.entries(TITLE_DEFINITIONS).map(([title, def]) => ({ title, ...def }))
 
 export default function TitleSelector({ userId, currentTitle }: Props) {
-  const [earned, setEarned]       = useState<string[]>([])
-  const [active, setActive]       = useState<string | null>(currentTitle ?? null)
-  const [setting, setSetting]     = useState<string | null>(null)
-  const [loading, setLoading]     = useState(true)
+  const [earned, setEarned]   = useState<string[]>([])
+  const [active, setActive]   = useState<string | null>(currentTitle ?? null)
+  const [setting, setSetting] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetch('/api/titles')
@@ -41,13 +41,13 @@ export default function TitleSelector({ userId, currentTitle }: Props) {
     setSetting(null)
   }
 
-  if (loading) return <div className="h-48 bg-white/5 rounded-2xl animate-pulse" />
+  if (loading) return <div className="h-48 bg-surface-2 rounded-2xl animate-pulse" />
 
   return (
-    <div className="rounded-2xl bg-[#1a1a2e] border border-white/10 overflow-hidden">
-      <div className="px-4 pt-4 pb-3 border-b border-white/5 flex items-center gap-2">
+    <div className="rounded-2xl bg-surface border border-stroke overflow-hidden">
+      <div className="px-4 pt-4 pb-3 border-b border-stroke flex items-center gap-2">
         <Crown size={14} className="text-yellow-400" />
-        <span className="text-sm font-bold text-white">Unvanlar</span>
+        <span className="text-sm font-bold text-fg">Unvanlar</span>
         {active && (
           <span className="ml-auto text-xs text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded-full border border-violet-500/20">
             Aktif: {ALL_TITLES.find(t => t.title === active)?.emoji} {ALL_TITLES.find(t => t.title === active)?.label}
@@ -70,14 +70,14 @@ export default function TitleSelector({ userId, currentTitle }: Props) {
                 isActive
                   ? 'bg-violet-500/15 border border-violet-500/30'
                   : isEarned
-                  ? 'bg-white/3 border border-white/8 hover:bg-white/6 hover:border-white/15 cursor-pointer'
-                  : 'opacity-40 cursor-default bg-white/2 border border-white/5'
+                  ? 'bg-surface-2 border border-stroke hover:bg-stroke hover:border-purple-500/30 cursor-pointer'
+                  : 'opacity-40 cursor-default bg-surface-2 border border-stroke'
               }`}
             >
               <span className="text-xl shrink-0">{t.emoji}</span>
               <div className="flex-1 min-w-0">
-                <p className={`text-sm font-semibold ${isEarned ? 'text-white' : 'text-white/50'}`}>{t.label}</p>
-                <p className="text-xs text-white/30">{t.condition}</p>
+                <p className={`text-sm font-semibold ${isEarned ? 'text-fg' : 'text-fg-subtle'}`}>{t.label}</p>
+                <p className="text-xs text-fg-subtle">{t.condition}</p>
               </div>
               <div className="shrink-0">
                 {isPending ? (
@@ -85,7 +85,7 @@ export default function TitleSelector({ userId, currentTitle }: Props) {
                 ) : isActive ? (
                   <CheckCircle size={16} className="text-violet-400" />
                 ) : !isEarned ? (
-                  <Lock size={14} className="text-white/20" />
+                  <Lock size={14} className="text-fg-subtle opacity-50" />
                 ) : null}
               </div>
             </button>
@@ -94,7 +94,7 @@ export default function TitleSelector({ userId, currentTitle }: Props) {
       </div>
 
       {earned.length === 0 && (
-        <div className="px-4 pb-4 text-center text-xs text-white/30">
+        <div className="px-4 pb-4 text-center text-xs text-fg-subtle">
           Düello kazan, cevap ver ve seri yap — unvanlar otomatik kazanılır.
         </div>
       )}

@@ -47,7 +47,7 @@ export default function CheckinWidget() {
   }
 
   if (loading) return (
-    <div className="h-24 bg-white/5 rounded-2xl animate-pulse" />
+    <div className="h-24 bg-surface-2 rounded-2xl animate-pulse" />
   )
 
   if (!status) return null
@@ -63,7 +63,7 @@ export default function CheckinWidget() {
     <div className={`relative overflow-hidden rounded-2xl border transition-all ${
       status.checked_in_today
         ? 'bg-green-500/8 border-green-500/25'
-        : 'bg-[#1a1a2e] border-white/10 hover:border-orange-500/30'
+        : 'bg-surface border-stroke hover:border-orange-500/30'
     }`}>
       {/* Burst animation */}
       {justClaimed && (
@@ -75,26 +75,26 @@ export default function CheckinWidget() {
       <div className="p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Flame size={16} className={streak >= 7 ? 'text-orange-400' : 'text-white/40'} />
-            <span className="text-sm font-bold text-white">Günlük Giriş</span>
+            <Flame size={16} className={streak >= 7 ? 'text-orange-400' : 'text-fg-subtle'} />
+            <span className="text-sm font-bold text-fg">Günlük Giriş</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="text-xl font-black text-orange-400">{streak}</span>
-            <span className="text-xs text-white/40">gün serisi</span>
+            <span className="text-xs text-fg-subtle">gün serisi</span>
           </div>
         </div>
 
         {/* Milestone progress bar */}
         {nextMilestone && (
           <div className="mb-3">
-            <div className="flex items-center justify-between text-[10px] text-white/30 mb-1">
+            <div className="flex items-center justify-between text-[10px] text-fg-subtle mb-1">
               <span>{prevMilestone}g</span>
               <span className="text-orange-400 font-semibold">
                 {status.days_until_next} gün → {nextMilestone}g (+{status.next_reward}pt)
               </span>
               <span>{nextMilestone}g</span>
             </div>
-            <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-stroke rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full transition-all"
                 style={{ width: `${progress}%` }}
@@ -111,8 +111,8 @@ export default function CheckinWidget() {
                 streak >= m
                   ? 'bg-orange-500/25 border-orange-500/50 text-orange-300'
                   : m === nextMilestone
-                  ? 'bg-white/5 border-orange-500/30 text-white/50 animate-pulse'
-                  : 'bg-white/3 border-white/10 text-white/20'
+                  ? 'bg-surface-2 border-orange-500/30 text-fg-subtle animate-pulse'
+                  : 'bg-surface-2 border-stroke text-fg-subtle'
               }`}>
                 {m === nextMilestone ? '🎯' : streak >= m ? '✓' : m}
               </div>

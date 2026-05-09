@@ -138,18 +138,18 @@ export default function BasarimlarPage() {
       </div>
 
       {/* Overall progress */}
-      <div className="bg-[#1a1a2e] border border-white/8 rounded-2xl p-4 mb-5">
-        <div className="flex items-center justify-between text-xs text-white/40 mb-2">
+      <div className="bg-surface border border-stroke rounded-2xl p-4 mb-5">
+        <div className="flex items-center justify-between text-xs text-fg-subtle mb-2">
           <span>Genel İlerleme</span>
           <span className="font-bold text-amber-400">{Math.round((earnedCount / ORDER.length) * 100)}%</span>
         </div>
-        <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+        <div className="h-2 bg-stroke rounded-full overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-amber-500 to-yellow-400 rounded-full transition-all"
+            className="h-full bg-gradient-to-r from-amber-500 to-yellow-400 rounded-full transition-all duration-500"
             style={{ width: `${(earnedCount / ORDER.length) * 100}%` }}
           />
         </div>
-        <div className="flex justify-between mt-2 text-[10px] text-white/25">
+        <div className="flex justify-between mt-2 text-[10px] text-fg-subtle">
           <span>{earnedCount} kazanıldı</span>
           <span>{ORDER.length - earnedCount} kaldı</span>
         </div>
@@ -172,56 +172,56 @@ export default function BasarimlarPage() {
               className={`flex items-center gap-4 p-4 rounded-2xl border transition-all ${
                 earned
                   ? 'bg-amber-500/6 border-amber-500/25'
-                  : 'bg-[#1a1a2e] border-white/8'
+                  : 'bg-surface border-stroke'
               }`}
             >
               {/* Emoji / locked */}
               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 ${
-                earned ? 'bg-amber-500/15' : 'bg-white/5'
+                earned ? 'bg-amber-500/15' : 'bg-surface-2'
               }`}>
-                {earned ? def.emoji : <Lock size={18} className="text-white/20" />}
+                {earned ? def.emoji : <Lock size={18} className="text-fg-subtle opacity-50" />}
               </div>
 
               {/* Content */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-0.5">
-                  <span className={`text-sm font-bold ${earned ? 'text-white' : 'text-white/40'}`}>
+                  <span className={`text-sm font-bold ${earned ? 'text-fg' : 'text-fg-subtle'}`}>
                     {def.label}
                   </span>
                   {earned && <CheckCircle2 size={13} className="text-green-400 shrink-0" />}
                 </div>
-                <p className={`text-xs mb-1 ${earned ? 'text-white/60' : 'text-white/25'}`}>
+                <p className={`text-xs mb-1 ${earned ? 'text-fg-muted' : 'text-fg-subtle'}`}>
                   {def.description}
                 </p>
 
                 {/* Progress bar (if not earned + has progress) */}
                 {!earned && progressData && (
                   <div>
-                    <div className="h-1 bg-white/8 rounded-full overflow-hidden mb-0.5">
+                    <div className="h-1 bg-stroke rounded-full overflow-hidden mb-0.5">
                       <div
                         className={`h-full rounded-full transition-all ${def.color.replace('text-', 'bg-')}`}
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <span className="text-[9px] text-white/25">{progressData.current}/{progressData.target}</span>
+                    <span className="text-[9px] text-fg-subtle">{progressData.current}/{progressData.target}</span>
                   </div>
                 )}
 
                 {/* How to earn */}
                 {!earned && !progressData && (
-                  <p className="text-[10px] text-white/20 italic">{def.how}</p>
+                  <p className="text-[10px] text-fg-subtle italic">{def.how}</p>
                 )}
 
                 {/* Earned date */}
                 {earned && achData?.earned_at && (
-                  <p className="text-[10px] text-amber-400/50">
+                  <p className="text-[10px] text-amber-400/60">
                     {new Date(achData.earned_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}
                   </p>
                 )}
               </div>
 
               {/* Points badge */}
-              <div className={`shrink-0 flex flex-col items-center gap-0.5 ${earned ? 'text-amber-400' : 'text-white/20'}`}>
+              <div className={`shrink-0 flex flex-col items-center gap-0.5 ${earned ? 'text-amber-400' : 'text-fg-subtle'}`}>
                 <Star size={12} className={earned ? 'fill-amber-400' : ''} />
                 <span className="text-xs font-black">{def.points}</span>
               </div>

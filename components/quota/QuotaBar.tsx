@@ -35,12 +35,10 @@ export default function QuotaBar({ compact = false }: { compact?: boolean }) {
 
   if (!data) return null
 
-  // If premium and all limits are high, don't show the bar
   const hasLowLimit = VISIBLE_KEYS.some((k) => (data.limits[k] ?? 0) < 999)
   if (!hasLowLimit) return null
 
   if (compact) {
-    // Just show colored dots for use in navbar/sidebar
     return (
       <div className="flex items-center gap-1.5">
         {VISIBLE_KEYS.map((k) => {
@@ -60,9 +58,9 @@ export default function QuotaBar({ compact = false }: { compact?: boolean }) {
   }
 
   return (
-    <div className="rounded-2xl bg-[#1a1a2e] border border-white/10 p-4">
+    <div className="rounded-2xl bg-surface border border-stroke p-4">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-semibold text-white/50 uppercase tracking-wider">Günlük Kullanım</span>
+        <span className="text-xs font-semibold text-fg-subtle uppercase tracking-wider">Günlük Kullanım</span>
         {!data.is_premium && (
           <Link
             href="/premium"
@@ -83,13 +81,13 @@ export default function QuotaBar({ compact = false }: { compact?: boolean }) {
           return (
             <div key={k}>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-white/60">{QUOTA_LABELS[k]}</span>
-                <span className={`text-xs font-medium ${p >= 100 ? 'text-red-400' : 'text-white/60'}`}>
+                <span className="text-xs text-fg-muted">{QUOTA_LABELS[k]}</span>
+                <span className={`text-xs font-medium ${p >= 100 ? 'text-red-400' : 'text-fg-muted'}`}>
                   {unlimited ? '∞' : `${used} / ${limit}`}
                 </span>
               </div>
               {!unlimited && (
-                <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+                <div className="h-1 bg-stroke rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${barColor(p)}`}
                     style={{ width: `${p}%` }}
@@ -102,9 +100,9 @@ export default function QuotaBar({ compact = false }: { compact?: boolean }) {
       </div>
 
       {!data.is_premium && (
-        <p className="text-xs text-white/30 mt-3 leading-relaxed">
+        <p className="text-xs text-fg-subtle mt-3 leading-relaxed">
           Limitler, hesabındaki toplam puana göre her gün sıfırlanır.
-          Premium'da tüm limitler kaldırılır.
+          Premium&apos;da tüm limitler kaldırılır.
         </p>
       )}
     </div>

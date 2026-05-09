@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Flame, Snowflake, Zap } from 'lucide-react'
+import { Flame, Snowflake } from 'lucide-react'
 
 interface Props {
   streak: number
@@ -12,8 +12,7 @@ interface Props {
 const MILESTONES = [3, 7, 14, 30, 60, 100]
 
 export default function StreakWidget({ streak, freezeCount, userId }: Props) {
-  const [freeze, setFreeze] = useState(freezeCount)
-  const [usingFreeze, setUsingFreeze] = useState(false)
+  const [freeze] = useState(freezeCount)
 
   const nextMilestone = MILESTONES.find(m => m > streak) ?? MILESTONES[MILESTONES.length - 1]
   const prevMilestone = [...MILESTONES].reverse().find(m => m <= streak) ?? 0
@@ -31,12 +30,12 @@ export default function StreakWidget({ streak, freezeCount, userId }: Props) {
   }
 
   return (
-    <div className="rounded-2xl bg-[#1a1a2e] border border-orange-500/15 overflow-hidden">
+    <div className="rounded-2xl bg-surface border border-orange-500/15 overflow-hidden">
       {/* Header */}
       <div className="px-4 pt-4 pb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Flame size={16} className="text-orange-400" />
-          <span className="text-sm font-bold text-white">Günlük Seri</span>
+          <span className="text-sm font-bold text-fg">Günlük Seri</span>
         </div>
         {freeze > 0 && (
           <div className="flex items-center gap-1 bg-cyan-500/10 border border-cyan-500/20 rounded-full px-2.5 py-1 text-xs text-cyan-400">
@@ -49,20 +48,20 @@ export default function StreakWidget({ streak, freezeCount, userId }: Props) {
       {/* Streak number */}
       <div className="px-4 pb-3 flex items-end gap-3">
         <div className="flex items-baseline gap-1">
-          <span className={`font-black leading-none ${
-            streak >= 30 ? 'text-5xl text-orange-400' :
-            streak >= 7  ? 'text-5xl text-amber-400' :
-            streak >= 3  ? 'text-5xl text-yellow-400' :
-                           'text-5xl text-white/60'
+          <span className={`font-black leading-none text-5xl ${
+            streak >= 30 ? 'text-orange-400' :
+            streak >= 7  ? 'text-amber-400' :
+            streak >= 3  ? 'text-yellow-400' :
+                           'text-fg-subtle'
           }`}>{streak}</span>
-          <span className="text-white/40 text-sm mb-1">gün</span>
+          <span className="text-fg-subtle text-sm mb-1">gün</span>
         </div>
         <div className="flex-1 pb-1">
-          <div className="flex justify-between text-xs text-white/30 mb-1">
+          <div className="flex justify-between text-xs text-fg-subtle mb-1">
             <span>{streak} / {nextMilestone}</span>
             <span>{milestoneReward[nextMilestone]}</span>
           </div>
-          <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+          <div className="h-2 rounded-full bg-stroke overflow-hidden">
             <div
               className="h-full rounded-full bg-gradient-to-r from-orange-500 to-amber-400 transition-all duration-700"
               style={{ width: `${progress}%` }}
@@ -80,7 +79,7 @@ export default function StreakWidget({ streak, freezeCount, userId }: Props) {
               className={`flex-1 text-center text-[10px] font-bold py-1 rounded-lg transition-all ${
                 streak >= m
                   ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30'
-                  : 'bg-white/3 text-white/20 border border-white/5'
+                  : 'bg-surface-2 text-fg-subtle border border-stroke'
               }`}
             >
               {m}🔥
@@ -91,7 +90,7 @@ export default function StreakWidget({ streak, freezeCount, userId }: Props) {
 
       {/* Motivation message */}
       <div className="px-4 pb-4">
-        <p className="text-xs text-white/40 text-center">
+        <p className="text-xs text-fg-subtle text-center">
           {streak === 0
             ? '👋 Bugün oyna ve seriyi başlat!'
             : streak < 3

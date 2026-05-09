@@ -7,6 +7,7 @@ import { Spinner } from '@/components/ui/Spinner'
 import { formatPoints } from '@/lib/utils/formatting'
 import { Users, Swords, FileText, Zap, ShieldOff, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
+import DauChart from '@/components/admin/DauChart'
 
 interface Stats {
   users: number
@@ -68,6 +69,11 @@ export default function AdminDashboard() {
             <p className="text-xs text-fg-subtle mt-1">{label}</p>
           </Card>
         ))}
+      </div>
+
+      {/* DAU Chart */}
+      <div className="mb-6">
+        <DauChart />
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">

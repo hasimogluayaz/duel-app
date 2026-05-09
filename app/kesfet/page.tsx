@@ -10,7 +10,7 @@ import { Spinner } from '@/components/ui/Spinner'
 import { formatPoints, timeAgo } from '@/lib/utils/formatting'
 import type { Profile } from '@/types'
 import Link from 'next/link'
-import { Search, Flame, Star, Users, TrendingUp, Swords, MessageCircle, Trophy, Zap, Layers } from 'lucide-react'
+import { Search, Flame, Star, Users, TrendingUp, Swords, MessageCircle, Trophy, Zap, Layers, FileText } from 'lucide-react'
 import BookmarkButton from '@/components/bookmarks/BookmarkButton'
 import { cn } from '@/lib/utils/cn'
 import { getTier } from '@/lib/utils/tier'
@@ -135,11 +135,13 @@ function FeedCard({ duel }: { duel: FeedDuel }) {
   )
 }
 
-// ─── Users Tab ────────────────────────────────────────────────────────────────
-function UsersTab() {
-  const [query, setQuery] = useState('')
-  const [users, setUsers] = useState<Profile[]>([])
-  const [loading, setLoading] = useState(true)
+// ─── Search Tab (users + scenarios) ──────────────────────────────────────────
+function SearchTab() {
+  const [query, setQuery]               = useState('')
+  const [mode, setMode]                 = useState<'users' | 'scenarios'>('users')
+  const [users, setUsers]               = useState<Profile[]>([])
+  const [scenarios, setScenarios]       = useState<any[]>([])
+  const [loading, setLoading]           = useState(true)
   const [debouncedQuery, setDebouncedQuery] = useState('')
 
   useEffect(() => {
@@ -147,23 +149,65 @@ function UsersTab() {
     return () => clearTimeout(id)
   }, [query])
 
-  const search = useCallback(async (q: string) => {
+  const search = useCallback(async (q: string, m: 'users' | 'scenarios') => {
     setLoading(true)
-    const res = await fetch(`/api/search/users?q=${encodeURIComponent(q)}`)
-    const json = await res.json()
-    setUsers(json.users ?? [])
+    if (m === 'users') {
+      const res = await fetch(`/api/search/users?q=${encodeURIComponent(q)}`)
+      const json = await res.json()
+      setUsers(json.users ?? [])
+    } else {
+      if (q.length < 2) {
+        // Show popular scenarios when no query
+        const res = await fetch('/api/scenarios?limit=20')
+        const json = await res.json()
+        setScenarios(json.scenarios ?? [])
+      } else {
+        const res = await fetch(`/api/search?type=scenarios&q=${encodeURIComponent(q)}`)
+        const json = await res.json()
+        setScenarios(json.scenarios ?? [])
+      }
+    }
     setLoading(false)
   }, [])
 
-  useEffect(() => { search(debouncedQuery) }, [debouncedQuery, search])
+  useEffect(() => { search(debouncedQuery, mode) }, [debouncedQuery, mode, search])
 
   return (
     <>
+      {/* Mode toggle */}
+      <div className="flex gap-1.5 mb-3">
+        <button
+          onClick={() => setMode('users')}
+          className={cn(
+            'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold transition-all',
+            mode === 'users'
+              ? 'bg-purple-600 text-white'
+              : 'bg-surface border border-stroke text-fg-subtle hover:border-purple-500/40'
+          )}
+        >
+          <Users size={13} />
+          Oyuncular
+        </button>
+        <button
+          onClick={() => setMode('scenarios')}
+          className={cn(
+            'flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-sm font-semibold transition-all',
+            mode === 'scenarios'
+              ? 'bg-purple-600 text-white'
+              : 'bg-surface border border-stroke text-fg-subtle hover:border-purple-500/40'
+          )}
+        >
+          <FileText size={13} />
+          Senaryolar
+        </button>
+      </div>
+
+      {/* Search input */}
       <div className="relative mb-4">
         <Search size={18} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-fg-subtle pointer-events-none" />
         <input
           type="text"
-          placeholder="Kullanıcı adı veya isim ara..."
+          placeholder={mode === 'users' ? 'Kullanıcı adı veya isim ara...' : 'Senaryo içeriği ara...'}
           value={query}
           onChange={e => setQuery(e.target.value)}
           className="w-full bg-surface border border-stroke rounded-xl pl-10 pr-4 py-3 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-purple-500 transition-colors"
@@ -171,64 +215,123 @@ function UsersTab() {
         />
       </div>
 
+      {/* Result label */}
       <div className="flex items-center gap-2 mb-3">
         {query.length >= 2 ? (
-          <><Search size={14} className="text-fg-subtle" /><span className="text-xs font-medium text-fg-subtle uppercase tracking-wide">&quot;{query}&quot; için sonuçlar</span></>
+          <>
+            <Search size={14} className="text-fg-subtle" />
+            <span className="text-xs font-medium text-fg-subtle uppercase tracking-wide">
+              &quot;{query}&quot; için sonuçlar
+            </span>
+          </>
         ) : (
-          <><TrendingUp size={14} className="text-fg-subtle" /><span className="text-xs font-medium text-fg-subtle uppercase tracking-wide">En İyi Oyuncular</span></>
+          <>
+            <TrendingUp size={14} className="text-fg-subtle" />
+            <span className="text-xs font-medium text-fg-subtle uppercase tracking-wide">
+              {mode === 'users' ? 'En İyi Oyuncular' : 'Popüler Senaryolar'}
+            </span>
+          </>
         )}
       </div>
 
       {loading ? (
         <div className="flex justify-center py-20"><Spinner size="lg" /></div>
-      ) : users.length === 0 ? (
-        <Card className="text-center py-14 border-dashed">
-          <Users size={32} className="text-fg-subtle opacity-30 mx-auto mb-3" />
-          <p className="text-fg font-semibold">Kullanıcı bulunamadı</p>
-          <p className="text-fg-subtle text-sm mt-1">Farklı bir arama dene</p>
-        </Card>
-      ) : (
-        <div className="flex flex-col gap-2">
-          {users.map((user, idx) => (
-            <Link key={user.id} href={`/profil/${user.username}`}>
-              <div className="flex items-center gap-3.5 px-4 py-3.5 rounded-xl bg-surface border border-stroke hover:border-purple-500/40 hover:bg-purple-500/5 transition-all cursor-pointer group">
-                {!query && (
-                  <span className="text-sm font-bold text-fg-subtle w-5 text-center flex-shrink-0">{idx + 1}</span>
-                )}
-                <Avatar src={user.avatar_url} username={user.username} size="md" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <p className="font-semibold text-fg text-sm group-hover:text-purple-300 transition-colors truncate">
-                      {user.display_name || user.username}
-                    </p>
-                    {user.personality_type && (
-                      <Badge variant="default" className="text-xs hidden sm:inline-flex shrink-0">🧠 {user.personality_type}</Badge>
+      ) : mode === 'users' ? (
+        users.length === 0 ? (
+          <Card className="text-center py-14 border-dashed">
+            <Users size={32} className="text-fg-subtle opacity-30 mx-auto mb-3" />
+            <p className="text-fg font-semibold">Kullanıcı bulunamadı</p>
+            <p className="text-fg-subtle text-sm mt-1">Farklı bir arama dene</p>
+          </Card>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {users.map((user, idx) => (
+              <Link key={user.id} href={`/profil/${user.username}`}>
+                <div className="flex items-center gap-3.5 px-4 py-3.5 rounded-xl bg-surface border border-stroke hover:border-purple-500/40 hover:bg-purple-500/5 transition-all cursor-pointer group">
+                  {!query && (
+                    <span className="text-sm font-bold text-fg-subtle w-5 text-center flex-shrink-0">{idx + 1}</span>
+                  )}
+                  <Avatar src={user.avatar_url} username={user.username} size="md" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <p className="font-semibold text-fg text-sm group-hover:text-purple-300 transition-colors truncate">
+                        {user.display_name || user.username}
+                      </p>
+                      {user.personality_type && (
+                        <Badge variant="default" className="text-xs hidden sm:inline-flex shrink-0">🧠 {user.personality_type}</Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-fg-subtle">@{user.username}</p>
+                    {user.bio && <p className="text-xs text-fg-muted mt-1 line-clamp-1">{user.bio}</p>}
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0 text-right">
+                    <div>
+                      <div className="flex items-center gap-1 justify-end">
+                        <Star size={11} className="text-amber-400 fill-amber-400" />
+                        <span className="text-sm font-bold text-fg">{formatPoints(user.total_points)}</span>
+                      </div>
+                      <p className="text-xs text-fg-subtle">puan</p>
+                    </div>
+                    {user.streak_count > 0 && (
+                      <div>
+                        <div className="flex items-center gap-1 justify-end text-amber-400">
+                          <Flame size={11} /><span className="text-sm font-bold">{user.streak_count}</span>
+                        </div>
+                        <p className="text-xs text-fg-subtle">seri</p>
+                      </div>
                     )}
                   </div>
-                  <p className="text-xs text-fg-subtle">@{user.username}</p>
-                  {user.bio && <p className="text-xs text-fg-muted mt-1 line-clamp-1">{user.bio}</p>}
                 </div>
-                <div className="flex items-center gap-3 shrink-0 text-right">
-                  <div>
-                    <div className="flex items-center gap-1 justify-end">
-                      <Star size={11} className="text-amber-400 fill-amber-400" />
-                      <span className="text-sm font-bold text-fg">{formatPoints(user.total_points)}</span>
-                    </div>
-                    <p className="text-xs text-fg-subtle">puan</p>
+              </Link>
+            ))}
+          </div>
+        )
+      ) : (
+        scenarios.length === 0 ? (
+          <Card className="text-center py-14 border-dashed">
+            <FileText size={32} className="text-fg-subtle opacity-30 mx-auto mb-3" />
+            <p className="text-fg font-semibold">Senaryo bulunamadı</p>
+            <p className="text-fg-subtle text-sm mt-1">Farklı anahtar kelimeler dene</p>
+          </Card>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {scenarios.map((s: any) => (
+              <Link key={s.id} href={`/arsiv/${s.id}`}>
+                <div className="flex items-start gap-3 px-4 py-3.5 rounded-xl bg-surface border border-stroke hover:border-purple-500/40 hover:bg-purple-500/5 transition-all cursor-pointer group">
+                  <div className="w-8 h-8 rounded-lg bg-purple-500/15 flex items-center justify-center shrink-0 mt-0.5">
+                    <FileText size={14} className="text-purple-400" />
                   </div>
-                  {user.streak_count > 0 && (
-                    <div>
-                      <div className="flex items-center gap-1 justify-end text-amber-400">
-                        <Flame size={11} /><span className="text-sm font-bold">{user.streak_count}</span>
-                      </div>
-                      <p className="text-xs text-fg-subtle">seri</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-fg group-hover:text-purple-300 transition-colors leading-relaxed line-clamp-2">
+                      {s.content}
+                    </p>
+                    <div className="flex items-center gap-3 mt-1.5 text-xs text-fg-subtle">
+                      <span>{s.answer_count ?? 0} cevap</span>
+                      {s.category && (
+                        <>
+                          <span>·</span>
+                          <span className="capitalize">{s.category}</span>
+                        </>
+                      )}
+                      {s.difficulty && (
+                        <>
+                          <span>·</span>
+                          <span className={
+                            s.difficulty === 'hard' ? 'text-red-400' :
+                            s.difficulty === 'medium' ? 'text-amber-400' :
+                            'text-green-400'
+                          }>
+                            {s.difficulty === 'hard' ? '🔥 Zor' : s.difficulty === 'medium' ? '⚡ Orta' : '✅ Kolay'}
+                          </span>
+                        </>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+              </Link>
+            ))}
+          </div>
+        )
       )}
     </>
   )
@@ -457,17 +560,18 @@ function CategoriesTab() {
 
       {/* Category grid */}
       <div>
-        <p className="text-xs text-white/40 font-bold mb-3 uppercase tracking-wider">Kategoriler</p>
+        <p className="text-xs text-fg-subtle font-bold mb-3 uppercase tracking-wider">Kategoriler</p>
         <div className="grid grid-cols-3 gap-2">
           {CATEGORIES.map(cat => (
             <button
               key={cat.key}
               onClick={() => setSelected(s => s === cat.key ? null : cat.key)}
-              className={`flex flex-col items-center gap-1 py-3 rounded-xl border transition-all text-sm font-semibold ${
+              className={cn(
+                'flex flex-col items-center gap-1 py-3 rounded-xl border transition-all text-sm font-semibold',
                 selected === cat.key
                   ? 'bg-violet-600/20 border-violet-500/50 text-violet-300'
-                  : 'bg-white/3 border-white/8 text-white/60 hover:bg-white/6 hover:border-white/15'
-              }`}
+                  : 'bg-surface border-stroke text-fg-subtle hover:bg-surface-2 hover:border-purple-500/30'
+              )}
             >
               <span className="text-xl">{cat.emoji}</span>
               <span className="text-xs">{cat.label}</span>
@@ -487,15 +591,15 @@ function CategoriesTab() {
               {[1,2,3].map(i => <div key={i} className="h-16 bg-white/5 rounded-xl animate-pulse" />)}
             </div>
           ) : scenarios.length === 0 ? (
-            <p className="text-center text-sm text-white/25 py-8">Bu kategoride henüz senaryo yok</p>
+            <p className="text-center text-sm text-fg-subtle py-8">Bu kategoride henüz senaryo yok</p>
           ) : (
             <div className="space-y-2">
               {scenarios.map(s => (
                 <Link key={s.id} href={`/arsiv/${s.id}`}>
-                  <div className="bg-white/3 border border-white/8 rounded-xl p-3 hover:border-violet-500/30 transition-colors cursor-pointer flex items-start justify-between gap-3">
-                    <p className="text-sm text-white/80 leading-relaxed flex-1">{s.content}</p>
+                  <div className="bg-surface border border-stroke rounded-xl p-3 hover:border-violet-500/30 transition-colors cursor-pointer flex items-start justify-between gap-3">
+                    <p className="text-sm text-fg-muted leading-relaxed flex-1">{s.content}</p>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-xs text-white/30">{s.answer_count}</span>
+                      <span className="text-xs text-fg-subtle">{s.answer_count}</span>
                       <BookmarkButton type="scenario" id={s.id} size={13} />
                     </div>
                   </div>

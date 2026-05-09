@@ -25,7 +25,6 @@ import DailyMissions from '@/components/missions/DailyMissions'
 import QuotaBar from '@/components/quota/QuotaBar'
 import KararVerCard from '@/components/karar-ver/KararVerCard'
 import WeeklyChampionCard from '@/components/champion/WeeklyChampionCard'
-import ReferralCard from '@/components/referral/ReferralCard'
 import CheckinWidget from '@/components/checkin/CheckinWidget'
 import SeasonCard from '@/components/seasons/SeasonCard'
 import WeeklyMissions from '@/components/missions/WeeklyMissions'
@@ -332,9 +331,6 @@ export function OyunClient({
 
       {/* ── Haftalık Şampiyon ────────────────────────── */}
       <WeeklyChampionCard />
-
-      {/* ── Referral ─────────────────────────────────── */}
-      {userId && <ReferralCard userId={userId} />}
 
       {/* ── Today's scenario ─────────────────────────── */}
       {!scenario ? (

@@ -14,35 +14,99 @@ import { Bell, CheckCheck, Swords, Settings2 } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils/cn'
 
+// ─── Universal URL resolver (mirrors NotificationBell logic) ──────────────────
+function getNotificationUrl(n: Notification): string | null {
+  const data = (n as any).data ?? {}
+  switch (n.type) {
+    case 'duel_invite':
+    case 'duel_result':
+    case 'duel_accepted':
+      if (data.share_token) return `/duel/${data.share_token}`
+      if (data.duel_id)     return `/duel/${data.duel_id}`
+      return null
+    case 'vote_milestone':
+      if (data.duel_id) return `/duel/${data.duel_id}`
+      return null
+    case 'new_follower':
+      if (data.follower_username) return `/profil/${data.follower_username}`
+      return null
+    case 'new_comment':
+    case 'comment_reply':
+    case 'answer_comment':
+      if (data.scenario_id) return `/arsiv/${data.scenario_id}`
+      return null
+    case 'reaction_milestone':
+      if (data.scenario_id) return `/arsiv/${data.scenario_id}`
+      return null
+    case 'streak_milestone':
+    case 'streak_reminder':
+    case 'weekly_mission_complete':
+      return '/oyun'
+    case 'achievement':
+    case 'tier_up':
+      return '/basarimlar'
+    case 'vote_received':
+      if (data.scenario_id) return `/arsiv/${data.scenario_id}`
+      return null
+    default:
+      return null
+  }
+}
+
+// ─── Type display helpers ─────────────────────────────────────────────────────
 const TYPE_GROUP: Record<string, string> = {
-  duel_invite: 'Düello',
-  duel_result: 'Düello',
-  duel_accepted: 'Düello',
-  vote_received: 'Oylar',
-  vote_milestone: 'Oylar',
-  new_follower: 'Sosyal',
-  streak_reminder: 'Seriler',
-  streak_milestone: 'Seriler',
-  title_earned: 'Başarımlar',
-  achievement: 'Başarımlar',
+  duel_invite:            'Düello',
+  duel_result:            'Düello',
+  duel_accepted:          'Düello',
+  vote_received:          'Oylar',
+  vote_milestone:         'Oylar',
+  reaction_milestone:     'Oylar',
+  new_follower:           'Sosyal',
+  streak_reminder:        'Seriler',
+  streak_milestone:       'Seriler',
+  weekly_mission_complete:'Görevler',
+  title_earned:           'Başarımlar',
+  achievement:            'Başarımlar',
+  tier_up:                'Başarımlar',
+  new_comment:            'Yorumlar',
+  comment_reply:          'Yorumlar',
+  answer_comment:         'Yorumlar',
 }
 
 const TYPE_ICONS: Record<string, string> = {
-  duel_invite: '⚔️',
-  duel_result: '🏆',
-  vote_milestone: '⭐',
-  streak_reminder: '🔥',
-  new_follower: '👥',
-  vote_received: '👍',
+  duel_invite:            '⚔️',
+  duel_result:            '🏆',
+  duel_accepted:          '🤝',
+  vote_milestone:         '⭐',
+  reaction_milestone:     '🔥',
+  streak_reminder:        '🔥',
+  streak_milestone:       '🎯',
+  new_follower:           '👥',
+  vote_received:          '👍',
+  new_comment:            '💬',
+  comment_reply:          '↩️',
+  answer_comment:         '💬',
+  achievement:            '🏅',
+  tier_up:                '📈',
+  weekly_mission_complete:'✅',
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  duel_invite: 'bg-purple-500/20 text-purple-300',
-  duel_result: 'bg-amber-500/20 text-amber-300',
-  vote_milestone: 'bg-yellow-500/20 text-yellow-300',
-  streak_reminder: 'bg-orange-500/20 text-orange-300',
-  new_follower: 'bg-blue-500/20 text-blue-300',
-  vote_received: 'bg-green-500/20 text-green-300',
+  duel_invite:            'bg-purple-500/20 text-purple-300',
+  duel_result:            'bg-amber-500/20 text-amber-300',
+  duel_accepted:          'bg-green-500/20 text-green-300',
+  vote_milestone:         'bg-yellow-500/20 text-yellow-300',
+  reaction_milestone:     'bg-orange-500/20 text-orange-300',
+  streak_reminder:        'bg-orange-500/20 text-orange-300',
+  streak_milestone:       'bg-red-500/20 text-red-300',
+  new_follower:           'bg-blue-500/20 text-blue-300',
+  vote_received:          'bg-green-500/20 text-green-300',
+  new_comment:            'bg-cyan-500/20 text-cyan-300',
+  comment_reply:          'bg-cyan-500/20 text-cyan-300',
+  answer_comment:         'bg-cyan-500/20 text-cyan-300',
+  achievement:            'bg-amber-500/20 text-amber-300',
+  tier_up:                'bg-violet-500/20 text-violet-300',
+  weekly_mission_complete:'bg-emerald-500/20 text-emerald-300',
 }
 
 export default function BildirimlerPage() {
@@ -68,12 +132,13 @@ export default function BildirimlerPage() {
       setNotifications(data ?? [])
       setLoading(false)
 
-      // Mark all as read
-      await supabase
+      // Mark all as read on open
+      supabase
         .from('notifications')
         .update({ is_read: true })
         .eq('user_id', user.id)
         .eq('is_read', false)
+        .then(() => {})
     }
     load()
   }, [])
@@ -87,14 +152,17 @@ export default function BildirimlerPage() {
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })))
   }
 
-  const unread = notifications.filter(n => !n.is_read).length
-
-  const getDuelLink = (n: Notification): string | null => {
-    const data = n.data as any
-    if (data?.share_token) return `/duel/${data.share_token}`
-    if (data?.duel_id) return `/duel/${data.duel_id}`
-    return null
+  async function handleClick(n: Notification) {
+    // Optimistic mark read
+    if (!n.is_read) {
+      setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, is_read: true } : x))
+      supabase.from('notifications').update({ is_read: true }).eq('id', n.id).then(() => {})
+    }
+    const url = getNotificationUrl(n)
+    if (url) router.push(url)
   }
+
+  const unread = notifications.filter(n => !n.is_read).length
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
@@ -150,7 +218,7 @@ export default function BildirimlerPage() {
         </Card>
       ) : (
         <div className="flex flex-col gap-2">
-          {/* Unread count chip */}
+          {/* Unread divider */}
           {unread > 0 && (
             <div className="flex items-center gap-2 mb-1">
               <div className="h-px flex-1 bg-stroke" />
@@ -158,24 +226,27 @@ export default function BildirimlerPage() {
               <div className="h-px flex-1 bg-stroke" />
             </div>
           )}
-          {notifications.map((n, idx) => {
-            // Group label between different groups
-            const thisGroup = TYPE_GROUP[n.type] ?? 'Diğer'
-            const prevGroup = idx > 0 ? (TYPE_GROUP[notifications[idx-1].type] ?? 'Diğer') : null
-            const showGroupLabel = idx === 0 || (thisGroup !== prevGroup)
 
-            const link = getDuelLink(n)
+          {notifications.map((n, idx) => {
+            const thisGroup = TYPE_GROUP[n.type] ?? 'Diğer'
+            const prevGroup = idx > 0 ? (TYPE_GROUP[notifications[idx - 1].type] ?? 'Diğer') : null
+            const showGroupLabel = idx === 0 || thisGroup !== prevGroup
+
+            const url = getNotificationUrl(n)
             const icon = TYPE_ICONS[n.type] ?? '🔔'
             const iconColor = TYPE_COLORS[n.type] ?? 'bg-surface-2 text-fg-muted'
 
             const inner = (
-              <div className={cn(
-                'flex items-start gap-3.5 p-4 rounded-xl border transition-all',
-                !n.is_read
-                  ? 'bg-purple-500/5 border-purple-500/20 hover:border-purple-500/40'
-                  : 'bg-surface border-stroke hover:border-purple-500/20',
-                link && 'cursor-pointer'
-              )}>
+              <div
+                onClick={() => handleClick(n)}
+                className={cn(
+                  'flex items-start gap-3.5 p-4 rounded-xl border transition-all',
+                  !n.is_read
+                    ? 'bg-purple-500/5 border-purple-500/20 hover:border-purple-500/40'
+                    : 'bg-surface border-stroke hover:border-purple-500/20',
+                  url && 'cursor-pointer',
+                )}
+              >
                 {/* Icon bubble */}
                 <div className={cn('w-9 h-9 rounded-xl flex items-center justify-center text-lg flex-shrink-0 mt-0.5', iconColor)}>
                   {icon}
@@ -196,9 +267,11 @@ export default function BildirimlerPage() {
             return (
               <div key={n.id}>
                 {showGroupLabel && idx > 0 && (
-                  <p className="text-[10px] text-white/25 font-bold uppercase tracking-widest mt-3 mb-1 px-1">{thisGroup}</p>
+                  <p className="text-[10px] text-white/25 font-bold uppercase tracking-widest mt-3 mb-1 px-1">
+                    {thisGroup}
+                  </p>
                 )}
-                {link ? <Link href={link}>{inner}</Link> : inner}
+                {inner}
               </div>
             )
           })}
