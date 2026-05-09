@@ -41,6 +41,26 @@ export async function POST(req: Request) {
         url: `/profil/${followerProfile?.username}`,
       }).catch(() => {})
 
+      // Mission: follow_user (günlük görev ilerlemesi)
+      const today = new Date().toISOString().split('T')[0]
+      const { data: existingMission } = await supabase
+        .from('user_daily_missions')
+        .select('progress, completed')
+        .eq('user_id', user.id).eq('date', today).eq('mission_type', 'follow_user')
+        .maybeSingle()
+      if (!existingMission?.completed) {
+        await supabase.from('user_daily_missions').upsert({
+          user_id: user.id, date: today, mission_type: 'follow_user',
+          progress: 1, completed: true,
+          completed_at: new Date().toISOString(), points_awarded: 10,
+        }, { onConflict: 'user_id,date,mission_type' })
+        const { data: p } = await supabase.from('profiles').select('total_points, weekly_points').eq('id', user.id).single()
+        if (p) await supabase.from('profiles').update({
+          total_points: (p.total_points ?? 0) + 10,
+          weekly_points: (p.weekly_points ?? 0) + 10,
+        }).eq('id', user.id)
+      }
+
       return NextResponse.json({ following: true })
     }
 

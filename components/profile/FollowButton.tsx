@@ -8,9 +8,12 @@ import { UserPlus, UserCheck } from 'lucide-react'
 interface Props {
   targetId: string
   initialFollowing: boolean
+  size?: 'sm' | 'md'
+  onFollow?: () => void
+  onUnfollow?: () => void
 }
 
-export function FollowButton({ targetId, initialFollowing }: Props) {
+export function FollowButton({ targetId, initialFollowing, size = 'sm', onFollow, onUnfollow }: Props) {
   const [following, setFollowing] = useState(initialFollowing)
   const [loading, setLoading] = useState(false)
   const toast = useToast()
@@ -30,14 +33,20 @@ export function FollowButton({ targetId, initialFollowing }: Props) {
       toast(json.error || 'İşlem başarısız.', 'error')
     } else {
       setFollowing(json.following)
-      toast(json.following ? 'Takip edildi! 👥' : 'Takip bırakıldı.', 'success')
+      if (json.following) {
+        toast('Takip edildi! 👥', 'success')
+        onFollow?.()
+      } else {
+        toast('Takip bırakıldı.', 'success')
+        onUnfollow?.()
+      }
     }
     setLoading(false)
   }
 
   return (
     <Button
-      size="sm"
+      size={size}
       variant={following ? 'secondary' : 'outline'}
       loading={loading}
       onClick={toggle}

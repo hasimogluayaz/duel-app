@@ -8,7 +8,23 @@ import ProfilClient from './ProfilClient'
 interface Props { params: { username: string } }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  return { title: `@${params.username} · Kapisio` }
+  const supabase = createClient()
+  const { data } = await supabase
+    .from('profiles')
+    .select('display_name, username, bio, avatar_url')
+    .eq('username', params.username.toLowerCase())
+    .single()
+  if (!data) return { title: 'Profil · Kapisio' }
+  return {
+    title: `${data.display_name || data.username} (@${data.username}) · Kapisio`,
+    description: data.bio ?? `${data.username} adlı kullanıcının Kapisio profili.`,
+    openGraph: {
+      title: `${data.display_name || data.username} · Kapisio`,
+      description: data.bio ?? `@${data.username} ile düello yap!`,
+      images: data.avatar_url ? [{ url: data.avatar_url }] : [],
+    },
+    twitter: { card: 'summary', title: `${data.display_name || data.username} · Kapisio` },
+  }
 }
 
 export default async function ProfilPage({ params }: Props) {
@@ -35,6 +51,9 @@ export default async function ProfilPage({ params }: Props) {
     { data: achievements },
     { data: recentDuels },
     { data: recentAnswers },
+    { count: followerCount },
+    { count: followingCount },
+    { data: userScenarios },
   ] = await Promise.all([
     supabase.from('duels').select('*', { count: 'exact', head: true })
       .or(`challenger_id.eq.${profile.id},challenged_id.eq.${profile.id}`)
@@ -54,16 +73,33 @@ export default async function ProfilPage({ params }: Props) {
       .limit(20),
     supabase.from('answers').select(`
       id, content, vote_count, created_at,
-      scenario:scenarios(content, active_date)
+      scenario:scenarios(id, content, active_date)
     `)
       .eq('user_id', profile.id)
       .order('vote_count', { ascending: false })
       .limit(10),
+    (supabase.from('followers' as any) as any)
+      .select('id', { count: 'exact', head: true })
+      .eq('following_id', profile.id),
+    (supabase.from('followers' as any) as any)
+      .select('id', { count: 'exact', head: true })
+      .eq('follower_id', profile.id),
+    supabase.from('scenarios')
+      .select('id, content, category, answer_count, created_at')
+      .eq('user_id', profile.id)
+      .eq('is_user_created', true)
+      .eq('is_approved', true)
+      .order('created_at', { ascending: false })
+      .limit(20),
   ])
 
   return (
     <ProfilClient
-      profile={profile}
+      profile={{
+        ...profile,
+        follower_count: followerCount ?? profile.follower_count ?? 0,
+        following_count: followingCount ?? profile.following_count ?? 0,
+      }}
       currentUserId={user?.id}
       isFollowing={isFollowing}
       duelCount={duelCount ?? 0}
@@ -71,6 +107,7 @@ export default async function ProfilPage({ params }: Props) {
       achievements={achievements ?? []}
       recentDuels={recentDuels ?? []}
       recentAnswers={recentAnswers ?? []}
+      userScenarios={userScenarios ?? []}
     />
   )
 }

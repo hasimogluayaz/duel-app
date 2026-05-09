@@ -11,8 +11,20 @@ interface Props { params: { id: string } }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = createClient()
-  const { data } = await supabase.from('scenarios').select('content').eq('id', params.id).single()
-  return { title: data ? `${data.content.slice(0, 60)}... · Kapisio` : 'Senaryo · Kapisio' }
+  const { data } = await supabase.from('scenarios').select('content, answer_count').eq('id', params.id).single()
+  if (!data) return { title: 'Senaryo · Kapisio' }
+  const title = `"${data.content.slice(0, 80)}"${data.content.length > 80 ? '...' : ''}`
+  const desc = `${data.answer_count ?? 0} kişi cevapladı. Sen de cevapla ve düello yap!`
+  return {
+    title: `${title} · Kapisio`,
+    description: desc,
+    openGraph: {
+      title: `Kapisio · Senaryo`,
+      description: `"${data.content.slice(0, 120)}" — ${desc}`,
+      siteName: 'Kapisio',
+    },
+    twitter: { card: 'summary_large_image', title: `Kapisio Senaryosu`, description: desc },
+  }
 }
 
 export default async function ScenarioDetailPage({ params }: Props) {

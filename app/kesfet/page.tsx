@@ -13,6 +13,8 @@ import Link from 'next/link'
 import { Search, Flame, Star, Users, TrendingUp, Swords, MessageCircle, Trophy, Zap } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { getTier } from '@/lib/utils/tier'
+import FollowSuggestions from '@/components/social/FollowSuggestions'
+import TrendingScenarios from '@/components/social/TrendingScenarios'
 
 // ─── Feed Types ───────────────────────────────────────────────────────────────
 type FeedDuel = {
@@ -440,7 +442,19 @@ export default function KesfetPage() {
         </button>
       </div>
 
-      {tab === 'feed' ? <FeedTab /> : tab === 'friends' ? <FriendsTab /> : <UsersTab />}
+      {tab === 'feed' && (
+        <div className="space-y-5">
+          <TrendingScenarios />
+          <FeedTab />
+        </div>
+      )}
+      {tab === 'friends' && <FriendsTab />}
+      {tab === 'users' && (
+        <div className="space-y-5">
+          <FollowSuggestions />
+          <UsersTab />
+        </div>
+      )}
     </div>
   )
 }

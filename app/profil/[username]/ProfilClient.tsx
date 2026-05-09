@@ -14,10 +14,10 @@ import { ACHIEVEMENT_LABELS } from '@/types'
 import {
   Settings, Trophy, Swords, Flame, Star, Calendar, Target,
   TrendingUp, Zap, Crown, MessageCircle, Share2, CheckCircle2,
-  Medal, BarChart3,
+  Medal, BarChart3, Sparkles,
 } from 'lucide-react'
 
-type Tab = 'genel' | 'duellolar' | 'cevaplar' | 'basarimlar'
+type Tab = 'genel' | 'duellolar' | 'cevaplar' | 'senaryolar' | 'basarimlar'
 
 interface Props {
   profile: any
@@ -28,11 +28,13 @@ interface Props {
   achievements: any[]
   recentDuels: any[]
   recentAnswers: any[]
+  userScenarios?: any[]
 }
 
 export default function ProfilClient({
   profile, currentUserId, isFollowing,
   duelCount, winCount, achievements, recentDuels, recentAnswers,
+  userScenarios = [],
 }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('genel')
   const [copied, setCopied] = useState(false)
@@ -59,6 +61,7 @@ export default function ProfilClient({
     { id: 'genel', label: 'Genel', icon: <BarChart3 size={14} /> },
     { id: 'duellolar', label: `Düellolar`, icon: <Swords size={14} /> },
     { id: 'cevaplar', label: 'Cevaplar', icon: <Star size={14} /> },
+    ...(userScenarios.length > 0 ? [{ id: 'senaryolar' as Tab, label: 'Senaryolar', icon: <Sparkles size={14} /> }] : []),
     { id: 'basarimlar', label: `Başarımlar`, icon: <Medal size={14} /> },
   ]
 
@@ -167,14 +170,14 @@ export default function ProfilClient({
 
           {/* ── Followers/Following — Twitter style ── */}
           <div className="flex items-center gap-5 mb-4 text-sm">
-            <button className="hover:underline text-left">
+            <Link href={`/profil/${profile.username}/takip`} className="hover:underline text-left">
               <span className="font-black text-fg">{profile.following_count ?? 0}</span>
               <span className="text-fg-subtle ml-1">Takip</span>
-            </button>
-            <button className="hover:underline text-left">
+            </Link>
+            <Link href={`/profil/${profile.username}/takipciler`} className="hover:underline text-left">
               <span className="font-black text-fg">{profile.follower_count ?? 0}</span>
               <span className="text-fg-subtle ml-1">Takipçi</span>
-            </button>
+            </Link>
             <span>
               <span className="font-black text-fg">{duelCount}</span>
               <span className="text-fg-subtle ml-1">Düello</span>
@@ -345,6 +348,33 @@ export default function ProfilClient({
                 )
               })
             )}
+          </div>
+        )}
+
+        {/* SENARYOLAR TAB */}
+        {activeTab === 'senaryolar' && (
+          <div className="space-y-3">
+            {userScenarios.length === 0 ? (
+              <EmptyState icon={<Sparkles size={28} className="text-fg-subtle opacity-50" />} text="Henüz senaryo oluşturulmadı" />
+            ) : userScenarios.map((s: any) => (
+              <Link key={s.id} href={`/arsiv/${s.id}`}>
+                <Card className="hover:border-purple-500/30 hover:bg-purple-500/5 transition-all cursor-pointer">
+                  <div className="flex items-start justify-between gap-3">
+                    <p className="text-sm text-fg leading-relaxed flex-1">{s.content}</p>
+                    <div className="text-right shrink-0">
+                      <div className="text-sm font-bold text-purple-400">{s.answer_count}</div>
+                      <div className="text-xs text-fg-subtle">cevap</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-xs bg-surface border border-stroke px-2 py-0.5 rounded-full text-fg-subtle">
+                      {s.category}
+                    </span>
+                    <span className="text-xs text-fg-subtle">{new Date(s.created_at).toLocaleDateString('tr-TR')}</span>
+                  </div>
+                </Card>
+              </Link>
+            ))}
           </div>
         )}
 
