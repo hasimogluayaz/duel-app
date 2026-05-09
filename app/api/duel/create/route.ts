@@ -5,6 +5,8 @@ import { sendDuelInviteEmail } from '@/lib/email/resend'
 import { pushToUser } from '@/lib/push/notify'
 import { checkRateLimit } from '@/lib/redis/ratelimit'
 import { checkQuota } from '@/lib/quota/check'
+import { logActivity } from '@/lib/activity/log'
+import { updateWeeklyMission } from '@/lib/missions/weekly'
 
 export async function POST(req: Request) {
   try {
@@ -77,6 +79,11 @@ export async function POST(req: Request) {
       .single()
 
     if (error) return NextResponse.json({ error: 'Düello oluşturulamadı.' }, { status: 500 })
+
+    // Activity log + weekly mission (fire-and-forget)
+    logActivity({ supabase, userId: user.id, type: 'duel_created', targetId: duel.id, targetType: 'duel',
+      data: { challenged_id, scenario_id } }).catch(() => {})
+    updateWeeklyMission(supabase, user.id, 'weekly_duels').catch(() => {})
 
     // Get challenger's profile for notification
     const { data: challenger } = await supabase

@@ -53,10 +53,11 @@ export const POST = withAuth(async (_req, { userId }) => {
     points_awarded: points,
   })
 
-  // Award points
+  // Award points + update streak_count
   await supabase.from('profiles').update({
     total_points: ((profile as any)?.total_points ?? 0) + points,
     weekly_points: ((profile as any)?.weekly_points ?? 0) + points,
+    streak_count: streakDay,
   } as any).eq('id', userId)
 
   // Milestone notification

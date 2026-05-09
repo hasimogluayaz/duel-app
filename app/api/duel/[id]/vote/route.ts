@@ -1,6 +1,7 @@
 import { createApiClient } from '@/lib/supabase/typed'
 import { NextResponse } from 'next/server'
 import { POINTS } from '@/types'
+import { updateWeeklyMission } from '@/lib/missions/weekly'
 
 async function checkVoteRateLimit(supabase: any, userId: string): Promise<boolean> {
   const today = new Date()
@@ -66,6 +67,9 @@ export async function POST(req: Request, { params }: { params: { id: string } })
       .insert({ duel_id: duel.id, voter_id: user.id, voted_for_id } as any)
 
     if (voteError) return NextResponse.json({ error: 'Oy kaydedilemedi.' }, { status: 500 })
+
+    // Update weekly mission for voter
+    updateWeeklyMission(supabase, user.id, 'weekly_votes').catch(() => {})
 
     // Add points to voted-for user AND to voter
     const [{ data: votedProfile }, { data: voterProfile }] = await Promise.all([
