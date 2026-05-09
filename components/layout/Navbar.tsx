@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
 import { NotificationBell } from './NotificationBell'
+import { MessageBell } from './MessageBell'
 import { formatPoints } from '@/lib/utils/formatting'
 import { getTier } from '@/lib/utils/tier'
 import type { Profile } from '@/types'
@@ -105,6 +106,7 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
 
           {profile ? (
             <>
+              <MessageBell userId={profile.id} />
               <NotificationBell userId={profile.id} />
               <div className="hidden md:flex items-center">
                 <UserMenu profile={profile} onSignOut={handleSignOut} />

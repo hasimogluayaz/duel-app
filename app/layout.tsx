@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import './globals.css'
 import { Navbar } from '@/components/layout/Navbar'
 import { BottomNav } from '@/components/layout/BottomNav'
+import OnboardingModal from '@/components/onboarding/OnboardingModal'
 import { Footer } from '@/components/layout/Footer'
 import { CookieBanner } from '@/components/layout/CookieBanner'
 import { ToastProvider } from '@/components/ui/Toast'
@@ -82,6 +83,7 @@ export default async function RootLayout({
             <ServiceWorkerRegister />
             <InstallPrompt />
             {initialProfile && <PushSubscriber />}
+            {initialProfile && <OnboardingModal />}
             <Suspense fallback={null}><PostHogPageView /></Suspense>
             <Analytics />
           </ToastProvider>

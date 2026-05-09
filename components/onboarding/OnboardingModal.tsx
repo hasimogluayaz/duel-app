@@ -1,193 +1,119 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/Button'
-import { Star, ChevronRight, CheckCircle, Gift } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { ChevronRight, X } from 'lucide-react'
 
 const STEPS = [
   {
-    emoji: '✍️',
-    title: 'Senaryoya Cevap Ver',
-    description: 'Her gün yeni bir senaryo yayınlanır. Cevabını yaz ve +5 puan kazan. Özgün, eğlenceli ya da dürüst — seçim senin!',
-    tip: '+5 puan · Her gün yeni senaryo',
-    color: 'from-violet-600/20 to-purple-600/10',
-    border: 'border-purple-500/30',
-  },
-  {
     emoji: '⚔️',
-    title: 'Düelloya Gir',
-    description: 'Cevabını yazdıktan sonra birini düelloya çağır ya da rastgele rakip bul. En çok oy toplayan kazanır — AI da karar verir!',
-    tip: '+50 puan kazanırsın · AI hakem',
-    color: 'from-pink-600/20 to-rose-600/10',
-    border: 'border-pink-500/30',
+    title: "Kapisio'ya Hoş Geldin!",
+    desc: 'Her gün yeni bir senaryo gelir. Cevapla, düello yap, kazan!',
+    color: 'from-violet-600 to-purple-600',
   },
   {
-    emoji: '⚖️',
-    title: 'Karar Ver',
-    description: 'Başkalarının cevaplarını karşılaştır, daha iyisini seç. Her oyun topluluk sıralamasını şekillendirir. Tinder gibi ama fikirlerle!',
-    tip: 'Karar Ver moduna git →',
-    color: 'from-cyan-600/20 to-blue-600/10',
-    border: 'border-cyan-500/30',
+    emoji: '📝',
+    title: 'Cevapla',
+    desc: 'Günlük senaryoyu oku ve bakış açını paylaş. Ne kadar özgün olursan o kadar çok oy alırsın.',
+    color: 'from-blue-600 to-cyan-600',
   },
   {
-    emoji: '🔥',
-    title: 'Seriyi Kır',
-    description: 'Her gün oynayarak seri yap. 7 günlük seri +100, 30 günlük seri +500 puan getirir. Streakini kaybetmemek için dondurma hakkın var!',
-    tip: 'Streak = daha çok puan',
-    color: 'from-amber-600/20 to-orange-600/10',
-    border: 'border-amber-500/30',
+    emoji: '⚡',
+    title: 'Düello Yap',
+    desc: 'Aynı senaryoyu yanıtlayan birini seç, düelloya çağır. Topluluk oylasın, AI karar versin!',
+    color: 'from-pink-600 to-rose-600',
   },
   {
     emoji: '🏆',
-    title: 'Liderliğe Çık',
-    description: 'Haftalık ve tüm zamanların liderlik tablosunda yerini al. Başarımlar kazan, tier yükselt ve unvan kazan!',
-    tip: 'Haftalık · Aylık · Arkadaşlar sıralaması',
-    color: 'from-green-600/20 to-emerald-600/10',
-    border: 'border-green-500/30',
+    title: 'Puan Kazan',
+    desc: 'Düello kazan, oy al, günlük giriş yap — puan topla, liderlik tablosuna çık!',
+    color: 'from-amber-500 to-orange-500',
   },
 ]
 
-interface Props {
-  userId: string
-  isNewUser: boolean
-}
-
-export function OnboardingModal({ userId, isNewUser }: Props) {
-  const [open, setOpen] = useState(false)
+export default function OnboardingModal() {
+  const [visible, setVisible] = useState(false)
   const [step, setStep] = useState(0)
-  const [closing, setClosing] = useState(false)
-  const [referralCode, setReferralCode] = useState('')
-  const [referralStatus, setReferralStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-  const [referralMsg, setReferralMsg] = useState('')
-  const supabase = createClient()
+  const router = useRouter()
 
   useEffect(() => {
-    if (isNewUser) {
-      const t = setTimeout(() => setOpen(true), 800)
-      return () => clearTimeout(t)
+    const seen = localStorage.getItem('kapisio_onboarded')
+    if (!seen) {
+      const timer = setTimeout(() => setVisible(true), 800)
+      return () => clearTimeout(timer)
     }
-  }, [isNewUser])
+  }, [])
 
-  async function applyReferral() {
-    if (!referralCode.trim()) { finish(); return }
-    setReferralStatus('loading')
-    const res = await fetch('/api/referral', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: referralCode.trim() }),
-    })
-    const data = await res.json()
-    if (res.ok) {
-      setReferralStatus('success')
-      setReferralMsg(`+${data.reward} puan kazandın! 🎉`)
-      setTimeout(() => finish(), 1500)
-    } else {
-      setReferralStatus('error')
-      setReferralMsg(data.error ?? 'Geçersiz kod.')
-    }
+  function dismiss() {
+    localStorage.setItem('kapisio_onboarded', '1')
+    setVisible(false)
   }
 
-  async function finish() {
-    setClosing(true)
-    await supabase.from('profiles')
-      .update({ onboarding_completed: true, onboarding_done: true } as any)
-      .eq('id', userId)
-    setTimeout(() => { setOpen(false); setClosing(false) }, 300)
+  function finish() {
+    localStorage.setItem('kapisio_onboarded', '1')
+    setVisible(false)
+    router.push('/oyun')
   }
 
-  function next() {
-    if (step < STEPS.length - 1) setStep(s => s + 1)
-    else finish()
-  }
+  if (!visible) return null
 
-  if (!open) return null
-
-  const isLastStep = step === STEPS.length - 1
   const current = STEPS[step]
+  const isLast = step === STEPS.length - 1
 
   return (
-    <div className={`fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/70 backdrop-blur-sm transition-opacity ${closing ? 'opacity-0' : 'opacity-100'}`}>
-      <div className="relative w-full max-w-sm bg-bg border border-stroke rounded-2xl shadow-2xl overflow-hidden">
-
-        {/* Progress bar */}
-        <div className="h-1 bg-stroke">
-          <div
-            className="h-full bg-gradient-to-r from-violet-500 to-purple-500 transition-all duration-500"
-            style={{ width: `${((step + 1) / (STEPS.length + 1)) * 100}%` }}
-          />
-        </div>
-
-        {/* Progress dots */}
-        <div className="flex items-center justify-center gap-1.5 pt-4 pb-1">
-          {STEPS.map((_, i) => (
-            <div
-              key={i}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                i === step ? 'w-6 bg-purple-500' : i < step ? 'w-1.5 bg-purple-500/40' : 'w-1.5 bg-stroke'
-              }`}
-            />
-          ))}
-          {/* referral dot */}
-          <div className={`h-1.5 rounded-full transition-all duration-300 ${
-            step > STEPS.length - 1 ? 'w-6 bg-green-500' : 'w-1.5 bg-stroke'
-          }`} />
-        </div>
-
-        {/* Content */}
-        <div className={`bg-gradient-to-br ${current.color} border-b ${current.border} mx-4 mt-3 rounded-2xl p-6 text-center`}>
-          <div className="text-5xl mb-3">{current.emoji}</div>
-          <h2 className="text-xl font-black text-fg mb-2">{current.title}</h2>
-          <p className="text-sm text-fg-muted leading-relaxed">{current.description}</p>
-          <div className="mt-3 inline-flex items-center gap-1 text-xs text-purple-400 bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20 font-semibold">
-            <Star size={10} className="fill-purple-400" />
-            {current.tip}
-          </div>
-        </div>
-
-        {/* Referral prompt on last step */}
-        {isLastStep && (
-          <div className="mx-4 mt-3 bg-green-500/8 border border-green-500/20 rounded-xl p-3">
-            <div className="flex items-center gap-2 mb-2">
-              <Gift size={14} className="text-green-400" />
-              <p className="text-xs font-semibold text-green-400">Davet Kodu Var Mı?</p>
-            </div>
-            <div className="flex gap-2">
-              <input
-                value={referralCode}
-                onChange={e => setReferralCode(e.target.value.toUpperCase())}
-                placeholder="ABCD1234"
-                maxLength={12}
-                className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-white placeholder-white/30 font-mono uppercase focus:outline-none focus:border-green-500/40"
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+      <div className="w-full max-w-sm bg-[#14142a] border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
+        <div className={`bg-gradient-to-br ${current.color} p-8 text-center relative`}>
+          <button
+            onClick={dismiss}
+            className="absolute top-3 right-3 w-7 h-7 rounded-full bg-black/20 flex items-center justify-center text-white/60 hover:text-white transition-colors"
+          >
+            <X size={14} />
+          </button>
+          <div className="text-6xl mb-2">{current.emoji}</div>
+          <div className="flex justify-center gap-1.5 mt-4">
+            {STEPS.map((_, i) => (
+              <span
+                key={i}
+                className={`h-1.5 rounded-full transition-all ${
+                  i === step ? 'w-6 bg-white' : 'w-1.5 bg-white/30'
+                }`}
               />
-              <button
-                onClick={applyReferral}
-                disabled={referralStatus === 'loading' || referralStatus === 'success'}
-                className="bg-green-600 hover:bg-green-500 disabled:opacity-50 text-white rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors"
-              >
-                {referralStatus === 'loading' ? '...' : referralStatus === 'success' ? '✓' : 'Uygula'}
-              </button>
-            </div>
-            {referralMsg && (
-              <p className={`text-xs mt-1.5 ${referralStatus === 'success' ? 'text-green-400' : 'text-red-400'}`}>
-                {referralMsg}
-              </p>
-            )}
+            ))}
           </div>
-        )}
+        </div>
 
-        {/* Actions */}
-        <div className="p-4 flex flex-col gap-2">
-          <Button onClick={isLastStep ? (referralCode ? applyReferral : finish) : next} className="w-full btn-gradient">
-            {!isLastStep ? (
-              <>Devam <ChevronRight size={15} /></>
-            ) : (
-              <><CheckCircle size={15} /> Başlayalım! 🚀</>
+        <div className="p-6">
+          <h2 className="text-xl font-black text-white mb-2">{current.title}</h2>
+          <p className="text-white/60 text-sm leading-relaxed mb-6">{current.desc}</p>
+
+          <div className="flex gap-3">
+            {step > 0 && (
+              <button
+                onClick={() => setStep(s => s - 1)}
+                className="flex-1 py-2.5 rounded-xl border border-white/10 text-white/50 hover:text-white text-sm font-medium transition-colors"
+              >
+                Geri
+              </button>
             )}
-          </Button>
-          {step < STEPS.length - 1 && (
-            <button onClick={finish} className="text-xs text-fg-subtle hover:text-fg transition-colors text-center py-1">
-              Atla
+            <button
+              onClick={isLast ? finish : () => setStep(s => s + 1)}
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r ${current.color} text-white text-sm font-bold transition-opacity hover:opacity-90`}
+            >
+              {isLast ? (
+                <span>Hadi Oynayalım 🚀</span>
+              ) : (
+                <><span>Devam</span><ChevronRight size={14} /></>
+              )}
+            </button>
+          </div>
+
+          {step === 0 && (
+            <button
+              onClick={dismiss}
+              className="w-full mt-3 text-xs text-white/30 hover:text-white/50 transition-colors"
+            >
+              Tanıtımı atla
             </button>
           )}
         </div>
