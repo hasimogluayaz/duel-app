@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createApiClient } from '@/lib/supabase/typed'
 import { withAuth } from '@/lib/api/auth'
+import { logActivity } from '@/lib/activity/log'
+import { updateWeeklyMission } from '@/lib/missions/weekly'
 
 const STREAK_REWARDS: Record<number, number> = {
   1: 5, 2: 5, 3: 15, 4: 10, 5: 10, 6: 10, 7: 100,
@@ -67,6 +69,10 @@ export const POST = withAuth(async (_req, { userId }) => {
       data: { streak: streakDay, points },
     }).catch(() => {})
   }
+
+  // Activity + weekly mission (fire-and-forget)
+  logActivity({ supabase, userId, type: 'streak_milestone', data: { streak: streakDay, points } }).catch(() => {})
+  updateWeeklyMission(supabase, userId, 'weekly_checkins').catch(() => {})
 
   return NextResponse.json({
     success: true,

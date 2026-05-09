@@ -8,6 +8,7 @@ export const metadata: Metadata = { title: 'Senaryo Arşivi · Kapisio' }
 
 const CATEGORIES = [
   { value: 'all', label: 'Tümü' },
+  { value: 'editor', label: '⭐ Editör' },
   { value: 'genel', label: '🌍 Genel' },
   { value: 'ask', label: '❤️ Aşk' },
   { value: 'is', label: '💼 İş' },
@@ -16,18 +17,21 @@ const CATEGORIES = [
   { value: 'teknoloji', label: '💻 Teknoloji' },
   { value: 'dunya', label: '🌏 Dünya' },
   { value: 'mizah', label: '😂 Mizah' },
+  { value: 'felsefe', label: '🤔 Felsefe' },
 ]
 
 export default async function ArsivPage({
   searchParams,
 }: {
-  searchParams: { category?: string; sort?: string }
+  searchParams: { category?: string; sort?: string; filter?: string }
 }) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const category = searchParams.category && searchParams.category !== 'all' ? searchParams.category : null
+  const category = searchParams.category && !['all', 'editor'].includes(searchParams.category) ? searchParams.category : null
+  const isEditorPick = searchParams.category === 'editor'
   const sort = searchParams.sort ?? 'recent'
+  const filter = searchParams.filter ?? 'all' // 'all' | 'unanswered' | 'answered'
 
   let query = supabase
     .from('scenarios')
@@ -38,6 +42,7 @@ export default async function ArsivPage({
     .eq('is_approved', true)
 
   if (category) query = query.eq('category', category)
+  if (isEditorPick) query = (query as any).eq('is_editor_pick', true)
 
   if (sort === 'popular') {
     query = query.order('answer_count', { ascending: false })
@@ -58,10 +63,17 @@ export default async function ArsivPage({
     answeredIds = (answers ?? []).map((a: any) => a.scenario_id)
   }
 
-  const enriched = (scenarios ?? []).map((s: any) => ({
+  let enriched = (scenarios ?? []).map((s: any) => ({
     ...s,
     answered: answeredIds.includes(s.id),
   }))
+
+  // Client-side filter by answered/unanswered
+  if (filter === 'unanswered' && user) {
+    enriched = enriched.filter((s: any) => !s.answered)
+  } else if (filter === 'answered' && user) {
+    enriched = enriched.filter((s: any) => s.answered)
+  }
 
   return (
     <ArsivClient
@@ -69,6 +81,7 @@ export default async function ArsivPage({
       categories={CATEGORIES}
       activeCategory={searchParams.category ?? 'all'}
       activeSort={sort}
+      activeFilter={filter}
       userId={user?.id ?? null}
     />
   )

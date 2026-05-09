@@ -5,6 +5,8 @@ import { ApiError } from '@/lib/api/errors'
 import { parseBody, requireUuid, validateAnswerContent } from '@/lib/api/validate'
 import { POINTS } from '@/types'
 import { checkQuota } from '@/lib/quota/check'
+import { logActivity } from '@/lib/activity/log'
+import { updateWeeklyMission } from '@/lib/missions/weekly'
 
 export const POST = withAuth(async (req, { userId }) => {
   const supabase = createApiClient()
@@ -52,11 +54,14 @@ export const POST = withAuth(async (req, { userId }) => {
     throw new ApiError('Cevap kaydedilemedi.', 500, 'DB_ERROR')
   }
 
-  // Update profile + missions (non-critical, fire-and-forget)
+  // Update profile + missions + activity (non-critical, fire-and-forget)
   updateProfileAsync(supabase, userId).catch((e) =>
     console.error('[answer] Profile update failed:', e),
   )
   updateMissionProgress(supabase, userId, 'answer_scenario').catch(() => {})
+  logActivity({ supabase, userId, type: 'answer_posted', targetId: (answer as any).id, targetType: 'answer',
+    data: { scenario_id: scenarioId } }).catch(() => {})
+  updateWeeklyMission(supabase, userId, 'weekly_answers').catch(() => {})
 
   return NextResponse.json({ answer })
 })

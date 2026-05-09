@@ -1,6 +1,7 @@
 import { createApiClient } from '@/lib/supabase/typed'
 import { NextResponse } from 'next/server'
 import { pushToUser } from '@/lib/push/notify'
+import { logActivity } from '@/lib/activity/log'
 
 export async function POST(req: Request) {
   try {
@@ -60,6 +61,10 @@ export async function POST(req: Request) {
           weekly_points: (p.weekly_points ?? 0) + 10,
         }).eq('id', user.id)
       }
+
+      // Activity log
+      logActivity({ supabase, userId: user.id, type: 'followed', targetId: following_id, targetType: 'profile',
+        data: { target_username: followerProfile?.username } }).catch(() => {})
 
       return NextResponse.json({ following: true })
     }

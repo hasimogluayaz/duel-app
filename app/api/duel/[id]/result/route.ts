@@ -4,6 +4,8 @@ import { generateVerdict } from '@/lib/anthropic/verdict'
 import { POINTS } from '@/types'
 import { pushToUser } from '@/lib/push/notify'
 import { sendDuelResultEmail } from '@/lib/email/resend'
+import { logActivity, awardSeasonPoints } from '@/lib/activity/log'
+import { updateWeeklyMission } from '@/lib/missions/weekly'
 
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   try {
@@ -96,6 +98,21 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     }
 
     const duelUrl = `${process.env.NEXT_PUBLIC_APP_URL}/duel/${duel.share_token}`
+
+    // Activity feed + season points (fire-and-forget)
+    const scenarioSnippet = (duel.scenario?.content ?? '').slice(0, 60)
+    Promise.all([
+      logActivity({ supabase, userId: winnerId, type: 'duel_won', targetId: duel.id, targetType: 'duel',
+        data: { scenario_snippet: scenarioSnippet, duel_id: duel.id } }),
+      logActivity({ supabase, userId: loserId, type: 'duel_lost', targetId: duel.id, targetType: 'duel',
+        data: { scenario_snippet: scenarioSnippet, duel_id: duel.id } }),
+      awardSeasonPoints(supabase, winnerId, POINTS.DUEL_WIN),
+      awardSeasonPoints(supabase, loserId, Math.floor(POINTS.DUEL_LOSE / 2)),
+      // Weekly missions
+      updateWeeklyMission(supabase, winnerId, 'weekly_duels'),
+      updateWeeklyMission(supabase, winnerId, 'weekly_wins'),
+      updateWeeklyMission(supabase, loserId, 'weekly_duels'),
+    ]).catch(() => {})
 
     // In-app notifications
     await Promise.all([

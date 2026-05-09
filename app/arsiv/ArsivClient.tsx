@@ -27,6 +27,7 @@ interface Props {
   categories: Category[]
   activeCategory: string
   activeSort: string
+  activeFilter?: string
   userId: string | null
 }
 
@@ -35,6 +36,7 @@ export default function ArsivClient({
   categories,
   activeCategory,
   activeSort,
+  activeFilter = 'all',
   userId,
 }: Props) {
   const router = useRouter()
@@ -106,12 +108,12 @@ export default function ArsivClient({
             ))}
           </div>
 
-          {/* Sort */}
-          <div className="flex gap-2 pb-3">
+          {/* Sort + filter row */}
+          <div className="flex items-center gap-2 pb-3 flex-wrap">
             {(['recent', 'popular'] as const).map((s) => (
               <button
                 key={s}
-                onClick={() => navigate({ category: activeCategory, sort: s })}
+                onClick={() => navigate({ category: activeCategory, sort: s, filter: activeFilter })}
                 className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
                   activeSort === s
                     ? 'bg-white/15 text-white'
@@ -121,6 +123,28 @@ export default function ArsivClient({
                 {s === 'recent' ? '🕐 Yeni' : '🔥 Popüler'}
               </button>
             ))}
+            {userId && (
+              <>
+                <div className="w-px h-4 bg-white/10 mx-1" />
+                {([
+                  { v: 'all', label: 'Hepsi' },
+                  { v: 'unanswered', label: '📭 Cevaplanmamış' },
+                  { v: 'answered', label: '✅ Cevapladım' },
+                ] as const).map(f => (
+                  <button
+                    key={f.v}
+                    onClick={() => navigate({ category: activeCategory, sort: activeSort, filter: f.v })}
+                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
+                      activeFilter === f.v
+                        ? 'bg-violet-600/40 text-violet-200'
+                        : 'text-white/40 hover:text-white/60'
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </>
+            )}
           </div>
         </div>
       </div>
