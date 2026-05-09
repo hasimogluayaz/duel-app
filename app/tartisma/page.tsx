@@ -27,6 +27,7 @@ export default async function TartismaPage() {
     .select('id, content, vote_count, user_id, mode_metadata, profiles:profiles(username, display_name, avatar_url)')
     .eq('scenario_id', scenario.id)
     .eq('mode', 'debate')
+    .eq('is_hidden', false)
     .order('vote_count', { ascending: false })
     .limit(20) : { data: [] }
 
@@ -72,6 +73,7 @@ export default async function TartismaPage() {
       communityAnswers={(communityAnswers ?? []) as any[]}
       forCount={forCount}
       againstCount={againstCount}
+      debateQuestion={(scenario as any)?.debate_question ?? null}
     />
   )
 }

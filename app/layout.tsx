@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import './globals.css'
 import { Navbar } from '@/components/layout/Navbar'
 import { BottomNav } from '@/components/layout/BottomNav'
+import { CreateFAB } from '@/components/layout/CreateFAB'
 import OnboardingModal from '@/components/onboarding/OnboardingModal'
 import { Footer } from '@/components/layout/Footer'
 import { CookieBanner } from '@/components/layout/CookieBanner'
@@ -79,6 +80,7 @@ export default async function RootLayout({
             </main>
             <Footer />
             <BottomNav userId={initialProfile?.id ?? null} username={initialProfile?.username ?? null} />
+            {initialProfile && <CreateFAB />}
             <CookieBanner />
             <ServiceWorkerRegister />
             <InstallPrompt />

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { Avatar } from '@/components/ui/Avatar'
 import { useToast } from '@/components/ui/Toast'
 import { Sparkles, Star, Lock, CheckCircle, Flame, ThumbsUp, ThumbsDown } from 'lucide-react'
+import { ContentMenu } from '@/components/ui/ContentMenu'
 import type { Profile, Scenario, Answer } from '@/types'
 import { ModeSwitcher } from '@/components/modes/ModeSwitcher'
 
@@ -18,9 +19,10 @@ interface Props {
   communityAnswers: any[]
   forCount: number
   againstCount: number
+  debateQuestion: string | null
 }
 
-export function TartismaClient({ scenario, profile, userAnswer: initialAnswer, userId, communityAnswers, forCount, againstCount }: Props) {
+export function TartismaClient({ scenario, profile, userAnswer: initialAnswer, userId, communityAnswers, forCount, againstCount, debateQuestion }: Props) {
   const router = useRouter()
   const toast = useToast()
   const isGuest = !userId
@@ -112,7 +114,12 @@ export function TartismaClient({ scenario, profile, userAnswer: initialAnswer, u
                 {new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })}
               </span>
             </div>
-            <p className="text-lg font-bold text-fg leading-snug">{scenario.content}</p>
+            <p className="text-lg font-bold text-fg leading-snug">
+              {debateQuestion ?? scenario.content}
+            </p>
+            {debateQuestion && (
+              <p className="text-xs text-fg-subtle mt-1.5 italic">{scenario.content}</p>
+            )}
 
             {/* Live side distribution */}
             {total > 0 && (
@@ -281,11 +288,20 @@ export function TartismaClient({ scenario, profile, userAnswer: initialAnswer, u
                               </span>
                             )}
                             {a.vote_count > 0 && (
-                              <span className="ml-auto flex items-center gap-1 text-xs text-amber-400 font-semibold">
+                              <span className="flex items-center gap-1 text-xs text-amber-400 font-semibold">
                                 <Star size={10} className="fill-amber-400" />
                                 {a.vote_count}
                               </span>
                             )}
+                            <span className="ml-auto">
+                              <ContentMenu
+                                targetType="answer"
+                                targetId={a.id}
+                                userId={userId}
+                                isOwn={a.user_id === userId}
+                                size={13}
+                              />
+                            </span>
                           </div>
                           <p className="text-sm text-fg-muted leading-relaxed line-clamp-3">{a.content}</p>
                         </div>

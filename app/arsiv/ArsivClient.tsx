@@ -83,7 +83,7 @@ export default function ArsivClient({
             {userId && (
               <button
                 onClick={() => setShowCreate(true)}
-                className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
+                className="flex items-center gap-2 btn-gradient text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
               >
                 <span>✍️</span>
                 <span className="hidden sm:inline">Senaryo Oluştur</span>
@@ -99,7 +99,7 @@ export default function ArsivClient({
                 onClick={() => navigate({ category: cat.value, sort: activeSort })}
                 className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
                   activeCategory === cat.value
-                    ? 'bg-violet-600 text-white'
+                    ? 'bg-primary text-white'
                     : 'bg-surface-2 text-fg-muted hover:bg-stroke'
                 }`}
               >
@@ -136,7 +136,7 @@ export default function ArsivClient({
                     onClick={() => navigate({ category: activeCategory, sort: activeSort, filter: f.v })}
                     className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
                       activeFilter === f.v
-                        ? 'bg-violet-600/40 text-violet-300'
+                        ? 'bg-primary/30 text-primary'
                         : 'text-fg-subtle hover:text-fg-muted'
                     }`}
                   >
@@ -279,7 +279,7 @@ function CreateScenarioModal({
                 onClick={() => setCategory(cat.value)}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
                   category === cat.value
-                    ? 'bg-violet-600 text-white'
+                    ? 'bg-primary text-white'
                     : 'bg-surface-2 text-fg-muted hover:bg-stroke'
                 }`}
               >
@@ -293,7 +293,7 @@ function CreateScenarioModal({
           <button
             type="submit"
             disabled={loading || content.trim().length < 20}
-            className="w-full py-3 bg-violet-600 hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors"
+            className="w-full py-3 btn-gradient disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors"
           >
             {loading ? 'Yayınlanıyor...' : 'Yayınla'}
           </button>

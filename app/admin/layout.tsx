@@ -6,12 +6,13 @@ import { useEffect, useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
-import { LayoutDashboard, Users, ShieldAlert, FileText, Mail, LogOut, Menu, X, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, Users, ShieldAlert, FileText, Mail, LogOut, Menu, X, ChevronRight, Flag } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 const NAV = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/kullanicilar', label: 'Kullanıcılar', icon: Users },
+  { href: '/admin/raporlar', label: 'Raporlar', icon: Flag },
   { href: '/admin/icerik', label: 'İçerik', icon: ShieldAlert },
   { href: '/admin/senaryolar', label: 'Senaryolar', icon: FileText },
   { href: '/admin/mesajlar', label: 'İletişim', icon: Mail },

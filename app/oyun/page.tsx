@@ -40,6 +40,7 @@ export default async function OyunPage() {
     .from('answers')
     .select('id, content, vote_count, user_id, profiles:profiles(username, display_name, avatar_url)')
     .eq('scenario_id', scenario.id)
+    .eq('is_hidden', false)
     .order('vote_count', { ascending: false })
     .limit(5) : { data: [] }
 

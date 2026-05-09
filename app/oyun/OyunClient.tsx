@@ -16,6 +16,7 @@ import {
   Star, Send, Sparkles, Users, Lock,
   ChevronRight, Zap, Target, LogIn, ExternalLink, MoreHorizontal, Flame
 } from 'lucide-react'
+import { ContentMenu } from '@/components/ui/ContentMenu'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ModeSwitcher } from '@/components/modes/ModeSwitcher'
@@ -394,11 +395,20 @@ export function OyunClient({
                           {userTier && <span className={`text-xs ${userTier.color}`}>{userTier.emoji}</span>}
                           {isOwn && <span className="text-xs bg-violet-500/15 text-violet-400 px-1.5 py-0.5 rounded-full font-medium">Sen</span>}
                           {(a.vote_count ?? 0) > 0 && (
-                            <span className="ml-auto flex items-center gap-0.5 text-xs text-amber-400 font-semibold">
+                            <span className="flex items-center gap-0.5 text-xs text-amber-400 font-semibold">
                               <Star size={10} className="fill-amber-400" />
                               {a.vote_count}
                             </span>
                           )}
+                          <span className="ml-auto">
+                            <ContentMenu
+                              targetType="answer"
+                              targetId={a.id}
+                              userId={userId}
+                              isOwn={isOwn}
+                              size={13}
+                            />
+                          </span>
                         </div>
                         <p className="text-sm text-fg-muted leading-relaxed">{a.content}</p>
                         {!isOwn && !shouldBlur && userAnswer && p?.id && (

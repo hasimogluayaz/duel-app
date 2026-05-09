@@ -13,7 +13,7 @@ import { MessageBell } from './MessageBell'
 import { formatPoints } from '@/lib/utils/formatting'
 import { getTier } from '@/lib/utils/tier'
 import type { Profile } from '@/types'
-import { Swords, Menu, X, Trophy, User, Settings, LogOut, Sun, Moon, Star, Flame, Shield, Search, Bookmark, Medal } from 'lucide-react'
+import { Swords, Menu, X, Trophy, User, Settings, LogOut, Sun, Moon, Star, Flame, Shield, Search, Bookmark, Medal, Plus } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import Image from 'next/image'
 
@@ -106,6 +106,13 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
 
           {profile ? (
             <>
+              <Link
+                href="/senaryo-olustur"
+                className="hidden md:flex items-center gap-1.5 text-xs font-semibold btn-gradient px-3 py-1.5 rounded-xl text-white"
+              >
+                <Plus size={13} />
+                Senaryo
+              </Link>
               <MessageBell userId={profile.id} />
               <NotificationBell userId={profile.id} />
               <div className="hidden md:flex items-center">

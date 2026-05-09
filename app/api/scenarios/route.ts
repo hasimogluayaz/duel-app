@@ -5,7 +5,8 @@ import { ApiError } from '@/lib/api/errors'
 import { parseBody } from '@/lib/api/validate'
 import { checkQuota } from '@/lib/quota/check'
 
-const CATEGORIES = ['genel', 'ask', 'is', 'aile', 'sosyal', 'teknoloji', 'dunya', 'mizah'] as const
+const CATEGORIES = ['genel', 'ask', 'is', 'aile', 'sosyal', 'teknoloji', 'dunya', 'mizah', 'felsefe', 'kariyer', 'etik', 'tartisma', 'spor'] as const
+const SCENARIO_TYPES = ['scenario', 'debate', 'emoji', 'character'] as const
 const MIN_CONTENT_LEN = 20
 const MAX_CONTENT_LEN = 280
 
@@ -17,14 +18,19 @@ export const GET = optionalAuth(async (req, { userId }) => {
   const limit = Math.min(Number(url.searchParams.get('limit') ?? 20), 50)
   const sort = url.searchParams.get('sort') ?? 'recent' // recent | popular
   const editorPick = url.searchParams.get('editor_pick') === 'true'
+  const userCreatedOnly = url.searchParams.get('user_created') === 'true'
 
   let query = supabase
     .from('scenarios')
     .select(`
-      id, content, category, active_date, answer_count, created_at, is_user_created,
+      id, content, category, active_date, answer_count, comment_count, generated_at, is_user_created, tags, upvotes,
       author:profiles!scenarios_user_id_fkey(username, display_name, avatar_url)
     `)
     .eq('is_approved', true)
+
+  if (userCreatedOnly) {
+    query = query.eq('is_user_created', true)
+  }
 
   if (category && CATEGORIES.includes(category as typeof CATEGORIES[number])) {
     query = query.eq('category', category)
@@ -35,13 +41,13 @@ export const GET = optionalAuth(async (req, { userId }) => {
   }
 
   if (cursor) {
-    query = query.lt('created_at', cursor)
+    query = query.lt('generated_at', cursor)
   }
 
   if (sort === 'popular') {
     query = query.order('answer_count', { ascending: false })
   } else {
-    query = query.order('created_at', { ascending: false })
+    query = query.order('generated_at', { ascending: false })
   }
 
   const { data, error } = await query.limit(limit)
@@ -69,7 +75,7 @@ export const GET = optionalAuth(async (req, { userId }) => {
   }))
 
   const nextCursor = data && data.length === limit
-    ? data[data.length - 1].created_at
+    ? data[data.length - 1].generated_at
     : null
 
   return NextResponse.json({ scenarios, nextCursor })
@@ -77,7 +83,13 @@ export const GET = optionalAuth(async (req, { userId }) => {
 
 export const POST = withAuth(async (req, { userId }) => {
   const supabase = createApiClient()
-  const body = await parseBody<{ content?: unknown; category?: unknown }>(req)
+  const body = await parseBody<{
+    content?: unknown
+    category?: unknown
+    tags?: unknown
+    scenario_type?: unknown
+    debate_question?: unknown
+  }>(req)
 
   const content = String(body.content ?? '').trim()
   if (content.length < MIN_CONTENT_LEN) {
@@ -92,6 +104,21 @@ export const POST = withAuth(async (req, { userId }) => {
     throw new ApiError('Geçersiz kategori.', 400, 'VALIDATION')
   }
 
+  const scenarioType = String(body.scenario_type ?? 'scenario')
+  if (!SCENARIO_TYPES.includes(scenarioType as typeof SCENARIO_TYPES[number])) {
+    throw new ApiError('Geçersiz senaryo türü.', 400, 'VALIDATION')
+  }
+
+  const rawTags = Array.isArray(body.tags) ? body.tags : []
+  const tags = rawTags
+    .map((t: unknown) => String(t).trim().toLowerCase().replace(/\s+/g, '-'))
+    .filter((t: string) => t.length > 0 && t.length <= 30)
+    .slice(0, 5)
+
+  const debateQuestion = scenarioType === 'debate'
+    ? String(body.debate_question ?? '').trim().slice(0, 280) || null
+    : null
+
   // Quota check (tier-based daily limit)
   await checkQuota(supabase, userId, 'scenarios_per_day')
 
@@ -101,9 +128,12 @@ export const POST = withAuth(async (req, { userId }) => {
       content,
       category,
       user_id: userId,
+      author_id: userId,
       is_user_created: true,
-      is_approved: true,
-    })
+      is_approved: false,
+      tags,
+      debate_question: debateQuestion,
+    } as any)
     .select(`
       id, content, category, answer_count, created_at, is_user_created,
       author:profiles!scenarios_user_id_fkey(username, display_name, avatar_url)

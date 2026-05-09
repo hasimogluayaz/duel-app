@@ -1,7 +1,7 @@
 import { createApiClient } from '@/lib/supabase/typed'
 import { NextResponse } from 'next/server'
 
-const VALID_TYPES = ['answer', 'duel', 'comment', 'profile'] as const
+const VALID_TYPES = ['answer', 'duel', 'comment', 'profile', 'scenario'] as const
 const VALID_REASONS = ['spam', 'hate_speech', 'inappropriate', 'harassment', 'other'] as const
 
 export async function POST(req: Request) {

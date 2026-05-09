@@ -81,7 +81,7 @@ export default function ProfilClient({
     { id: 'genel', label: 'Genel' },
     { id: 'duellolar', label: 'Düellolar' },
     { id: 'cevaplar', label: 'Cevaplar' },
-    ...(userScenarios.length > 0 ? [{ id: 'senaryolar' as Tab, label: 'Senaryolar' }] : []),
+    ...(userScenarios.length > 0 || isOwnProfile ? [{ id: 'senaryolar' as Tab, label: 'Senaryolar' }] : []),
     { id: 'basarimlar', label: 'Başarımlar' },
     { id: 'istatistik', label: 'İstatistik' },
     { id: 'aktivite', label: 'Aktivite' },
@@ -494,9 +494,20 @@ export default function ProfilClient({
 
         {/* SENARYOLAR TAB */}
         {activeTab === 'senaryolar' && (
-          <div className="space-y-2">
+          <div className="space-y-3">
+            {isOwnProfile && (
+              <Link href="/senaryo-olustur" className="flex items-center gap-3 p-3.5 rounded-xl border-2 border-dashed border-stroke hover:border-fg/30 hover:bg-surface transition-all group">
+                <div className="w-8 h-8 rounded-lg bg-surface-2 border border-stroke flex items-center justify-center shrink-0">
+                  <Sparkles size={14} className="text-fg-subtle" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-fg">Senaryo Oluştur</p>
+                  <p className="text-xs text-fg-subtle">Topluluğa kendi soruну sun — +30 puan</p>
+                </div>
+              </Link>
+            )}
             {userScenarios.length === 0 ? (
-              <EmptyState icon={<Sparkles size={22} />} text="Henüz senaryo yok" />
+              !isOwnProfile && <EmptyState icon={<Sparkles size={22} />} text="Henüz senaryo yok" />
             ) : userScenarios.map((s: any) => (
               <Link key={s.id} href={`/arsiv/${s.id}`}>
                 <div className="border border-stroke rounded-xl p-4 bg-surface hover:bg-surface-2 transition-colors cursor-pointer">

@@ -25,7 +25,8 @@
       "Bash(git clean *)",
       "Bash(grep -v \"^$\")",
       "Bash(npx vercel *)",
-      "Bash(mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\app\\\\api\\\\scenarios\" && mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\app\\\\api\\\\missions\" && mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\app\\\\arsiv\" && mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\app\\\\arsiv\\\\[id]\" && mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\components\\\\missions\")"
+      "Bash(mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\app\\\\api\\\\scenarios\" && mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\app\\\\api\\\\missions\" && mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\app\\\\arsiv\" && mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\app\\\\arsiv\\\\[id]\" && mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\components\\\\missions\")",
+      "Bash(mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\pensive-newton-351e35\\\\app\\\\api\\\\scenarios\\\\[id]\")"
     ]
   }
 }

@@ -10,12 +10,13 @@ import { Spinner } from '@/components/ui/Spinner'
 import { formatPoints, timeAgo } from '@/lib/utils/formatting'
 import type { Profile } from '@/types'
 import Link from 'next/link'
-import { Search, Flame, Star, Users, TrendingUp, Swords, MessageCircle, Trophy, Zap, Layers, FileText } from 'lucide-react'
+import { Search, Flame, Star, Users, TrendingUp, Swords, MessageCircle, Trophy, FileText, Plus } from 'lucide-react'
 import BookmarkButton from '@/components/bookmarks/BookmarkButton'
 import { cn } from '@/lib/utils/cn'
 import { getTier } from '@/lib/utils/tier'
 import FollowSuggestions from '@/components/social/FollowSuggestions'
 import TrendingScenarios from '@/components/social/TrendingScenarios'
+import ScenarioCard from '@/components/scenarios/ScenarioCard'
 
 // ─── Feed Types ───────────────────────────────────────────────────────────────
 type FeedDuel = {
@@ -425,70 +426,117 @@ function FeedTab() {
 
 // ─── Friends Feed Tab ─────────────────────────────────────────────────────────
 function FriendsTab() {
+  const [tab, setTab] = useState<'senaryolar' | 'cevaplar'>('senaryolar')
+  const [scenarios, setScenarios] = useState<any[]>([])
   const [answers, setAnswers] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/feed/friends')
-      .then((r) => r.json())
-      .then((d) => {
-        setAnswers(d.answers ?? [])
-        setLoading(false)
-      })
-      .catch(() => setLoading(false))
+    setLoading(true)
+    Promise.all([
+      fetch('/api/feed/friends').then(r => r.json()),
+      fetch('/api/scenarios?user_created=true&sort=recent&limit=20').then(r => r.json()),
+    ]).then(([friendsData, scenariosData]) => {
+      setAnswers(friendsData.answers ?? [])
+      setScenarios(scenariosData.scenarios ?? [])
+      setLoading(false)
+    }).catch(() => setLoading(false))
   }, [])
 
   if (loading) return <div className="flex justify-center py-20"><Spinner size="lg" /></div>
 
-  if (answers.length === 0) {
+  const hasContent = answers.length > 0 || scenarios.length > 0
+
+  if (!hasContent) {
     return (
       <div className="text-center py-16">
         <Users size={28} className="text-fg-subtle opacity-25 mx-auto mb-3" />
         <p className="text-fg-muted font-semibold mb-1">Takip ettiğin kimse yok</p>
         <p className="text-fg-subtle text-sm">
-          Oyuncular sekmesinden insanları takip et — cevaplarını burada gör.
+          Arama sekmesinden insanları takip et — paylaşımlarını burada gör.
         </p>
+        <Link href="/kesfet" onClick={() => {}} className="inline-block mt-4 text-sm font-semibold btn-gradient text-white px-4 py-2 rounded-xl">
+          Kişi Keşfet
+        </Link>
       </div>
     )
   }
 
   return (
-    <div className="space-y-3">
-      {answers.map((a: any) => (
-        <div key={a.id} className="border border-stroke rounded-xl p-4 bg-surface hover:bg-surface-2 transition-colors">
-          {a.scenario_content && (
-            <p className="text-xs text-fg-subtle italic mb-2 border-l-2 border-stroke pl-2 line-clamp-2">
-              {a.scenario_content}
-            </p>
-          )}
-          <div className="flex items-start gap-3">
-            <Link href={`/profil/${a.username}`}>
-              <Avatar src={a.avatar_url} username={a.username} size="sm" />
-            </Link>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <Link href={`/profil/${a.username}`} className="text-sm font-semibold text-fg hover:text-fg-muted transition-colors">
-                  {a.display_name || a.username}
-                </Link>
-                <span className="text-xs text-fg-subtle">@{a.username}</span>
-                <span className="text-xs text-fg-subtle">· {timeAgo(a.created_at)}</span>
-              </div>
-              <p className="text-sm text-fg-muted leading-relaxed">{a.content}</p>
-              <div className="flex items-center gap-3 mt-2">
-                <span className="flex items-center gap-1 text-xs text-fg-subtle">
-                  <Star size={11} className="text-amber-400" />
-                  {a.vote_count} oy
-                </span>
-                {a.scenario_id && (
-                  <Link href={`/arsiv/${a.scenario_id}`} className="text-xs text-fg-subtle hover:text-fg transition-colors">
-                    Cevaplara bak →
-                  </Link>
-                )}
-              </div>
-            </div>
+    <div className="space-y-4">
+      {/* Sub-tabs */}
+      <div className="flex border-b border-stroke">
+        {([
+          { id: 'senaryolar', label: 'Senaryolar' },
+          { id: 'cevaplar', label: 'Cevaplar' },
+        ] as const).map(t => (
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={cn(
+              'flex-1 py-2.5 text-sm font-semibold border-b-2 transition-colors -mb-px',
+              tab === t.id ? 'border-fg text-fg' : 'border-transparent text-fg-subtle hover:text-fg-muted'
+            )}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'senaryolar' && (
+        scenarios.length === 0 ? (
+          <p className="text-center text-sm text-fg-subtle py-12">Takip ettiğin kimse senaryo paylaşmamış.</p>
+        ) : (
+          <div className="space-y-3">
+            {scenarios.map((s: any) => (
+              <ScenarioCard key={s.id} scenario={s} userId={null} mode="feed" />
+            ))}
           </div>
-        </div>
-      ))}
+        )
+      )}
+
+      {tab === 'cevaplar' && (
+        answers.length === 0 ? (
+          <p className="text-center text-sm text-fg-subtle py-12">Takip ettiğin kimse henüz cevap vermemiş.</p>
+        ) : (
+          <div className="space-y-3">
+            {answers.map((a: any) => (
+              <div key={a.id} className="border border-stroke rounded-2xl p-4 bg-surface hover:bg-surface-2 transition-colors">
+                {a.scenario_content && (
+                  <p className="text-xs text-fg-subtle italic mb-3 border-l-2 border-stroke pl-2 line-clamp-2">
+                    {a.scenario_content}
+                  </p>
+                )}
+                <div className="flex items-start gap-3">
+                  <Link href={`/profil/${a.username}`}>
+                    <Avatar src={a.avatar_url} username={a.username} size="sm" />
+                  </Link>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Link href={`/profil/${a.username}`} className="text-sm font-semibold text-fg hover:text-primary transition-colors">
+                        {a.display_name || a.username}
+                      </Link>
+                      <span className="text-xs text-fg-subtle">· {timeAgo(a.created_at)}</span>
+                    </div>
+                    <p className="text-sm text-fg-muted leading-relaxed">{a.content}</p>
+                    <div className="flex items-center gap-3 mt-2">
+                      <span className="flex items-center gap-1 text-xs text-fg-subtle">
+                        <Star size={11} className="text-amber-400" />
+                        {a.vote_count} oy
+                      </span>
+                      {a.scenario_id && (
+                        <Link href={`/arsiv/${a.scenario_id}`} className="text-xs text-fg-subtle hover:text-fg transition-colors">
+                          Cevaplara bak →
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      )}
     </div>
   )
 }
@@ -612,25 +660,130 @@ function CategoriesTab() {
   )
 }
 
+// ─── Community Scenarios Tab ──────────────────────────────────────────────────
+function SenaryolarTab() {
+  const [scenarios, setScenarios] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [sort, setSort] = useState<'recent' | 'popular'>('recent')
+  const [hasMore, setHasMore] = useState(true)
+  const cursorRef = useRef<string | null>(null)
+
+  const load = useCallback(async (s: 'recent' | 'popular', reset = false) => {
+    if (reset) { setLoading(true); cursorRef.current = null }
+    else setLoadingMore(true)
+
+    const params = new URLSearchParams({ sort: s, limit: '15', user_created: 'true' })
+    if (!reset && cursorRef.current) params.set('cursor', cursorRef.current)
+
+    const res = await fetch(`/api/scenarios?${params}`)
+    const json = await res.json()
+    const items: any[] = json.scenarios ?? []
+
+    if (reset) setScenarios(items)
+    else setScenarios(prev => [...prev, ...items])
+
+    setHasMore(items.length === 15)
+    if (items.length > 0) cursorRef.current = items[items.length - 1].generated_at
+
+    setLoading(false)
+    setLoadingMore(false)
+  }, [])
+
+  useEffect(() => { load(sort, true) }, [sort, load])
+
+  return (
+    <div className="space-y-4">
+      {/* Create CTA */}
+      <Link
+        href="/senaryo-olustur"
+        className="flex items-center gap-3 p-4 rounded-2xl border-2 border-dashed border-stroke hover:border-fg/30 hover:bg-surface transition-all group"
+      >
+        <div className="w-10 h-10 rounded-xl bg-surface-2 flex items-center justify-center shrink-0 group-hover:bg-surface border border-stroke">
+          <Plus size={18} className="text-fg-subtle" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-fg">Senaryo Oluştur</p>
+          <p className="text-xs text-fg-subtle mt-0.5">Topluluğa kendi senaryonu sun — +30 puan</p>
+        </div>
+      </Link>
+
+      {/* Sort toggle */}
+      <div className="flex border-b border-stroke">
+        {(['recent', 'popular'] as const).map(s => (
+          <button
+            key={s}
+            onClick={() => setSort(s)}
+            className={cn(
+              'flex-1 py-2.5 text-sm font-semibold border-b-2 transition-colors -mb-px',
+              sort === s ? 'border-fg text-fg' : 'border-transparent text-fg-subtle hover:text-fg-muted'
+            )}
+          >
+            {s === 'recent' ? 'Yeni' : 'Popüler'}
+          </button>
+        ))}
+      </div>
+
+      {loading ? (
+        <div className="flex justify-center py-20"><Spinner size="lg" /></div>
+      ) : scenarios.length === 0 ? (
+        <div className="text-center py-16">
+          <FileText size={28} className="text-fg-subtle opacity-25 mx-auto mb-3" />
+          <p className="text-fg-muted font-semibold mb-1">Henüz senaryo yok</p>
+          <p className="text-fg-subtle text-sm">İlk senaryoyu sen oluştur!</p>
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-col gap-3">
+            {scenarios.map((s: any) => (
+              <ScenarioCard key={s.id} scenario={s} userId={null} mode="feed" />
+            ))}
+          </div>
+
+          {hasMore && (
+            <button
+              onClick={() => load(sort)}
+              disabled={loadingMore}
+              className="w-full py-3 rounded-xl border border-stroke text-sm text-fg-subtle hover:bg-surface-2 hover:text-fg transition-all disabled:opacity-50"
+            >
+              {loadingMore ? <Spinner size="sm" className="mx-auto" /> : 'Daha fazla yükle'}
+            </button>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function KesfetPage() {
-  const [tab, setTab] = useState<'feed' | 'friends' | 'users' | 'kategoriler'>('feed')
+  const [tab, setTab] = useState<'feed' | 'senaryolar' | 'friends' | 'ara' | 'kategoriler'>('feed')
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-8">
 
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-black text-fg">Keşfet</h1>
-        <p className="text-sm text-fg-subtle mt-1">Topluluk akışı ve oyuncular</p>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-black text-fg">Keşfet</h1>
+          <p className="text-sm text-fg-subtle mt-0.5">Topluluk akışı ve senaryolar</p>
+        </div>
+        <Link
+          href="/senaryo-olustur"
+          className="flex items-center gap-1.5 btn-gradient text-sm font-semibold px-3 py-2 rounded-xl text-white"
+        >
+          <Plus size={15} />
+          <span className="hidden sm:inline">Senaryo</span>
+        </Link>
       </div>
 
       {/* Tabs */}
       <div className="flex border-b border-stroke mb-6 overflow-x-auto scrollbar-none">
         {([
           { id: 'feed',        label: 'Akış' },
+          { id: 'senaryolar',  label: 'Senaryolar' },
           { id: 'friends',     label: 'Arkadaşlar' },
-          { id: 'users',       label: 'Ara' },
+          { id: 'ara',         label: 'Ara' },
           { id: 'kategoriler', label: 'Kategoriler' },
         ] as const).map(t => (
           <button
@@ -654,11 +807,12 @@ export default function KesfetPage() {
           <FeedTab />
         </div>
       )}
+      {tab === 'senaryolar' && <SenaryolarTab />}
       {tab === 'friends' && <FriendsTab />}
-      {tab === 'users' && (
+      {tab === 'ara' && (
         <div className="space-y-5">
           <FollowSuggestions />
-          <UsersTab />
+          <SearchTab />
         </div>
       )}
       {tab === 'kategoriler' && <CategoriesTab />}

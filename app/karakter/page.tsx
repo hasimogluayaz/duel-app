@@ -27,6 +27,7 @@ export default async function KarakterPage() {
     .select('id, content, vote_count, user_id, mode_metadata, profiles:profiles(username, display_name, avatar_url)')
     .eq('scenario_id', scenario.id)
     .eq('mode', 'character')
+    .eq('is_hidden', false)
     .order('vote_count', { ascending: false })
     .limit(20) : { data: [] }
 
