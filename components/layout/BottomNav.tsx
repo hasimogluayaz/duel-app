@@ -4,7 +4,10 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { Swords, Compass, BookOpen, Bell, User } from 'lucide-react'
+import {
+  Home, Compass, Plus, User, MoreHorizontal,
+  MessageCircle, BookOpen, Bookmark, Trophy, Settings, Bell, ChevronRight,
+} from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 interface Props {
@@ -12,15 +15,109 @@ interface Props {
   username?: string | null
 }
 
+// ──────────────────────────────────────────────────────
+// "Daha" bottom sheet
+// ──────────────────────────────────────────────────────
+function MoreSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+  if (!open) return null
+
+  const items = [
+    { href: '/bildirimler', label: 'Bildirimler',    hint: 'Yeni bildirimler',        icon: Bell },
+    { href: '/mesajlar',    label: 'Mesajlar',       hint: 'Özel mesajlar',            icon: MessageCircle },
+    { href: '/arsiv',       label: 'Arşiv',          hint: 'Geçmiş senaryolar',        icon: BookOpen },
+    { href: '/kayitlarim',  label: 'Kaydettiklerim', hint: 'Kaydettiğin içerikler',    icon: Bookmark },
+    { href: '/liderlik',    label: 'Liderlik',       hint: 'En iyi oyuncular',         icon: Trophy },
+    { href: '/profil/ayarlar', label: 'Ayarlar',     hint: 'Hesap ve tercihler',       icon: Settings },
+  ]
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex flex-col justify-end"
+      onClick={onClose}
+    >
+      <div className="absolute inset-0 bg-black/45" />
+      <div
+        className="relative bg-surface border-t border-stroke rounded-t-[20px] pb-6 animate-slide-up"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Drag handle */}
+        <div className="w-10 h-1 bg-stroke-strong rounded-full mx-auto mt-3 mb-3" />
+        <p className="px-5 pb-2 text-[11px] font-semibold text-fg-subtle uppercase tracking-widest">Menü</p>
+
+        {items.map(({ href, label, hint, icon: Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            onClick={onClose}
+            className="flex items-center gap-3 px-5 py-3 hover:bg-surface-2 transition-colors"
+          >
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary flex-none">
+              <Icon size={18} />
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="text-[14.5px] font-semibold text-fg">{label}</div>
+              <div className="text-[12px] text-fg-subtle mt-0.5">{hint}</div>
+            </div>
+            <ChevronRight size={15} className="text-fg-subtle flex-none" />
+          </Link>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ──────────────────────────────────────────────────────
+// Bottom nav tab (non-FAB)
+// ──────────────────────────────────────────────────────
+function Tab({
+  label, active, badge, children, onClick, href,
+}: {
+  label: string
+  active: boolean
+  badge?: number
+  children: React.ReactNode
+  onClick?: () => void
+  href?: string
+}) {
+  const cls = cn(
+    'flex-1 flex flex-col items-center justify-center gap-[3px] transition-colors relative h-full',
+    active ? 'text-primary' : 'text-fg-subtle'
+  )
+  const inner = (
+    <>
+      {active && (
+        <span className="absolute top-0 left-1/2 -translate-x-1/2 w-7 h-0.5 bg-primary rounded-full" />
+      )}
+      <div className="relative">
+        {children}
+        {badge && badge > 0 ? (
+          <span className="absolute -top-1 -right-2 min-w-[14px] h-[14px] px-0.5 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center border border-surface">
+            {badge > 9 ? '9+' : badge}
+          </span>
+        ) : null}
+      </div>
+      <span className={cn('text-[10px]', active ? 'font-semibold' : 'font-medium')}>{label}</span>
+    </>
+  )
+
+  if (href) {
+    return <Link href={href} className={cls}>{inner}</Link>
+  }
+  return <button onClick={onClick} className={cls}>{inner}</button>
+}
+
+// ──────────────────────────────────────────────────────
+// Main export
+// ──────────────────────────────────────────────────────
 export function BottomNav({ userId, username }: Props) {
   const pathname = usePathname()
   const supabase = createClient()
   const [unreadCount, setUnreadCount] = useState(0)
+  const [moreOpen, setMoreOpen] = useState(false)
 
   useEffect(() => {
     if (!userId) return
 
-    // Load initial unread count
     supabase
       .from('notifications')
       .select('id', { count: 'exact', head: true })
@@ -28,7 +125,6 @@ export function BottomNav({ userId, username }: Props) {
       .eq('is_read', false)
       .then((res: { count: number | null }) => setUnreadCount(res.count ?? 0))
 
-    // Realtime updates
     const channel = supabase
       .channel(`bottom-nav-notif:${userId}`)
       .on(
@@ -40,7 +136,6 @@ export function BottomNav({ userId, username }: Props) {
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
         () => {
-          // Re-fetch to stay accurate on bulk mark-as-read
           supabase
             .from('notifications')
             .select('id', { count: 'exact', head: true })
@@ -54,77 +149,64 @@ export function BottomNav({ userId, username }: Props) {
     return () => { supabase.removeChannel(channel) }
   }, [userId])
 
-  const tabs = [
-    {
-      href: '/oyun',
-      label: 'Oyna',
-      icon: Swords,
-      match: (p: string) => p.startsWith('/oyun') || p.startsWith('/duel'),
-    },
-    {
-      href: '/kesfet',
-      label: 'Keşfet',
-      icon: Compass,
-      match: (p: string) => p.startsWith('/kesfet'),
-    },
-    {
-      href: '/arsiv',
-      label: 'Arşiv',
-      icon: BookOpen,
-      match: (p: string) => p.startsWith('/arsiv'),
-    },
-    {
-      href: '/bildirimler',
-      label: 'Bildirimler',
-      icon: Bell,
-      match: (p: string) => p.startsWith('/bildirimler'),
-      badge: unreadCount,
-    },
-    {
-      href: username ? `/profil/${username}` : '/giris',
-      label: 'Profil',
-      icon: User,
-      match: (p: string) => p.startsWith('/profil') || p.startsWith('/basarimlar') || p.startsWith('/kayitlarim'),
-    },
-  ]
+  const isMoreActive = [
+    '/arsiv', '/mesajlar', '/kayitlarim', '/liderlik', '/bildirimler', '/profil/ayarlar', '/basarimlar',
+  ].some(p => pathname.startsWith(p))
 
-  // Hide bottom nav on auth pages and admin
   const hideOn = ['/giris', '/kayit', '/sifre-sifirla', '/admin']
   if (hideOn.some(p => pathname.startsWith(p))) return null
 
+  const isHome    = pathname.startsWith('/oyun') || pathname.startsWith('/duel')
+  const isKesfet  = pathname.startsWith('/kesfet')
+  const isProfil  = pathname.startsWith('/profil') && !pathname.startsWith('/profil/ayarlar')
+
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/90 backdrop-blur-xl border-t border-stroke safe-bottom">
-      <div className="flex items-stretch h-16">
-        {tabs.map(tab => {
-          const Icon = tab.icon
-          const active = tab.match(pathname)
-          return (
+    <>
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-xl border-t border-stroke">
+        <div className="flex items-stretch h-16 px-1">
+
+          {/* Anasayfa */}
+          <Tab label="Anasayfa" active={isHome} href="/oyun">
+            <Home size={21} strokeWidth={isHome ? 2.4 : 1.8} />
+          </Tab>
+
+          {/* Keşfet */}
+          <Tab label="Keşfet" active={isKesfet} href="/kesfet">
+            <Compass size={21} strokeWidth={isKesfet ? 2.4 : 1.8} />
+          </Tab>
+
+          {/* FAB — center raised button */}
+          <div className="flex-1 flex items-center justify-center">
             <Link
-              key={tab.href}
-              href={tab.href}
-              className={cn(
-                'flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative',
-                active ? 'text-primary' : 'text-fg-subtle hover:text-fg-muted'
-              )}
+              href="/senaryo-olustur"
+              aria-label="Senaryo oluştur"
+              className="flex items-center justify-center rounded-2xl shadow-lg active:scale-95 transition-transform"
+              style={{
+                width: 52,
+                height: 52,
+                background: 'linear-gradient(135deg, #5188fa 0%, #2a6cf0 60%, #1442a8 100%)',
+                boxShadow: '0 6px 18px rgba(42,108,240,0.38)',
+                transform: 'translateY(-13px)',
+              }}
             >
-              <div className="relative">
-                <Icon size={20} strokeWidth={active ? 2.5 : 1.8} />
-                {tab.badge && tab.badge > 0 ? (
-                  <span className="absolute -top-1 -right-1.5 min-w-4 h-4 px-0.5 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">
-                    {tab.badge > 9 ? '9+' : tab.badge}
-                  </span>
-                ) : null}
-              </div>
-              <span className={cn('text-[10px] font-medium', active ? 'text-primary' : '')}>
-                {tab.label}
-              </span>
-              {active && (
-                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full" />
-              )}
+              <Plus size={24} className="text-white" strokeWidth={2.5} />
             </Link>
-          )
-        })}
-      </div>
-    </nav>
+          </div>
+
+          {/* Profil */}
+          <Tab label="Profil" active={isProfil} href={username ? `/profil/${username}` : '/giris'}>
+            <User size={21} strokeWidth={isProfil ? 2.4 : 1.8} />
+          </Tab>
+
+          {/* Daha */}
+          <Tab label="Daha" active={isMoreActive} badge={isMoreActive ? 0 : unreadCount} onClick={() => setMoreOpen(true)}>
+            <MoreHorizontal size={21} strokeWidth={isMoreActive ? 2.4 : 1.8} />
+          </Tab>
+
+        </div>
+      </nav>
+
+      <MoreSheet open={moreOpen} onClose={() => setMoreOpen(false)} />
+    </>
   )
 }

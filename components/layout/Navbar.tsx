@@ -55,8 +55,8 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
     return (
       <>
         {/* Mobile top bar: logo + actions (lg:hidden) */}
-        <header className="lg:hidden sticky top-0 z-40 border-b border-stroke bg-surface/90 backdrop-blur-md">
-          <div className="flex items-center justify-between px-4 h-14">
+        <header className="lg:hidden sticky top-0 z-40 border-b border-stroke bg-surface/92 backdrop-blur-md">
+          <div className="flex items-center justify-between px-4 h-[54px]">
             <Link href="/oyun" className="flex items-center gap-2">
               <Image src="/logo.png" alt="Kapisio" width={28} height={28} className="w-7 h-7 object-contain" />
               <span className="font-black text-lg text-gradient">Kapisio</span>
@@ -142,7 +142,7 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
         </header>
 
         {/* Desktop top bar: very minimal — just theme + notifications (behind left sidebar) */}
-        <header className="hidden lg:flex fixed top-0 left-64 right-0 xl:right-80 z-20 border-b border-stroke bg-surface/80 backdrop-blur-md h-14 items-center justify-end px-4 gap-1">
+        <header className="hidden lg:flex fixed top-0 left-64 right-0 xl:right-80 z-20 border-b border-stroke bg-surface/85 backdrop-blur-md h-14 items-center justify-end px-4 gap-1">
           {mounted && (
             <button
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
