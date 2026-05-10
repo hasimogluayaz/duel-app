@@ -3,10 +3,10 @@ import { createApiClient } from '@/lib/supabase/typed'
 import { withAuth, optionalAuth } from '@/lib/api/auth'
 import { ApiError } from '@/lib/api/errors'
 
-interface Ctx { params: { id: string } }
-
-export const GET = optionalAuth(async (_req, _auth, ctx: Ctx) => {
+export const GET = optionalAuth(async (_req, { params }) => {
   const supabase = createApiClient()
+  const id = params?.id
+  if (!id) throw new ApiError('Senaryo ID gerekli.', 400, 'VALIDATION')
 
   const { data: scenario, error } = await supabase
     .from('scenarios')
@@ -15,7 +15,7 @@ export const GET = optionalAuth(async (_req, _auth, ctx: Ctx) => {
       is_user_created, is_approved, tags, debate_question, scenario_type,
       author:profiles!scenarios_user_id_fkey(username, display_name, avatar_url)
     `)
-    .eq('id', ctx.params.id)
+    .eq('id', id)
     .eq('is_approved', true)
     .single()
 
@@ -23,13 +23,15 @@ export const GET = optionalAuth(async (_req, _auth, ctx: Ctx) => {
   return NextResponse.json({ scenario })
 })
 
-export const DELETE = withAuth(async (_req, { userId }, ctx: Ctx) => {
+export const DELETE = withAuth(async (_req, { userId, params }) => {
   const supabase = createApiClient()
+  const id = params?.id
+  if (!id) throw new ApiError('Senaryo ID gerekli.', 400, 'VALIDATION')
 
   const { data: scenario } = await supabase
     .from('scenarios')
     .select('user_id, is_user_created')
-    .eq('id', ctx.params.id)
+    .eq('id', id)
     .single()
 
   if (!scenario) throw new ApiError('Senaryo bulunamadı.', 404, 'NOT_FOUND')
@@ -48,6 +50,6 @@ export const DELETE = withAuth(async (_req, { userId }, ctx: Ctx) => {
     throw new ApiError('Admin senaryoları silinemez.', 403, 'FORBIDDEN')
   }
 
-  await supabase.from('scenarios').delete().eq('id', ctx.params.id)
+  await supabase.from('scenarios').delete().eq('id', id)
   return NextResponse.json({ success: true })
 })

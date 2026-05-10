@@ -4,11 +4,10 @@ import { withAuth, optionalAuth } from '@/lib/api/auth'
 import { ApiError } from '@/lib/api/errors'
 import { parseBody } from '@/lib/api/validate'
 
-interface Ctx { params: { id: string } }
-
-export const GET = optionalAuth(async (req, _auth, ctx: Ctx) => {
+export const GET = optionalAuth(async (req, { params }) => {
   const supabase = createApiClient()
-  const scenarioId = ctx.params.id
+  const scenarioId = params?.id
+  if (!scenarioId) throw new ApiError('Senaryo ID gerekli.', 400, 'VALIDATION')
 
   const { data, error } = await (supabase as any)
     .from('scenario_comments')
@@ -29,9 +28,11 @@ export const GET = optionalAuth(async (req, _auth, ctx: Ctx) => {
   return NextResponse.json({ comments: data ?? [] })
 })
 
-export const POST = withAuth(async (req, { userId }, ctx: Ctx) => {
+export const POST = withAuth(async (req, { userId, params }) => {
   const supabase = createApiClient()
-  const scenarioId = ctx.params.id
+  const scenarioId = params?.id
+  if (!scenarioId) throw new ApiError('Senaryo ID gerekli.', 400, 'VALIDATION')
+
   const body = await parseBody<{ content?: unknown; parent_id?: unknown }>(req)
 
   const content = String(body.content ?? '').trim()

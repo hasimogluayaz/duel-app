@@ -110,6 +110,35 @@ export async function sendDuelResultEmail(opts: {
   })
 }
 
+export async function sendWeeklyDigestEmail(opts: {
+  to: string
+  username: string
+  scenarios: Array<{ content: string; answer_count: number; id: string }>
+}) {
+  const resend = getResend()
+  if (!resend) return
+  const scenarioItems = opts.scenarios.map((s, i) =>
+    `<div style="margin-bottom:12px;padding:12px;background:#0d0b1e;border:1px solid #2d2b4e;border-radius:10px">
+      <span style="font-size:12px;color:#a78bfa;font-weight:700;">#${i + 1}</span>
+      <p style="font-size:14px;font-weight:600;margin:4px 0;">"${s.content.slice(0, 100)}${s.content.length > 100 ? '...' : ''}"</p>
+      <a href="${APP_URL}/arsiv/${s.id}" style="font-size:12px;color:#6366f1;text-decoration:none;">${s.answer_count} cevap →</a>
+    </div>`
+  ).join('')
+  return resend.emails.send({
+    from: FROM,
+    to: opts.to,
+    subject: '📊 Bu haftanın en çok konuşulan senaryoları',
+    html: base(`
+      <div class="card">
+        <p style="font-size:22px;font-weight:900;margin:0 0 16px">Bu hafta neler konuşuldu? 🗳️</p>
+        <p style="color:#94a3b8;font-size:14px;margin:0 0 20px">Merhaba ${opts.username}! İşte bu haftanın en popüler senaryoları:</p>
+        ${scenarioItems}
+        <a href="${APP_URL}/kesfet" class="btn">Tümünü Keşfet →</a>
+      </div>
+    `),
+  })
+}
+
 export async function sendStreakReminderEmail(opts: {
   to: string
   username: string

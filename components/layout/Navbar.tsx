@@ -33,7 +33,7 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: string, session: Session | null) => {
       if (session?.user) {
         supabase.from('profiles').select('*').eq('id', session.user.id).single()
-          .then(({ data }) => setProfile(data))
+          .then(({ data }: { data: Profile | null }) => setProfile(data))
       } else {
         setProfile(null)
       }
