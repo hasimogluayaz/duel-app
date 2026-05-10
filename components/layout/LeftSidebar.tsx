@@ -10,8 +10,8 @@ import { cn } from '@/lib/utils/cn'
 import { createClient } from '@/lib/supabase/client'
 import type { Profile } from '@/types'
 import {
-  Home, Compass, Swords, Bell, User, Settings,
-  BookOpen, Trophy, Plus, LogOut, MessageCircle, Bookmark,
+  Home, Compass, Bell, User, Settings,
+  BookOpen, Trophy, Plus, LogOut, MessageCircle, Bookmark, Flame,
 } from 'lucide-react'
 
 interface Props {
@@ -19,12 +19,12 @@ interface Props {
 }
 
 const NAV = [
-  { href: '/oyun',        label: 'Anasayfa',    icon: Home },
-  { href: '/kesfet',      label: 'Keşfet',      icon: Compass },
-  { href: '/arsiv',       label: 'Arşiv',        icon: BookOpen },
-  { href: '/bildirimler', label: 'Bildirimler',  icon: Bell },
-  { href: '/mesajlar',    label: 'Mesajlar',     icon: MessageCircle },
-  { href: '/liderlik',    label: 'Liderlik',     icon: Trophy },
+  { href: '/oyun',        label: 'Anasayfa',      icon: Home },
+  { href: '/kesfet',      label: 'Keşfet',        icon: Compass },
+  { href: '/bildirimler', label: 'Bildirimler',    icon: Bell },
+  { href: '/mesajlar',    label: 'Mesajlar',       icon: MessageCircle },
+  { href: '/liderlik',    label: 'Liderlik',       icon: Trophy },
+  { href: '/arsiv',       label: 'Arşiv',          icon: BookOpen },
   { href: '/kayitlarim',  label: 'Kaydettiklerim', icon: Bookmark },
 ]
 
@@ -47,13 +47,13 @@ export function LeftSidebar({ profile }: Props) {
       <div className="flex flex-col h-full px-3 py-4">
 
         {/* Logo */}
-        <Link href="/oyun" className="flex items-center gap-3 px-3 py-2 rounded-2xl hover:bg-surface-2 transition-colors mb-2 group">
-          <Image src="/logo.png" alt="Kapisio" width={32} height={32} className="w-8 h-8 object-contain" />
-          <span className="font-black text-xl text-gradient">Kapisio</span>
+        <Link href="/oyun" className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-surface-2 transition-colors mb-3 group">
+          <Image src="/logo.png" alt="Kapisio" width={30} height={30} className="w-7 h-7 object-contain" />
+          <span className="font-black text-[19px] text-gradient tracking-tight">Kapisio</span>
         </Link>
 
         {/* Nav items */}
-        <nav className="flex flex-col gap-0.5 mt-1">
+        <nav className="flex flex-col gap-0.5">
           {NAV.map(({ href, label, icon: Icon }) => {
             const active = pathname === href || pathname.startsWith(href + '/')
             return (
@@ -61,13 +61,17 @@ export function LeftSidebar({ profile }: Props) {
                 key={href}
                 href={href}
                 className={cn(
-                  'flex items-center gap-4 px-3 py-3 rounded-2xl text-[15px] font-medium transition-colors',
+                  'flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-[14.5px] font-medium transition-all',
                   active
-                    ? 'text-fg font-bold'
+                    ? 'bg-primary/8 text-[#1442a8] font-semibold'
                     : 'text-fg-muted hover:text-fg hover:bg-surface-2'
                 )}
               >
-                <Icon size={22} strokeWidth={active ? 2.5 : 1.8} className={active ? 'text-primary' : ''} />
+                <Icon
+                  size={20}
+                  strokeWidth={active ? 2.3 : 1.8}
+                  className={active ? 'text-primary' : ''}
+                />
                 <span>{label}</span>
               </Link>
             )
@@ -76,21 +80,31 @@ export function LeftSidebar({ profile }: Props) {
           <Link
             href={`/profil/${profile.username}`}
             className={cn(
-              'flex items-center gap-4 px-3 py-3 rounded-2xl text-[15px] font-medium transition-colors',
-              pathname.startsWith('/profil')
-                ? 'text-fg font-bold'
+              'flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-[14.5px] font-medium transition-all',
+              pathname.startsWith('/profil') && !pathname.startsWith('/profil/ayarlar')
+                ? 'bg-primary/8 text-[#1442a8] font-semibold'
                 : 'text-fg-muted hover:text-fg hover:bg-surface-2'
             )}
           >
-            <User size={22} strokeWidth={pathname.startsWith('/profil') ? 2.5 : 1.8} className={pathname.startsWith('/profil') ? 'text-primary' : ''} />
+            <User
+              size={20}
+              strokeWidth={pathname.startsWith('/profil') && !pathname.startsWith('/profil/ayarlar') ? 2.3 : 1.8}
+              className={pathname.startsWith('/profil') && !pathname.startsWith('/profil/ayarlar') ? 'text-primary' : ''}
+            />
             <span>Profil</span>
           </Link>
 
           <Link
             href="/profil/ayarlar"
-            className="flex items-center gap-4 px-3 py-3 rounded-2xl text-[15px] font-medium text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors"
+            className={cn(
+              'flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-[14.5px] font-medium transition-all',
+              pathname.startsWith('/profil/ayarlar')
+                ? 'bg-primary/8 text-[#1442a8] font-semibold'
+                : 'text-fg-muted hover:text-fg hover:bg-surface-2'
+            )}
           >
-            <Settings size={22} strokeWidth={1.8} />
+            <Settings size={20} strokeWidth={pathname.startsWith('/profil/ayarlar') ? 2.3 : 1.8}
+              className={pathname.startsWith('/profil/ayarlar') ? 'text-primary' : ''} />
             <span>Ayarlar</span>
           </Link>
         </nav>
@@ -98,26 +112,39 @@ export function LeftSidebar({ profile }: Props) {
         {/* Create button */}
         <Link
           href="/senaryo-olustur"
-          className="mt-4 mx-1 flex items-center justify-center gap-2 btn-gradient rounded-full py-3.5 text-[15px] font-bold text-white transition-all"
+          className="mt-4 mx-1 flex items-center justify-center gap-2 btn-gradient rounded-full py-3 text-[14.5px] font-semibold text-white transition-all"
         >
-          <Plus size={18} strokeWidth={2.5} />
+          <Plus size={17} strokeWidth={2.5} />
           Senaryo Oluştur
         </Link>
 
-        {/* Spacer */}
         <div className="flex-1" />
 
+        {/* Streak card */}
+        {profile.streak_count > 0 && (
+          <div className="mx-1 mb-3 px-3 py-3 rounded-xl"
+            style={{ background: 'linear-gradient(135deg, #1c2f6e 0%, #2a6cf0 100%)' }}>
+            <div className="flex items-center gap-2 mb-1">
+              <Flame size={16} className="text-orange-300" />
+              <span className="text-sm font-bold text-white">{profile.streak_count} günlük seri</span>
+            </div>
+            <p className="text-[11.5px] text-white/80 leading-tight">
+              Bugünkü senaryoyu cevapla, serin korunsun.
+            </p>
+          </div>
+        )}
+
         {/* User profile card at bottom */}
-        <div className="mt-4">
-          <div className="flex items-center gap-3 px-3 py-3 rounded-2xl hover:bg-surface-2 transition-colors group">
+        <div className="mx-1">
+          <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-surface-2 transition-colors group border border-stroke">
             <div className={`p-0.5 rounded-full ring-2 ${tier.ringColor} shrink-0`}>
               <Avatar src={profile.avatar_url} username={profile.username} size="sm" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-fg truncate leading-tight">
+              <p className="text-[13.5px] font-semibold text-fg truncate leading-tight">
                 {profile.display_name || profile.username}
               </p>
-              <p className="text-xs text-fg-subtle truncate">@{profile.username}</p>
+              <p className="text-[11.5px] text-fg-subtle truncate">@{profile.username}</p>
             </div>
             <button
               onClick={handleSignOut}

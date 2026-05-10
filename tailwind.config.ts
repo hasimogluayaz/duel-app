@@ -18,14 +18,19 @@ const config: Config = {
         fg:      'var(--fg)',
         'fg-muted': 'var(--fg-muted)',
         'fg-subtle': 'var(--fg-subtle)',
+        // New semantic tokens
+        'bg-soft': 'var(--bg-soft)',
+        'stroke-strong': 'var(--stroke-strong)',
         // Brand colors (same in both modes)
-        primary: '#1967d2',
-        'primary-dark': '#1558b8',
-        secondary: '#0099cc',
-        accent: '#f97316',
+        primary: '#2a6cf0',
+        'primary-dark': '#1a56d6',
+        'primary-light': '#eef4ff',
+        secondary: '#1f8df0',
+        accent: '#1442a8',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Geist', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'system-ui', 'sans-serif'],
+        mono: ['Geist Mono', 'ui-monospace', 'JetBrains Mono', 'Menlo', 'monospace'],
       },
       borderRadius: {
         xl: '0.75rem',
