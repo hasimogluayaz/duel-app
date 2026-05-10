@@ -11,7 +11,13 @@ import { HomeAnswerGate } from '@/components/home/HomeAnswerGate'
 
 export default async function HomePage() {
   const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+
+  // Auth check
+  let user = null
+  try {
+    const { data } = await supabase.auth.getUser()
+    user = data.user
+  } catch {}
 
   if (user) {
     const { redirect } = await import('next/navigation')
@@ -20,34 +26,52 @@ export default async function HomePage() {
 
   const today = new Date().toISOString().split('T')[0]
 
-  const { data: scenario } = await supabase
-    .from('scenarios')
-    .select('*')
-    .eq('active_date', today)
-    .single()
+  // Fetch all data with individual error handling
+  let scenario: any = null
+  let topAnswers: any[] = []
+  let recentDuels: any[] = []
+  let userCount: number | null = null
+  let duelCount: number | null = null
 
-  const { data: topAnswers } = scenario ? await supabase
-    .from('answers')
-    .select('id, content, vote_count, profiles:profiles(username, display_name, avatar_url)')
-    .eq('scenario_id', scenario.id)
-    .order('vote_count', { ascending: false })
-    .limit(4) : { data: [] }
+  try {
+    const { data } = await supabase.from('scenarios').select('*').eq('active_date', today).single()
+    scenario = data
+  } catch {}
 
-  const { data: recentDuels } = await supabase
-    .from('duels')
-    .select(`
-      id, share_token, ai_verdict, created_at,
-      challenger:profiles!duels_challenger_id_fkey(username, display_name, avatar_url),
-      challenged:profiles!duels_challenged_id_fkey(username, display_name, avatar_url)
-    `)
-    .eq('status', 'completed')
-    .order('created_at', { ascending: false })
-    .limit(3)
+  try {
+    if (scenario) {
+      const { data } = await supabase
+        .from('answers')
+        .select('id, content, vote_count, profiles:profiles(username, display_name, avatar_url)')
+        .eq('scenario_id', scenario.id)
+        .order('vote_count', { ascending: false })
+        .limit(4)
+      topAnswers = data ?? []
+    }
+  } catch {}
 
-  const [{ count: userCount }, { count: duelCount }] = await Promise.all([
-    supabase.from('profiles').select('*', { count: 'exact', head: true }),
-    supabase.from('duels').select('*', { count: 'exact', head: true }).eq('status', 'completed'),
-  ])
+  try {
+    const { data } = await supabase
+      .from('duels')
+      .select(`
+        id, share_token, ai_verdict, created_at,
+        challenger:profiles!duels_challenger_id_fkey(username, display_name, avatar_url),
+        challenged:profiles!duels_challenged_id_fkey(username, display_name, avatar_url)
+      `)
+      .eq('status', 'completed')
+      .order('created_at', { ascending: false })
+      .limit(3)
+    recentDuels = data ?? []
+  } catch {}
+
+  try {
+    const [pr, dr] = await Promise.all([
+      supabase.from('profiles').select('*', { count: 'exact', head: true }),
+      supabase.from('duels').select('*', { count: 'exact', head: true }).eq('status', 'completed'),
+    ])
+    userCount = pr.count
+    duelCount = dr.count
+  } catch {}
 
   const MODES = [
     {

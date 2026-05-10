@@ -13,6 +13,10 @@ export default function Error({
 }) {
   useEffect(() => {
     console.error(error)
+    // Temporary: log to a visible place for debugging
+    if (typeof window !== 'undefined') {
+      (window as any).__LAST_ERROR__ = { message: error.message, stack: error.stack, digest: error.digest }
+    }
   }, [error])
 
   return (
