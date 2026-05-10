@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils/cn'
+﻿import { cn } from '@/lib/utils/cn'
 
 interface SpinnerProps {
   size?: 'sm' | 'md' | 'lg'
@@ -9,7 +9,7 @@ export function Spinner({ size = 'md', className }: SpinnerProps) {
   return (
     <svg
       className={cn(
-        'animate-spin text-purple-400',
+        'animate-spin text-primary/70',
         size === 'sm' && 'w-4 h-4',
         size === 'md' && 'w-6 h-6',
         size === 'lg' && 'w-10 h-10',

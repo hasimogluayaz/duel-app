@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { cn } from '@/lib/utils/cn'
 
@@ -17,8 +17,8 @@ interface ProgressBarProps {
 export function ProgressBar({
   value,
   className,
-  colorA = 'bg-purple-500',
-  colorB = 'bg-violet-500',
+  colorA = 'bg-primary',
+  colorB = 'bg-primary',
   showLabels,
   labelA = 'A',
   labelB = 'B',
@@ -31,10 +31,10 @@ export function ProgressBar({
     <div className={cn('w-full', className)}>
       {showLabels && (
         <div className="flex justify-between text-sm mb-1.5">
-          <span className="text-purple-400 font-medium">
+          <span className="text-primary/70 font-medium">
             {labelA} {countA !== undefined && <span className="text-fg-muted">({countA})</span>}
           </span>
-          <span className="text-violet-400 font-medium">
+          <span className="text-primary/70 font-medium">
             {labelB} {countB !== undefined && <span className="text-fg-muted">({countB})</span>}
           </span>
         </div>

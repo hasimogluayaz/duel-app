@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/Card'
@@ -28,7 +28,7 @@ interface ProfileMini {
 
 const STAT_CARDS = (s: Stats) => [
   { label: 'Toplam Kullanıcı', value: s.users, icon: Users, color: 'text-blue-400', bg: 'bg-blue-500/15' },
-  { label: 'Toplam Düello', value: s.duels, icon: Swords, color: 'text-purple-400', bg: 'bg-purple-500/15' },
+  { label: 'Toplam Düello', value: s.duels, icon: Swords, color: 'text-primary/70', bg: 'bg-primary/15' },
   { label: 'Toplam Cevap', value: s.answers, icon: FileText, color: 'text-green-400', bg: 'bg-green-500/15' },
   { label: 'Aktif Düello', value: s.activeDuels, icon: Zap, color: 'text-amber-400', bg: 'bg-amber-500/15' },
   { label: 'Banlı Kullanıcı', value: s.bannedUsers, icon: ShieldOff, color: 'text-red-400', bg: 'bg-red-500/15' },

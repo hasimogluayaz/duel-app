@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -61,7 +61,7 @@ export default function GizlilikPage() {
                   <tr key={veri}>
                     <td className="py-2 pr-4 text-fg text-xs font-medium">{veri}</td>
                     <td className="py-2 pr-4 text-xs">{amac}</td>
-                    <td className="py-2 text-xs text-purple-400">{dayanak}</td>
+                    <td className="py-2 text-xs text-primary/70">{dayanak}</td>
                   </tr>
                 ))}
               </tbody>

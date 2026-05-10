@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -162,9 +162,9 @@ export function OyunClient({
 
       {/* ── Guest banner ── */}
       {isGuest && (
-        <div className="flex items-center gap-3 bg-violet-600/10 border border-violet-500/20 rounded-2xl px-4 py-3">
+        <div className="flex items-center gap-3 bg-primary/10 border border-primary/20 rounded-2xl px-4 py-3">
           <Image src="/logo.png" alt="Kapisio" width={24} height={24} className="w-6 h-6 object-contain opacity-80" />
-          <p className="text-sm text-fg-muted flex-1">Cevap yazmak ve düello yapmak için <span className="font-semibold text-violet-500">ücretsiz katıl</span></p>
+          <p className="text-sm text-fg-muted flex-1">Cevap yazmak ve düello yapmak için <span className="font-semibold text-primary">ücretsiz katıl</span></p>
           <Link href="/kayit">
             <Button size="sm" className="btn-gradient shrink-0">Katıl</Button>
           </Link>
@@ -177,13 +177,13 @@ export function OyunClient({
           <p className="text-3xl mb-3">🌙</p>
           <h2 className="text-base font-bold text-fg mb-1">Bugünkü senaryo hazırlanıyor</h2>
           {nextScenarioCountdown && (
-            <p className="text-xs text-violet-400 mt-1 font-mono font-bold">{nextScenarioCountdown}</p>
+            <p className="text-xs text-primary/70 mt-1 font-mono font-bold">{nextScenarioCountdown}</p>
           )}
         </div>
       ) : (
         <div className="bg-surface border border-stroke rounded-2xl p-4">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold text-violet-500 uppercase tracking-wider flex items-center gap-1.5">
+            <span className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
               <Sparkles size={11} />
               Günün Senaryosu
             </span>
@@ -200,8 +200,8 @@ export function OyunClient({
           <p className="text-lg font-bold text-fg leading-snug">{scenario.content}</p>
           {userAnswer && nextScenarioCountdown && (
             <div className="mt-3 flex items-center gap-1.5 text-xs text-fg-subtle border-t border-stroke pt-2">
-              <Clock size={10} className="text-violet-400" />
-              <span>Yeni senaryo: <span className="font-mono font-bold text-violet-400">{nextScenarioCountdown}</span></span>
+              <Clock size={10} className="text-primary/70" />
+              <span>Yeni senaryo: <span className="font-mono font-bold text-primary/70">{nextScenarioCountdown}</span></span>
             </div>
           )}
         </div>
@@ -225,10 +225,10 @@ export function OyunClient({
               <button
                 onClick={quickMatch}
                 disabled={quickMatching}
-                className="flex items-center justify-center gap-2 p-3 rounded-xl border border-violet-500/30 bg-violet-500/8 hover:bg-violet-500/15 hover:border-violet-500/50 transition-all disabled:opacity-50 text-sm font-semibold text-violet-400"
+                className="flex items-center justify-center gap-2 p-3 rounded-xl border border-primary/30 bg-primary/8 hover:bg-primary/15 hover:border-primary/50 transition-all disabled:opacity-50 text-sm font-semibold text-primary/70"
               >
                 {quickMatching
-                  ? <div className="w-4 h-4 border-2 border-violet-400 border-t-transparent rounded-full animate-spin" />
+                  ? <div className="w-4 h-4 border-2 border-primary/70 border-t-transparent rounded-full animate-spin" />
                   : <Zap size={15} />
                 }
                 Hızlı Düello
@@ -246,7 +246,7 @@ export function OyunClient({
             {activeDuels.length > 0 && (
               <div>
                 <p className="text-xs font-semibold text-fg-subtle mb-2 flex items-center gap-1.5">
-                  <Swords size={11} className="text-violet-400" />
+                  <Swords size={11} className="text-primary/70" />
                   Aktif Düellolar ({activeDuels.length})
                 </p>
                 <div className="space-y-1.5">
@@ -255,7 +255,7 @@ export function OyunClient({
                     const opponent = isChallenger ? duel.challenged : duel.challenger
                     return (
                       <Link key={duel.id} href={`/duel/${duel.share_token}`}>
-                        <div className="flex items-center gap-3 bg-surface border border-stroke rounded-xl px-3 py-2.5 hover:border-violet-500/30 transition-colors">
+                        <div className="flex items-center gap-3 bg-surface border border-stroke rounded-xl px-3 py-2.5 hover:border-primary/30 transition-colors">
                           <Avatar src={opponent?.avatar_url} username={opponent?.username || '?'} size="xs" />
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-semibold text-fg truncate">vs {opponent?.display_name || opponent?.username}</p>
@@ -280,7 +280,7 @@ export function OyunClient({
           /* Write answer */
           <div className="bg-surface border border-stroke rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-3">
-              <Send size={14} className="text-violet-400" />
+              <Send size={14} className="text-primary/70" />
               <h3 className="text-sm font-bold text-fg">Cevabını Yaz</h3>
               {isGuest && (
                 <span className="ml-auto flex items-center gap-1 text-xs text-fg-subtle">
@@ -300,7 +300,7 @@ export function OyunClient({
                 rows={3}
                 maxLength={280}
                 readOnly={isGuest}
-                className={`w-full bg-bg border border-stroke rounded-xl px-3 py-2.5 text-sm text-fg placeholder-fg-subtle resize-none focus:outline-none focus:border-violet-500/50 transition-colors ${isGuest ? 'cursor-pointer' : ''}`}
+                className={`w-full bg-bg border border-stroke rounded-xl px-3 py-2.5 text-sm text-fg placeholder-fg-subtle resize-none focus:outline-none focus:border-primary/50 transition-colors ${isGuest ? 'cursor-pointer' : ''}`}
               />
               {isGuest && (
                 <div
@@ -308,7 +308,7 @@ export function OyunClient({
                   onClick={() => setJoinModal(true)}
                 >
                   <div className="flex items-center gap-2 bg-surface border border-stroke rounded-xl px-3 py-2 shadow-sm">
-                    <Lock size={13} className="text-violet-400" />
+                    <Lock size={13} className="text-primary/70" />
                     <span className="text-xs font-semibold text-fg">Cevaplamak için katıl</span>
                   </div>
                 </div>
@@ -376,7 +376,7 @@ export function OyunClient({
                 <div
                   key={a.id}
                   className={`relative bg-surface px-4 py-3.5 transition-colors ${
-                    isOwn ? 'bg-violet-500/5' : 'hover:bg-surface-2'
+                    isOwn ? 'bg-primary/5' : 'hover:bg-surface-2'
                   } ${shouldBlur ? 'cursor-pointer' : ''}`}
                   onClick={shouldBlur ? () => setJoinModal(true) : undefined}
                 >
@@ -393,7 +393,7 @@ export function OyunClient({
                             </span>
                           </Link>
                           {userTier && <span className={`text-xs ${userTier.color}`}>{userTier.emoji}</span>}
-                          {isOwn && <span className="text-xs bg-violet-500/15 text-violet-400 px-1.5 py-0.5 rounded-full font-medium">Sen</span>}
+                          {isOwn && <span className="text-xs bg-primary/15 text-primary/70 px-1.5 py-0.5 rounded-full font-medium">Sen</span>}
                           {(a.vote_count ?? 0) > 0 && (
                             <span className="flex items-center gap-0.5 text-xs text-amber-400 font-semibold">
                               <Star size={10} className="fill-amber-400" />
@@ -414,7 +414,7 @@ export function OyunClient({
                         {!isOwn && !shouldBlur && userAnswer && p?.id && (
                           <button
                             onClick={() => challengeFromAnswer(p.id, p.username)}
-                            className="mt-2 flex items-center gap-1 text-xs text-violet-400 hover:text-violet-300 font-medium"
+                            className="mt-2 flex items-center gap-1 text-xs text-primary/70 hover:text-primary/40 font-medium"
                           >
                             <Swords size={10} />
                             Meydan Oku
@@ -427,7 +427,7 @@ export function OyunClient({
                   {shouldBlur && (
                     <div className="absolute inset-0 flex items-center justify-center bg-surface/60 backdrop-blur-[3px]">
                       <div className="flex items-center gap-2 bg-surface border border-stroke rounded-xl px-3 py-1.5 shadow-sm">
-                        <Lock size={12} className="text-violet-400" />
+                        <Lock size={12} className="text-primary/70" />
                         <span className="text-xs font-semibold text-fg">Görmek için katıl</span>
                       </div>
                     </div>
@@ -440,7 +440,7 @@ export function OyunClient({
           {isGuest && communityAnswers.length > 2 && (
             <button
               onClick={() => setJoinModal(true)}
-              className="mt-2 w-full text-center text-xs text-violet-400 hover:text-violet-300 font-semibold py-2.5 border border-dashed border-violet-500/30 rounded-xl transition-colors"
+              className="mt-2 w-full text-center text-xs text-primary/70 hover:text-primary/40 font-semibold py-2.5 border border-dashed border-primary/30 rounded-xl transition-colors"
             >
               +{communityAnswers.length - 2} cevap daha — katılınca gör →
             </button>
@@ -453,7 +453,7 @@ export function OyunClient({
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-bold text-fg">Son Düellolar</h2>
-            <Link href="/liderlik" className="text-xs text-violet-400 hover:text-violet-300 font-medium">
+            <Link href="/liderlik" className="text-xs text-primary/70 hover:text-primary/40 font-medium">
               Liderlik →
             </Link>
           </div>
@@ -497,7 +497,7 @@ export function OyunClient({
               <Flame size={11} /> {profile.streak_count}
             </span>
           )}
-          <Link href={`/profil/${profile.username}`} className="text-xs text-fg-subtle hover:text-violet-400 transition-colors shrink-0 font-medium">
+          <Link href={`/profil/${profile.username}`} className="text-xs text-fg-subtle hover:text-primary/70 transition-colors shrink-0 font-medium">
             Profilim →
           </Link>
         </div>
@@ -573,12 +573,12 @@ export function OyunClient({
                 placeholder="Kullanıcı adı ara..."
                 value={searchQuery}
                 onChange={e => searchUsers(e.target.value)}
-                className="w-full bg-bg border border-stroke rounded-xl pl-9 pr-4 py-2.5 text-fg placeholder-fg-subtle focus:outline-none focus:border-violet-500/50 text-sm"
+                className="w-full bg-bg border border-stroke rounded-xl pl-9 pr-4 py-2.5 text-fg placeholder-fg-subtle focus:outline-none focus:border-primary/50 text-sm"
               />
             </div>
             {searchLoading && (
               <div className="text-center py-6">
-                <div className="w-5 h-5 border-2 border-violet-500 border-t-transparent rounded-full animate-spin mx-auto" />
+                <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
               </div>
             )}
             {searchResults.length > 0 && (
@@ -586,7 +586,7 @@ export function OyunClient({
                 {searchResults.map(user => {
                   const userTier = getTier((user as any).total_points ?? 0)
                   return (
-                    <div key={user.id} className="flex items-center justify-between p-3 bg-bg rounded-xl border border-stroke hover:border-violet-500/30 transition-colors">
+                    <div key={user.id} className="flex items-center justify-between p-3 bg-bg rounded-xl border border-stroke hover:border-primary/30 transition-colors">
                       <div className="flex items-center gap-3">
                         <Avatar src={user.avatar_url} username={user.username} size="sm" />
                         <div>

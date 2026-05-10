@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Download, X } from 'lucide-react'
@@ -40,9 +40,9 @@ export default function InstallPrompt() {
 
   return (
     <div className="fixed bottom-20 left-4 right-4 z-40 max-w-sm mx-auto">
-      <div className="bg-surface border border-violet-500/30 rounded-2xl p-4 shadow-2xl shadow-black/50 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center shrink-0">
-          <Download size={18} className="text-violet-400" />
+      <div className="bg-surface border border-primary/30 rounded-2xl p-4 shadow-2xl shadow-black/50 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+          <Download size={18} className="text-primary/70" />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-fg">Uygulamayı Yükle</p>
@@ -51,7 +51,7 @@ export default function InstallPrompt() {
         <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={install}
-            className="bg-violet-600 hover:bg-violet-500 text-white rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors"
+            className="bg-primary hover:bg-primary text-white rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors"
           >
             Yükle
           </button>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 export const dynamic = 'force-dynamic'
 
@@ -150,15 +150,15 @@ export default function LiderlikPage() {
                       <Avatar src={entry.avatar_url} username={entry.username} size="sm" />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <p className={`font-semibold text-sm truncate transition-colors ${entry.is_me ? 'text-purple-400' : 'text-fg'}`}>
+                          <p className={`font-semibold text-sm truncate transition-colors ${entry.is_me ? 'text-primary/70' : 'text-fg'}`}>
                             {entry.display_name || entry.username}
-                            {entry.is_me && <span className="ml-1 text-xs text-purple-400 font-normal">(sen)</span>}
+                            {entry.is_me && <span className="ml-1 text-xs text-primary/70 font-normal">(sen)</span>}
                           </p>
                           <span className={`text-xs font-bold ${t.color} shrink-0`}>{t.emoji} {t.label}</span>
                         </div>
                         <p className="text-xs text-fg-subtle">
                           @{entry.username}
-                          {entry.active_title && <span className="ml-2 text-violet-400">· {entry.active_title}</span>}
+                          {entry.active_title && <span className="ml-2 text-primary/70">· {entry.active_title}</span>}
                         </p>
                       </div>
                       <div className="text-right flex-shrink-0">
@@ -187,9 +187,9 @@ export default function LiderlikPage() {
             Senin Sıralamanı
           </p>
           <Link href={`/profil/${myEntry.username}`}>
-            <div className="flex items-center gap-3 px-4 py-3 border border-purple-500/30 bg-purple-500/5 rounded-xl hover:bg-purple-500/10 transition-all cursor-pointer">
+            <div className="flex items-center gap-3 px-4 py-3 border border-primary/30 bg-primary/5 rounded-xl hover:bg-primary/10 transition-all cursor-pointer">
               <div className="w-7 text-center flex-shrink-0">
-                <span className="text-sm font-black text-purple-400">#{myEntry.rank}</span>
+                <span className="text-sm font-black text-primary/70">#{myEntry.rank}</span>
               </div>
               <Avatar src={myEntry.avatar_url} username={myEntry.username} size="sm" />
               <div className="flex-1 min-w-0">
@@ -197,7 +197,7 @@ export default function LiderlikPage() {
                 <p className="text-xs text-fg-subtle">@{myEntry.username}</p>
               </div>
               <div className="text-right flex-shrink-0">
-                <p className="font-black text-purple-400">{formatPoints(myEntry.points)}</p>
+                <p className="font-black text-primary/70">{formatPoints(myEntry.points)}</p>
                 <p className="text-xs text-fg-subtle">puan</p>
               </div>
             </div>

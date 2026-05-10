@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
@@ -64,7 +64,7 @@ export default function QuotaBar({ compact = false }: { compact?: boolean }) {
         {!data.is_premium && (
           <Link
             href="/premium"
-            className="text-xs text-violet-400 hover:text-violet-300 font-medium transition-colors"
+            className="text-xs text-primary/70 hover:text-primary/40 font-medium transition-colors"
           >
             Premium → Sınırsız
           </Link>

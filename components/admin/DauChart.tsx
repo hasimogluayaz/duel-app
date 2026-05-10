@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { Spinner } from '@/components/ui/Spinner'
@@ -22,9 +22,9 @@ interface Summary {
 type Series = 'dau' | 'signups' | 'duels'
 
 const SERIES_CONFIG: Record<Series, { label: string; color: string; strokeColor: string; fillColor: string; icon: React.ElementType }> = {
-  dau:     { label: 'Aktif Kullanıcı', color: 'text-purple-400', strokeColor: '#a855f7', fillColor: 'rgba(168,85,247,0.15)', icon: Users },
+  dau:     { label: 'Aktif Kullanıcı', color: 'text-primary/70', strokeColor: '#a855f7', fillColor: 'rgba(168,85,247,0.15)', icon: Users },
   signups: { label: 'Yeni Kayıt',      color: 'text-blue-400',   strokeColor: '#60a5fa', fillColor: 'rgba(96,165,250,0.15)',  icon: UserPlus },
-  duels:   { label: 'Düello',          color: 'text-pink-400',   strokeColor: '#f472b6', fillColor: 'rgba(244,114,182,0.15)', icon: Swords },
+  duels:   { label: 'Düello',          color: 'text-secondary/70',   strokeColor: '#f472b6', fillColor: 'rgba(244,114,182,0.15)', icon: Swords },
 }
 
 // ── Inline sparkline SVG chart ────────────────────────────────────────────────
@@ -174,7 +174,7 @@ export default function DauChart() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <TrendingUp size={16} className="text-purple-400" />
+          <TrendingUp size={16} className="text-primary/70" />
           <h2 className="font-bold text-fg text-sm">Platform Aktivitesi</h2>
         </div>
         <div className="flex items-center gap-1.5">
@@ -184,7 +184,7 @@ export default function DauChart() {
               onClick={() => setDays(d)}
               className={`text-xs font-semibold px-2.5 py-1 rounded-lg transition-all ${
                 days === d
-                  ? 'bg-purple-600 text-white'
+                  ? 'bg-primary text-white'
                   : 'text-fg-subtle hover:text-fg hover:bg-surface-2'
               }`}
             >
@@ -209,8 +209,8 @@ export default function DauChart() {
                 onClick={() => setActiveSeries(key)}
                 className={`text-left p-3 rounded-xl border transition-all ${
                   activeSeries === key
-                    ? 'border-purple-500/40 bg-purple-500/8'
-                    : 'border-stroke hover:border-purple-500/20 hover:bg-purple-500/4'
+                    ? 'border-primary/40 bg-primary/8'
+                    : 'border-stroke hover:border-primary/20 hover:bg-primary/4'
                 }`}
               >
                 <div className="flex items-center gap-1.5 mb-1">

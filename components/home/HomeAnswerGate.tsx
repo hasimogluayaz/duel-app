@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -13,7 +13,7 @@ export function HomeAnswerGate() {
     <>
       {/* Locked answer textarea */}
       <div
-        className="relative rounded-xl border border-stroke bg-surface p-4 cursor-pointer hover:border-purple-500/40 transition-colors group"
+        className="relative rounded-xl border border-stroke bg-surface p-4 cursor-pointer hover:border-primary/40 transition-colors group"
         onClick={() => setJoinModal(true)}
         role="button"
         tabIndex={0}
@@ -22,13 +22,13 @@ export function HomeAnswerGate() {
         {/* Fake textarea */}
         <div className="w-full h-20 rounded-lg bg-bg border border-stroke flex items-center justify-center mb-3">
           <div className="flex items-center gap-2 text-fg-subtle text-sm">
-            <Lock size={13} className="text-purple-400" />
+            <Lock size={13} className="text-primary/70" />
             <span>Cevabını buraya yaz...</span>
           </div>
         </div>
         <div className="flex items-center justify-between">
           <span className="text-xs text-fg-subtle">0 / 280</span>
-          <div className="flex items-center gap-2 text-xs font-semibold text-purple-400 group-hover:text-purple-300 transition-colors">
+          <div className="flex items-center gap-2 text-xs font-semibold text-primary/70 group-hover:text-primary/40 transition-colors">
             <Sparkles size={12} />
             Cevaplamak için katıl
           </div>

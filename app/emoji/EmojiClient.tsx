@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -89,8 +89,8 @@ export function EmojiClient({ scenario, profile, userAnswer: initialAnswer, user
 
       {/* Guest banner */}
       {isGuest && (
-        <div className="flex items-center gap-3 bg-violet-600/10 border border-violet-500/20 rounded-2xl px-4 py-3">
-          <p className="text-sm text-fg-muted flex-1">Emoji cevabı kaydetmek için <span className="font-semibold text-violet-500">ücretsiz katıl</span></p>
+        <div className="flex items-center gap-3 bg-primary/10 border border-primary/20 rounded-2xl px-4 py-3">
+          <p className="text-sm text-fg-muted flex-1">Emoji cevabı kaydetmek için <span className="font-semibold text-primary">ücretsiz katıl</span></p>
           <Link href="/kayit">
             <Button size="sm" className="btn-gradient shrink-0">Katıl</Button>
           </Link>
@@ -108,7 +108,7 @@ export function EmojiClient({ scenario, profile, userAnswer: initialAnswer, user
         <>
           <div className="bg-surface border border-stroke rounded-2xl p-4">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold text-violet-500 uppercase tracking-wider flex items-center gap-1.5">
+              <span className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
                 <Sparkles size={11} />
                 Günün Senaryosu
               </span>
@@ -143,7 +143,7 @@ export function EmojiClient({ scenario, profile, userAnswer: initialAnswer, user
                 value={answer}
                 onChange={handleInput}
                 placeholder="Emoji yaz..."
-                className="w-full bg-transparent border border-stroke rounded-xl px-4 py-2.5 text-2xl outline-none focus:border-purple-500/50 placeholder:text-fg-subtle placeholder:text-sm"
+                className="w-full bg-transparent border border-stroke rounded-xl px-4 py-2.5 text-2xl outline-none focus:border-primary/50 placeholder:text-fg-subtle placeholder:text-sm"
                 disabled={!!submitting}
                 inputMode="text"
               />
@@ -223,7 +223,7 @@ export function EmojiClient({ scenario, profile, userAnswer: initialAnswer, user
                       {blurred && (
                         <Link href="/kayit" className="absolute inset-0 flex items-center justify-center rounded-xl bg-surface/70 backdrop-blur-[3px] hover:bg-surface/60 transition-colors">
                           <div className="flex items-center gap-2 bg-surface border border-stroke rounded-xl px-3 py-2 shadow-md">
-                            <Lock size={13} className="text-purple-400" />
+                            <Lock size={13} className="text-primary/70" />
                             <span className="text-xs font-semibold text-fg">Görmek için katıl</span>
                           </div>
                         </Link>

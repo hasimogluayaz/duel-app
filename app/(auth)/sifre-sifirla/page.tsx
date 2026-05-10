@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 export const dynamic = 'force-dynamic'
 
@@ -76,7 +76,7 @@ export default function SifreSifirlaPage() {
         </div>
 
         <p className="text-center text-sm text-fg-subtle mt-6">
-          <Link href="/giris" className="text-purple-400 hover:text-purple-300">← Giriş sayfasına dön</Link>
+          <Link href="/giris" className="text-primary/70 hover:text-primary/40">← Giriş sayfasına dön</Link>
         </p>
       </div>
     </div>

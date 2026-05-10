@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useRef, useEffect } from 'react'
 import { MoreHorizontal, Flag, Trash2, Edit2 } from 'lucide-react'
@@ -124,7 +124,7 @@ export function ContentMenu({ targetType, targetId, userId, isOwn, onDelete, onE
                     value={r.value}
                     checked={reason === r.value}
                     onChange={() => setReason(r.value)}
-                    className="accent-purple-500"
+                    className="accent-primary"
                   />
                   <span className={`text-sm transition-colors ${reason === r.value ? 'text-fg font-semibold' : 'text-fg-muted group-hover:text-fg'}`}>
                     {r.label}
@@ -138,7 +138,7 @@ export function ContentMenu({ targetType, targetId, userId, isOwn, onDelete, onE
               placeholder="Ek açıklama (isteğe bağlı)..."
               rows={2}
               maxLength={500}
-              className="w-full bg-bg border border-stroke rounded-xl px-3 py-2 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-purple-500/50 resize-none mb-4"
+              className="w-full bg-bg border border-stroke rounded-xl px-3 py-2 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-primary/50 resize-none mb-4"
             />
             <div className="flex gap-2">
               <Button className="flex-1 btn-gradient" loading={loading} disabled={!reason} onClick={submitReport}>

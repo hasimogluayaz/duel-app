@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 export const dynamic = 'force-dynamic'
 
@@ -162,7 +162,7 @@ export default function AyarlarPage() {
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full" />
+      <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
     </div>
   )
 
@@ -171,8 +171,8 @@ export default function AyarlarPage() {
 
       {/* ── User summary header ──────────────────────── */}
       {profile && (
-        <div className="relative overflow-hidden rounded-2xl border border-purple-500/20 bg-gradient-to-br from-violet-600/15 via-purple-600/10 to-pink-500/15 p-5 mb-7">
-          <div className="pointer-events-none absolute -top-6 -right-6 h-24 w-24 rounded-full bg-purple-500/10" />
+        <div className="relative overflow-hidden rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/15 via-primary/10 to-secondary/15 p-5 mb-7">
+          <div className="pointer-events-none absolute -top-6 -right-6 h-24 w-24 rounded-full bg-primary/10" />
           <div className="flex items-center gap-4">
             <div className="p-1 bg-surface/60 rounded-full backdrop-blur-sm">
               <Avatar src={form.avatar_url || profile.avatar_url} username={profile.username} size="lg" />
@@ -206,8 +206,8 @@ export default function AyarlarPage() {
       {/* ── Profile form ─────────────────────────────── */}
       <Card className="mb-5">
         <div className="flex items-center gap-2.5 mb-5">
-          <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center">
-            <User size={16} className="text-purple-400" />
+          <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+            <User size={16} className="text-primary/70" />
           </div>
           <div>
             <h2 className="text-base font-bold text-fg">Profil Bilgileri</h2>
@@ -239,7 +239,7 @@ export default function AyarlarPage() {
             <div className="flex items-center gap-3">
               <div className="relative">
                 <Avatar src={form.avatar_url || profile?.avatar_url} username={profile?.username || '?'} size="lg" />
-                <label className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-purple-600 flex items-center justify-center cursor-pointer hover:bg-purple-500 transition-colors shadow-lg">
+                <label className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-primary flex items-center justify-center cursor-pointer hover:bg-primary transition-colors shadow-lg">
                   {avatarUploading ? (
                     <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
                   ) : (
@@ -382,12 +382,12 @@ export default function AyarlarPage() {
           <div className="mb-5">
             <p className="text-sm text-fg-subtle mb-2">Referans kodun</p>
             <div className="flex items-center gap-2">
-              <div className="flex-1 bg-surface-raised border border-border rounded-xl px-4 py-3 font-mono text-lg font-black text-purple-300 tracking-widest text-center">
+              <div className="flex-1 bg-surface-raised border border-border rounded-xl px-4 py-3 font-mono text-lg font-black text-primary/40 tracking-widest text-center">
                 {referralCode}
               </div>
               <button
                 onClick={copyReferralCode}
-                className="p-3 rounded-xl bg-purple-600 hover:bg-purple-500 transition-colors text-white"
+                className="p-3 rounded-xl bg-primary hover:bg-primary transition-colors text-white"
                 title="Kodu kopyala"
               >
                 {codeCopied ? <Check size={18} /> : <Copy size={18} />}
@@ -406,7 +406,7 @@ export default function AyarlarPage() {
                     setCodeCopied(true)
                     setTimeout(() => setCodeCopied(false), 2000)
                   }}
-                  className="p-2 rounded-lg bg-purple-600 hover:bg-purple-500 transition-colors text-white shrink-0"
+                  className="p-2 rounded-lg bg-primary hover:bg-primary transition-colors text-white shrink-0"
                 >
                   {codeCopied ? <Check size={14} /> : <Copy size={14} />}
                 </button>

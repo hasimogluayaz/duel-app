@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 
@@ -78,7 +78,7 @@ export default function DailyMissions() {
       {/* Progress bar */}
       <div className="h-1 bg-surface-2 mx-4 rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-violet-500 to-pink-500 transition-all duration-500"
+          className="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-500"
           style={{ width: `${(completed / data.missions.length) * 100}%` }}
         />
       </div>
@@ -113,7 +113,7 @@ function MissionRow({ mission }: { mission: Mission }) {
         {mission.goal > 1 && !mission.completed && (
           <div className="mt-1.5 h-1 bg-stroke rounded-full overflow-hidden">
             <div
-              className="h-full bg-violet-500 transition-all"
+              className="h-full bg-primary transition-all"
               style={{ width: `${(mission.progress / mission.goal) * 100}%` }}
             />
           </div>

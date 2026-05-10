@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic'
+﻿export const dynamic = 'force-dynamic'
 
 export default function OfflinePage() {
   return (
@@ -9,7 +9,7 @@ export default function OfflinePage() {
         <p className="text-fg-muted mb-6">Bağlantın geri geldiğinde DUEL&apos;e devam edebilirsin.</p>
         <a
           href="/"
-          className="inline-block bg-purple-600 text-fg px-6 py-2.5 rounded-xl font-semibold hover:bg-purple-500 transition-colors"
+          className="inline-block bg-primary text-fg px-6 py-2.5 rounded-xl font-semibold hover:bg-primary transition-colors"
         >
           Yeniden Dene
         </a>

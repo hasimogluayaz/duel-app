@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
@@ -79,7 +79,7 @@ export default function KararVerCard({ scenarioId, userId }: Props) {
       <div className="text-4xl mb-3">🏆</div>
       <p className="text-fg font-semibold">Tüm cevapları gördün!</p>
       <p className="text-fg-subtle text-sm mt-1">{totalJudged} karar verdin bugün.</p>
-      <Link href="/arsiv" className="inline-flex items-center gap-1 mt-4 text-violet-400 hover:text-violet-300 text-sm transition-colors">
+      <Link href="/arsiv" className="inline-flex items-center gap-1 mt-4 text-primary/70 hover:text-primary/40 text-sm transition-colors">
         Daha fazla senaryo <ChevronRight size={14} />
       </Link>
     </div>
@@ -92,7 +92,7 @@ export default function KararVerCard({ scenarioId, userId }: Props) {
       {/* Header */}
       <div className="px-4 pt-4 pb-3">
         <div className="flex items-center gap-2 mb-2">
-          <Swords size={14} className="text-violet-400" />
+          <Swords size={14} className="text-primary/70" />
           <span className="text-xs font-semibold text-fg-subtle uppercase tracking-wider">Karar Ver</span>
           {totalJudged > 0 && (
             <span className="ml-auto text-xs text-fg-subtle">{totalJudged} karar</span>
@@ -125,7 +125,7 @@ export default function KararVerCard({ scenarioId, userId }: Props) {
                 isWinner ? 'bg-green-500/15' :
                 isLoser  ? 'bg-red-500/5 opacity-50' :
                 voted    ? '' :
-                userId   ? 'hover:bg-violet-500/10 cursor-pointer active:scale-95' :
+                userId   ? 'hover:bg-primary/10 cursor-pointer active:scale-95' :
                            'cursor-default'
               }`}
             >
@@ -154,7 +154,7 @@ export default function KararVerCard({ scenarioId, userId }: Props) {
               </div>
 
               {!voted && userId && (
-                <div className={`absolute bottom-2 ${i === 0 ? 'right-2' : 'left-2'} text-xs font-bold text-violet-400 opacity-0 group-hover:opacity-100 transition-opacity`}>
+                <div className={`absolute bottom-2 ${i === 0 ? 'right-2' : 'left-2'} text-xs font-bold text-primary/70 opacity-0 group-hover:opacity-100 transition-opacity`}>
                   Seç →
                 </div>
               )}
@@ -166,7 +166,7 @@ export default function KararVerCard({ scenarioId, userId }: Props) {
       {/* Footer */}
       <div className="px-4 py-3 border-t border-stroke flex items-center justify-between">
         {!userId ? (
-          <Link href="/kayit" className="text-xs text-violet-400 hover:text-violet-300 transition-colors">
+          <Link href="/kayit" className="text-xs text-primary/70 hover:text-primary/40 transition-colors">
             Oy vermek için giriş yap →
           </Link>
         ) : voted ? (

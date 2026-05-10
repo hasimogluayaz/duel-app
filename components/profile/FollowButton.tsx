@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
@@ -50,7 +50,7 @@ export function FollowButton({ targetId, initialFollowing, size = 'sm', onFollow
       variant={following ? 'secondary' : 'outline'}
       loading={loading}
       onClick={toggle}
-      className={following ? '' : 'border-purple-500/40 text-purple-400 hover:bg-purple-500/10'}
+      className={following ? '' : 'border-primary/40 text-primary/70 hover:bg-primary/10'}
     >
       {following ? <UserCheck size={13} /> : <UserPlus size={13} />}
       {following ? 'Takip Ediliyor' : 'Takip Et'}

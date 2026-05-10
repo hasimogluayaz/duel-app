@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 
@@ -85,7 +85,7 @@ export default function ReactionBar({ answerId, userId, compact = false }: Props
             title={!userId ? 'Tepki vermek için giriş yap' : undefined}
             className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-sm transition-all duration-150 select-none ${
               ismine
-                ? 'bg-violet-500/20 border border-violet-500/40 text-fg scale-105'
+                ? 'bg-primary/20 border border-primary/40 text-fg scale-105'
                 : count > 0
                   ? 'bg-surface-2 border border-stroke text-fg-muted hover:bg-stroke hover:scale-105'
                   : 'bg-surface-2 border border-stroke text-fg-subtle hover:bg-stroke hover:text-fg-muted hover:scale-105'
@@ -93,7 +93,7 @@ export default function ReactionBar({ answerId, userId, compact = false }: Props
           >
             <span>{emoji}</span>
             {count > 0 && (
-              <span className={`text-xs font-medium tabular-nums ${ismine ? 'text-violet-400' : 'text-fg-subtle'}`}>
+              <span className={`text-xs font-medium tabular-nums ${ismine ? 'text-primary/70' : 'text-fg-subtle'}`}>
                 {count}
               </span>
             )}

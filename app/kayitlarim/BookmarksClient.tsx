@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -76,8 +76,8 @@ export default function BookmarksClient() {
     <div className="max-w-2xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-10 h-10 rounded-2xl bg-violet-500/15 flex items-center justify-center">
-          <Bookmark size={18} className="text-violet-400" />
+        <div className="w-10 h-10 rounded-2xl bg-primary/15 flex items-center justify-center">
+          <Bookmark size={18} className="text-primary/70" />
         </div>
         <div>
           <h1 className="text-xl font-black text-fg">Kaydettiklerim</h1>
@@ -96,7 +96,7 @@ export default function BookmarksClient() {
             onClick={() => switchTab(t.id)}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
               tab === t.id
-                ? 'bg-violet-600 text-white shadow-lg'
+                ? 'bg-primary text-white shadow-lg'
                 : 'text-fg-subtle hover:text-fg-muted'
             }`}
           >
@@ -117,11 +117,11 @@ export default function BookmarksClient() {
         ) : (
           <div className="space-y-3">
             {answers.map(b => b.answer && (
-              <div key={b.id} className="group bg-surface border border-stroke rounded-2xl p-4 hover:border-violet-500/30 transition-colors">
+              <div key={b.id} className="group bg-surface border border-stroke rounded-2xl p-4 hover:border-primary/30 transition-colors">
                 {/* Scenario context */}
                 {b.answer.scenario && (
                   <Link href={`/arsiv/${b.answer.scenario.id}`}>
-                    <p className="text-xs text-fg-subtle italic mb-2 hover:text-violet-400 line-clamp-1 transition-colors">
+                    <p className="text-xs text-fg-subtle italic mb-2 hover:text-primary/70 line-clamp-1 transition-colors">
                       &ldquo;{b.answer.scenario.content}&rdquo;
                     </p>
                   </Link>
@@ -134,7 +134,7 @@ export default function BookmarksClient() {
                 <div className="flex items-center justify-between mt-3">
                   <div className="flex items-center gap-3 text-xs text-fg-subtle">
                     {b.answer.user && (
-                      <Link href={`/profil/${b.answer.user.username}`} className="hover:text-violet-400 transition-colors">
+                      <Link href={`/profil/${b.answer.user.username}`} className="hover:text-primary/70 transition-colors">
                         @{b.answer.user.username}
                       </Link>
                     )}
@@ -162,7 +162,7 @@ export default function BookmarksClient() {
           <div className="space-y-3">
             {scenarios.map(b => b.scenario && (
               <Link key={b.id} href={`/arsiv/${b.scenario.id}`}>
-                <div className="group bg-surface border border-stroke rounded-2xl p-4 hover:border-violet-500/30 transition-colors cursor-pointer">
+                <div className="group bg-surface border border-stroke rounded-2xl p-4 hover:border-primary/30 transition-colors cursor-pointer">
                   <p className="text-sm text-fg leading-relaxed mb-3">{b.scenario.content}</p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">

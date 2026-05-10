@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState, useCallback } from 'react'
 import { Avatar } from '@/components/ui/Avatar'
@@ -87,7 +87,7 @@ export default function AdminKullanicilarPage() {
             placeholder="Kullanıcı ara..."
             value={query}
             onChange={e => setQuery(e.target.value)}
-            className="w-full bg-surface border border-stroke rounded-xl pl-10 pr-4 py-2.5 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-purple-500"
+            className="w-full bg-surface border border-stroke rounded-xl pl-10 pr-4 py-2.5 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-primary"
           />
         </div>
         <div className="flex gap-2">
@@ -96,7 +96,7 @@ export default function AdminKullanicilarPage() {
               key={f}
               onClick={() => { setFilter(f); setPage(1) }}
               className={`px-3 py-2 rounded-xl text-sm font-medium transition-colors ${
-                filter === f ? 'bg-purple-600 text-white' : 'bg-surface border border-stroke text-fg-muted hover:text-fg'
+                filter === f ? 'bg-primary text-white' : 'bg-surface border border-stroke text-fg-muted hover:text-fg'
               }`}
             >
               {f === 'all' ? 'Tümü' : f === 'banned' ? 'Banlılar' : 'Adminler'}
@@ -120,7 +120,7 @@ export default function AdminKullanicilarPage() {
                   </Link>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <Link href={`/profil/${u.username}`} className="text-sm font-bold text-fg hover:text-purple-300 transition-colors">
+                      <Link href={`/profil/${u.username}`} className="text-sm font-bold text-fg hover:text-primary/40 transition-colors">
                         {u.display_name || u.username}
                       </Link>
                       {u.is_admin && <Badge variant="warning" className="text-xs">Admin</Badge>}

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 export const dynamic = 'force-dynamic'
 
@@ -69,8 +69,8 @@ export default function MesajlarPage() {
 
       {/* Header */}
       <div className="flex items-center gap-3 mb-6">
-        <div className="relative w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
-          <MessageCircle size={20} className="text-purple-400" />
+        <div className="relative w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+          <MessageCircle size={20} className="text-primary/70" />
           {totalUnread > 0 && (
             <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center">
               {totalUnread > 9 ? '9+' : totalUnread}
@@ -94,7 +94,7 @@ export default function MesajlarPage() {
             placeholder="Konuşma ara..."
             value={query}
             onChange={e => setQuery(e.target.value)}
-            className="w-full bg-surface border border-stroke rounded-xl pl-10 pr-4 py-2.5 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-purple-500"
+            className="w-full bg-surface border border-stroke rounded-xl pl-10 pr-4 py-2.5 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-primary"
           />
         </div>
       )}
@@ -120,13 +120,13 @@ export default function MesajlarPage() {
               <div className={cn(
                 'flex items-center gap-3.5 px-4 py-3.5 rounded-xl border transition-all cursor-pointer',
                 c.unread_count > 0
-                  ? 'bg-purple-500/5 border-purple-500/20 hover:border-purple-500/40'
-                  : 'bg-surface border-stroke hover:border-purple-500/20 hover:bg-purple-500/5'
+                  ? 'bg-primary/5 border-primary/20 hover:border-primary/40'
+                  : 'bg-surface border-stroke hover:border-primary/20 hover:bg-primary/5'
               )}>
                 <div className="relative shrink-0">
                   <Avatar src={c.user.avatar_url} username={c.user.username} size="md" />
                   {c.unread_count > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-purple-500 text-white text-[10px] font-black rounded-full flex items-center justify-center">
+                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary text-white text-[10px] font-black rounded-full flex items-center justify-center">
                       {c.unread_count > 9 ? '9+' : c.unread_count}
                     </span>
                   )}

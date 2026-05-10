@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useToast } from '@/components/ui/Toast'
@@ -77,7 +77,7 @@ export function FollowButton({
             ? hovered
               ? 'border-red-500/40 bg-red-500/10 text-red-400'
               : 'border-green-500/30 bg-green-500/10 text-green-400'
-            : 'border-purple-500/50 bg-gradient-to-r from-purple-600 to-pink-500 text-white hover:opacity-90'
+            : 'border-primary/50 bg-gradient-to-r from-primary to-secondary text-white hover:opacity-90'
           }
         `}
       >

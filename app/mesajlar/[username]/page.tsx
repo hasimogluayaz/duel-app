@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 export const dynamic = 'force-dynamic'
 
@@ -147,7 +147,7 @@ export default function ConversationPage() {
                   <div className={cn(
                     'px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed',
                     isMine
-                      ? 'bg-purple-600 text-white rounded-br-sm'
+                      ? 'bg-primary text-white rounded-br-sm'
                       : 'bg-surface border border-stroke text-fg rounded-bl-sm'
                   )}>
                     {msg.content}
@@ -177,13 +177,13 @@ export default function ConversationPage() {
           placeholder="Mesaj yaz..."
           rows={1}
           maxLength={500}
-          className="flex-1 bg-surface-2 border border-stroke rounded-2xl px-4 py-3 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-purple-500 resize-none max-h-32 transition-colors"
+          className="flex-1 bg-surface-2 border border-stroke rounded-2xl px-4 py-3 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-primary resize-none max-h-32 transition-colors"
           style={{ height: 'auto' }}
         />
         <button
           type="submit"
           disabled={!input.trim() || sending}
-          className="w-10 h-10 bg-purple-600 rounded-2xl flex items-center justify-center hover:bg-purple-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
+          className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center hover:bg-primary disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
         >
           <Send size={16} className="text-white" />
         </button>

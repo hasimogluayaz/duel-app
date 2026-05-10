@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Pencil, Save, X, AlertCircle } from 'lucide-react'
@@ -57,7 +57,7 @@ export default function EditAnswerButton({ answerId, initialContent, editCount =
   if (!editing) return (
     <button
       onClick={() => setEditing(true)}
-      className="flex items-center gap-1 text-xs text-fg-subtle hover:text-violet-400 transition-colors"
+      className="flex items-center gap-1 text-xs text-fg-subtle hover:text-primary/70 transition-colors"
       title={`Düzenle (${editsLeft} hak kaldı)`}
     >
       <Pencil size={11} />
@@ -72,7 +72,7 @@ export default function EditAnswerButton({ answerId, initialContent, editCount =
         onChange={e => setContent(e.target.value)}
         rows={3}
         maxLength={500}
-        className="w-full bg-surface-2 border border-violet-500/40 rounded-xl px-3 py-2 text-sm text-fg placeholder-fg-subtle focus:outline-none focus:border-violet-400 resize-none"
+        className="w-full bg-surface-2 border border-primary/40 rounded-xl px-3 py-2 text-sm text-fg placeholder-fg-subtle focus:outline-none focus:border-primary/70 resize-none"
         autoFocus
       />
       <div className="flex items-center justify-between">
@@ -80,7 +80,7 @@ export default function EditAnswerButton({ answerId, initialContent, editCount =
           <button
             onClick={save}
             disabled={saving || !content.trim()}
-            className="flex items-center gap-1.5 text-xs font-semibold text-white bg-violet-600 hover:bg-violet-500 disabled:opacity-40 px-3 py-1.5 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 text-xs font-semibold text-white bg-primary hover:bg-primary disabled:opacity-40 px-3 py-1.5 rounded-lg transition-colors"
           >
             <Save size={11} />
             {saving ? 'Kaydediliyor...' : 'Kaydet'}

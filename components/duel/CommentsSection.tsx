@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { Avatar } from '@/components/ui/Avatar'
@@ -69,7 +69,7 @@ export function CommentsSection({ duelId, userId }: Props) {
   return (
     <div className="mt-6 border-t border-stroke pt-5">
       <h3 className="text-sm font-bold text-fg mb-3 flex items-center gap-2">
-        <MessageCircle size={15} className="text-purple-400" />
+        <MessageCircle size={15} className="text-primary/70" />
         Yorumlar
         {comments.length > 0 && (
           <span className="text-xs font-normal bg-surface border border-stroke px-2 py-0.5 rounded-full text-fg-subtle">
@@ -80,7 +80,7 @@ export function CommentsSection({ duelId, userId }: Props) {
 
       {loading && (
         <div className="text-center py-4">
-          <div className="w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
         </div>
       )}
 
@@ -91,7 +91,7 @@ export function CommentsSection({ duelId, userId }: Props) {
       {!loading && comments.length > 5 && !showAll && (
         <button
           onClick={() => setShowAll(true)}
-          className="text-xs text-purple-400 hover:text-purple-300 font-semibold mb-3 transition-colors"
+          className="text-xs text-primary/70 hover:text-primary/40 font-semibold mb-3 transition-colors"
         >
           Önceki {comments.length - 5} yorumu göster
         </button>
@@ -133,7 +133,7 @@ export function CommentsSection({ duelId, userId }: Props) {
             placeholder="Yorum yaz... (Enter ile gönder)"
             rows={2}
             maxLength={300}
-            className="flex-1 bg-bg border border-stroke rounded-xl px-3 py-2 text-sm text-fg placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+            className="flex-1 bg-bg border border-stroke rounded-xl px-3 py-2 text-sm text-fg placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary resize-none"
           />
           <Button
             size="sm"
@@ -148,7 +148,7 @@ export function CommentsSection({ duelId, userId }: Props) {
       ) : (
         <p className="text-xs text-fg-subtle text-center mt-3">
           Yorum yazmak için{' '}
-          <a href="/giris" className="text-purple-400 hover:underline">giriş yap</a>.
+          <a href="/giris" className="text-primary/70 hover:underline">giriş yap</a>.
         </p>
       )}
     </div>

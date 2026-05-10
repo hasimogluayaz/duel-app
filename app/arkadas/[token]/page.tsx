@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
@@ -65,7 +65,7 @@ export default function ArkadasChallengePage() {
 
   if (phase === 'loading') return (
     <div className="min-h-screen bg-bg flex items-center justify-center">
-      <Loader2 size={32} className="text-violet-400 animate-spin" />
+      <Loader2 size={32} className="text-primary/70 animate-spin" />
     </div>
   )
 
@@ -75,7 +75,7 @@ export default function ArkadasChallengePage() {
         <AlertCircle size={48} className="text-red-400 mx-auto mb-4" />
         <h1 className="text-fg font-bold text-xl mb-2">Meydan Okuma Bulunamadı</h1>
         <p className="text-fg-muted text-sm mb-6">{errorMsg}</p>
-        <Link href="/" className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl px-6 py-3 text-sm font-semibold transition-colors">
+        <Link href="/" className="inline-flex items-center gap-2 bg-primary hover:bg-primary text-white rounded-xl px-6 py-3 text-sm font-semibold transition-colors">
           Ana Sayfaya Dön
         </Link>
       </div>
@@ -96,13 +96,13 @@ export default function ArkadasChallengePage() {
             <span className="text-2xl font-black text-fg">DUEL</span>
           </Link>
           <div className="flex items-center justify-center gap-1.5 mt-2">
-            <Users size={12} className="text-violet-400" />
-            <span className="text-xs text-violet-400 font-semibold">Arkadaş Meydan Okuması</span>
+            <Users size={12} className="text-primary/70" />
+            <span className="text-xs text-primary/70 font-semibold">Arkadaş Meydan Okuması</span>
           </div>
         </div>
 
         {/* Challenger card */}
-        <div className="rounded-2xl bg-surface border border-violet-500/20 p-5 mb-4">
+        <div className="rounded-2xl bg-surface border border-primary/20 p-5 mb-4">
           <div className="flex items-center gap-3 mb-4">
             <Avatar src={challenge.challenger.avatar_url} username={challenge.challenger.username} size="md" />
             <div>
@@ -116,8 +116,8 @@ export default function ArkadasChallengePage() {
             <p className="text-sm text-fg-muted italic leading-relaxed">&ldquo;{challenge.scenario.content}&rdquo;</p>
           </div>
 
-          <div className="bg-violet-500/8 rounded-xl p-3 border border-violet-500/15">
-            <p className="text-xs text-violet-400 mb-1">
+          <div className="bg-primary/8 rounded-xl p-3 border border-primary/15">
+            <p className="text-xs text-primary/70 mb-1">
               {challenge.challenger.display_name || challenge.challenger.username} şöyle dedi:
             </p>
             <p className="text-sm text-fg leading-relaxed">{challenge.challenger_answer.content}</p>
@@ -143,7 +143,7 @@ export default function ArkadasChallengePage() {
               onChange={e => setContent(e.target.value)}
               placeholder="Cevabını buraya yaz..."
               rows={4}
-              className="w-full bg-surface-2 border border-stroke rounded-xl px-4 py-3 text-sm text-fg placeholder-fg-subtle resize-none focus:outline-none focus:border-violet-500/50 transition-colors"
+              className="w-full bg-surface-2 border border-stroke rounded-xl px-4 py-3 text-sm text-fg placeholder-fg-subtle resize-none focus:outline-none focus:border-primary/50 transition-colors"
             />
             {content.trim().length > 0 && content.trim().length < 10 && (
               <p className="text-xs text-red-400 mt-1">En az 10 karakter gerekli.</p>
@@ -154,7 +154,7 @@ export default function ArkadasChallengePage() {
             <button
               onClick={submitting ? undefined : submitAnswer}
               disabled={submitting || content.trim().length < 10}
-              className="w-full mt-3 bg-violet-600 hover:bg-violet-500 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-2"
+              className="w-full mt-3 bg-primary hover:bg-primary disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl py-3 text-sm font-semibold transition-colors flex items-center justify-center gap-2"
             >
               {submitting ? <><Loader2 size={14} className="animate-spin" /> Kaydediliyor...</> : <><Zap size={14} /> Cevapla & Karşılaştır</>}
             </button>
@@ -203,8 +203,8 @@ export default function ArkadasChallengePage() {
 
               {/* Side by side */}
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-violet-500/8 rounded-xl p-3 border border-violet-500/15">
-                  <p className="text-[10px] text-violet-400 font-semibold mb-1 uppercase tracking-wider">
+                <div className="bg-primary/8 rounded-xl p-3 border border-primary/15">
+                  <p className="text-[10px] text-primary/70 font-semibold mb-1 uppercase tracking-wider">
                     {challenge.challenger.display_name || challenge.challenger.username}
                   </p>
                   <p className="text-xs text-fg-muted leading-relaxed">{challenge.challenger_answer.content}</p>
@@ -221,7 +221,7 @@ export default function ArkadasChallengePage() {
               <p className="text-sm text-fg-muted mb-4">Sen de arkadaşlarına meydan oku!</p>
               <Link
                 href="/kayit"
-                className="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-500 text-white rounded-xl px-6 py-3 text-sm font-semibold transition-colors"
+                className="inline-flex items-center gap-2 bg-primary hover:bg-primary text-white rounded-xl px-6 py-3 text-sm font-semibold transition-colors"
               >
                 <Zap size={14} />
                 Ücretsiz Katıl

@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils/cn'
+﻿import { cn } from '@/lib/utils/cn'
 import Image from 'next/image'
 
 interface AvatarProps {
@@ -30,12 +30,12 @@ function getInitial(username: string) {
 
 function getColor(username: string) {
   const colors = [
-    'from-indigo-500 to-purple-600',
+    'from-indigo-500 to-primary',
     'from-blue-500 to-cyan-600',
     'from-green-500 to-emerald-600',
     'from-amber-500 to-orange-600',
-    'from-pink-500 to-rose-600',
-    'from-violet-500 to-purple-600',
+    'from-secondary to-rose-600',
+    'from-primary to-primary',
   ]
   const idx = username.charCodeAt(0) % colors.length
   return colors[idx]

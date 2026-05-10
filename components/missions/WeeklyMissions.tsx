@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Target, Clock, CheckCircle2, Star } from 'lucide-react'
@@ -48,7 +48,7 @@ export default function WeeklyMissions() {
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center gap-3 px-4 py-3 hover:bg-surface-2 transition-colors"
       >
-        <Target size={15} className={allDone ? 'text-amber-400' : 'text-violet-400'} />
+        <Target size={15} className={allDone ? 'text-amber-400' : 'text-primary/70'} />
         <div className="flex-1 text-left">
           <div className="flex items-center gap-2">
             <span className="text-sm font-bold text-fg">Haftalık Görevler</span>
@@ -57,7 +57,7 @@ export default function WeeklyMissions() {
           {/* Progress bar */}
           <div className="mt-1 h-1 bg-stroke rounded-full overflow-hidden w-full">
             <div
-              className={`h-full rounded-full transition-all ${allDone ? 'bg-amber-400' : 'bg-violet-500'}`}
+              className={`h-full rounded-full transition-all ${allDone ? 'bg-amber-400' : 'bg-primary'}`}
               style={{ width: `${pct}%` }}
             />
           </div>
@@ -102,7 +102,7 @@ export default function WeeklyMissions() {
                   </div>
                   <div className="h-1 bg-stroke rounded-full overflow-hidden">
                     <div
-                      className={`h-full rounded-full transition-all ${m.completed ? 'bg-green-500' : 'bg-violet-500'}`}
+                      className={`h-full rounded-full transition-all ${m.completed ? 'bg-green-500' : 'bg-primary'}`}
                       style={{ width: `${mpct}%` }}
                     />
                   </div>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 export const dynamic = 'force-dynamic'
 
@@ -208,7 +208,7 @@ export default function KayitPage() {
   return (
     <div className="min-h-[calc(100vh-4rem)] flex">
       {/* Left branding panel */}
-      <div className="hidden lg:flex flex-col justify-between w-[480px] shrink-0 bg-gradient-to-br from-pink-500 via-purple-600 to-violet-700 p-12 text-white relative overflow-hidden">
+      <div className="hidden lg:flex flex-col justify-between w-[480px] shrink-0 bg-gradient-to-br from-secondary via-primary to-primary-dark p-12 text-white relative overflow-hidden">
         {/* Background decorations */}
         <div className="absolute top-0 right-0 w-72 h-72 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/3" />
         <div className="absolute bottom-0 left-0 w-56 h-56 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/3" />
@@ -404,8 +404,8 @@ function ConsentBlock({ consents, onToggle, error }: ConsentProps) {
           <div className={cn(
             'mt-0.5 w-4 h-4 rounded border-2 flex-shrink-0 flex items-center justify-center transition-colors',
             consents[c.id]
-              ? 'bg-purple-600 border-purple-600'
-              : 'border-stroke group-hover:border-purple-400 bg-surface-2'
+              ? 'bg-primary border-primary'
+              : 'border-stroke group-hover:border-primary/70 bg-surface-2'
           )}>
             {consents[c.id] && (
               <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
@@ -440,7 +440,7 @@ function GoogleConsentModal({
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       <div className="w-full max-w-md bg-surface border border-stroke rounded-2xl shadow-2xl overflow-hidden">
         <div className="px-5 py-4 border-b border-stroke flex items-center gap-3">
-          <Shield size={18} className="text-purple-400 shrink-0" />
+          <Shield size={18} className="text-primary/70 shrink-0" />
           <div>
             <p className="text-sm font-bold text-fg">Google ile devam etmeden önce</p>
             <p className="text-xs text-fg-subtle">Lütfen aşağıdaki onayları verin</p>

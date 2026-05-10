@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { Bell } from 'lucide-react'
@@ -118,7 +118,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
       >
         <Bell size={20} />
         {unreadCount > 0 && (
-          <span className="absolute top-1 right-1 w-4 h-4 bg-purple-500 text-fg text-[10px] font-bold rounded-full flex items-center justify-center">
+          <span className="absolute top-1 right-1 w-4 h-4 bg-primary text-fg text-[10px] font-bold rounded-full flex items-center justify-center">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -133,7 +133,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
               {unreadCount > 0 && (
                 <button
                   onClick={markAllRead}
-                  className="text-xs text-purple-400 hover:text-purple-300"
+                  className="text-xs text-primary/70 hover:text-primary/40"
                 >
                   Tümünü oku
                 </button>
@@ -150,12 +150,12 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                       key={n.id}
                       onClick={() => handleNotificationClick(n)}
                       className={`px-4 py-3 border-b border-stroke last:border-0 transition-colors ${
-                        !n.is_read ? 'bg-purple-500/5' : ''
+                        !n.is_read ? 'bg-primary/5' : ''
                       } ${url ? 'cursor-pointer hover:bg-surface-2' : ''}`}
                     >
                       <div className="flex items-start gap-2">
                         {!n.is_read && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-1.5 shrink-0" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-primary/70 mt-1.5 shrink-0" />
                         )}
                         <div className={!n.is_read ? '' : 'pl-3.5'}>
                           <p className="text-sm text-fg font-medium">{n.title}</p>
@@ -172,7 +172,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
               <Link
                 href="/bildirimler"
                 onClick={() => setOpen(false)}
-                className="block text-center text-sm text-purple-400 hover:text-purple-300"
+                className="block text-center text-sm text-primary/70 hover:text-primary/40"
               >
                 Tüm bildirimleri gör
               </Link>

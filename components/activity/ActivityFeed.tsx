@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -14,10 +14,10 @@ interface ActivityItem {
 const TYPE_CONFIG: Record<string, { icon: React.ElementType; color: string; label: (d: any) => string }> = {
   duel_won:         { icon: Trophy,        color: 'text-yellow-400', label: d => `"${d.scenario_snippet ?? 'Senaryo'}" düellosunu kazandı` },
   duel_lost:        { icon: Swords,        color: 'text-red-400',    label: d => `"${d.scenario_snippet ?? 'Senaryo'}" düellosunda yenildi` },
-  duel_created:     { icon: Swords,        color: 'text-violet-400', label: _d => `Yeni bir düello başlattı` },
+  duel_created:     { icon: Swords,        color: 'text-primary/70', label: _d => `Yeni bir düello başlattı` },
   answer_posted:    { icon: MessageSquare, color: 'text-blue-400',   label: d => `"${d.scenario_snippet ?? 'Senaryo'}" için cevap verdi` },
   answer_voted:     { icon: ThumbsUp,      color: 'text-green-400',  label: d => `Cevabı ${d.votes ?? 0} oy aldı` },
-  followed:         { icon: UserPlus,      color: 'text-pink-400',   label: d => `${d.target_username ?? 'birini'} takip etmeye başladı` },
+  followed:         { icon: UserPlus,      color: 'text-secondary/70',   label: d => `${d.target_username ?? 'birini'} takip etmeye başladı` },
   streak_milestone: { icon: Flame,         color: 'text-orange-400', label: d => `${d.streak ?? 0} günlük seri madalyası kazandı` },
   title_earned:     { icon: Star,          color: 'text-amber-400',  label: d => `"${d.title_label ?? 'Yeni unvan'}" unvanını kazandı` },
   level_up:         { icon: Zap,           color: 'text-cyan-400',   label: _d => `Seviye atladı` },
@@ -95,7 +95,7 @@ export default function ActivityFeed({ username, limit = 20 }: Props) {
               {item.data?.duel_id && (
                 <Link
                   href={`/duel/${item.data.duel_id}`}
-                  className="text-xs text-violet-400 hover:underline mt-0.5 inline-block"
+                  className="text-xs text-primary/70 hover:underline mt-0.5 inline-block"
                 >
                   Düelloyu gör →
                 </Link>

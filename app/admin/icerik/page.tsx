@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/Card'
@@ -106,7 +106,7 @@ export default function AdminIcerikPage() {
             key={key}
             onClick={() => setTab(key)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
-              tab === key ? 'bg-purple-600 text-white' : 'bg-surface border border-stroke text-fg-muted hover:text-fg'
+              tab === key ? 'bg-primary text-white' : 'bg-surface border border-stroke text-fg-muted hover:text-fg'
             }`}
           >
             <Icon size={14} />
@@ -146,7 +146,7 @@ export default function AdminIcerikPage() {
                       <div className="bg-surface-2 border border-stroke rounded-lg p-2 mb-2">
                         <p className="text-xs text-fg-muted line-clamp-3">{r.target_content.content}</p>
                         {r.target_content?.user?.username && (
-                          <Link href={`/profil/${r.target_content.user.username}`} className="text-[10px] text-purple-400 mt-1 block">
+                          <Link href={`/profil/${r.target_content.user.username}`} className="text-[10px] text-primary/70 mt-1 block">
                             @{r.target_content.user.username}
                           </Link>
                         )}
@@ -198,7 +198,7 @@ export default function AdminIcerikPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1.5">
                     {a.profiles && (
-                      <Link href={`/profil/${a.profiles.username}`} className="text-xs font-semibold text-purple-400 hover:underline">
+                      <Link href={`/profil/${a.profiles.username}`} className="text-xs font-semibold text-primary/70 hover:underline">
                         @{a.profiles.username}
                       </Link>
                     )}

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { Avatar } from '@/components/ui/Avatar'
@@ -69,7 +69,7 @@ export function ScenarioDetailPanel({ scenarioId, onClose }: Props) {
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-stroke shrink-0">
           <div className="flex items-center gap-2">
-            <BarChart3 size={18} className="text-purple-400" />
+            <BarChart3 size={18} className="text-primary/70" />
             <h2 className="font-black text-fg">Senaryo Detayı</h2>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-lg text-fg-subtle hover:text-fg hover:bg-surface transition-colors">
@@ -96,10 +96,10 @@ export function ScenarioDetailPanel({ scenarioId, onClose }: Props) {
             <div className="grid grid-cols-5 gap-0 border-b border-stroke shrink-0">
               {[
                 { icon: Users, label: 'Katılımcı', value: data.stats.total_answers, color: 'text-blue-400' },
-                { icon: Swords, label: 'Düello', value: data.stats.total_duels, color: 'text-purple-400' },
+                { icon: Swords, label: 'Düello', value: data.stats.total_duels, color: 'text-primary/70' },
                 { icon: Clock, label: 'Aktif', value: data.stats.active_duels, color: 'text-amber-400' },
                 { icon: Trophy, label: 'Tamamlandı', value: data.stats.completed_duels, color: 'text-green-400' },
-                { icon: Star, label: 'Toplam Oy', value: data.stats.total_votes, color: 'text-pink-400' },
+                { icon: Star, label: 'Toplam Oy', value: data.stats.total_votes, color: 'text-secondary/70' },
               ].map(({ icon: Icon, label, value, color }) => (
                 <div key={label} className="text-center py-3 border-r border-stroke last:border-r-0">
                   <Icon size={14} className={`${color} mx-auto mb-1`} />
@@ -115,7 +115,7 @@ export function ScenarioDetailPanel({ scenarioId, onClose }: Props) {
                 onClick={() => setTab('answers')}
                 className={`flex-1 py-2.5 text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${
                   tab === 'answers'
-                    ? 'text-purple-400 border-b-2 border-purple-400'
+                    ? 'text-primary/70 border-b-2 border-primary/70'
                     : 'text-fg-subtle hover:text-fg'
                 }`}
               >
@@ -126,7 +126,7 @@ export function ScenarioDetailPanel({ scenarioId, onClose }: Props) {
                 onClick={() => setTab('duels')}
                 className={`flex-1 py-2.5 text-sm font-semibold transition-colors flex items-center justify-center gap-1.5 ${
                   tab === 'duels'
-                    ? 'text-purple-400 border-b-2 border-purple-400'
+                    ? 'text-primary/70 border-b-2 border-primary/70'
                     : 'text-fg-subtle hover:text-fg'
                 }`}
               >
@@ -153,7 +153,7 @@ export function ScenarioDetailPanel({ scenarioId, onClose }: Props) {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                           <Avatar src={a.user?.avatar_url} username={a.user?.username ?? '?'} size="xs" />
-                          <Link href={`/profil/${a.user?.username}`} className="text-xs font-semibold text-fg hover:text-purple-400 transition-colors">
+                          <Link href={`/profil/${a.user?.username}`} className="text-xs font-semibold text-fg hover:text-primary/70 transition-colors">
                             {a.user?.display_name || a.user?.username || '?'}
                           </Link>
                           {a.vote_count > 0 && (
@@ -187,7 +187,7 @@ export function ScenarioDetailPanel({ scenarioId, onClose }: Props) {
                             {d.status === 'pending'   && <Badge variant="warning" className="text-xs">⏳ Bekliyor</Badge>}
                             <span className="text-xs text-fg-subtle">{d.total_votes} oy</span>
                           </div>
-                          <Link href={`/duel/${d.share_token}`} className="text-xs text-purple-400 hover:underline">
+                          <Link href={`/duel/${d.share_token}`} className="text-xs text-primary/70 hover:underline">
                             Görüntüle →
                           </Link>
                         </div>
@@ -205,8 +205,8 @@ export function ScenarioDetailPanel({ scenarioId, onClose }: Props) {
                           {/* Vote bar */}
                           <div className="flex flex-col items-center gap-1 shrink-0">
                             <div className="w-24 h-1.5 rounded-full overflow-hidden flex bg-stroke">
-                              <div className="bg-purple-500 transition-all" style={{ width: `${pctA}%` }} />
-                              <div className="bg-pink-500 transition-all" style={{ width: `${100 - pctA}%` }} />
+                              <div className="bg-primary transition-all" style={{ width: `${pctA}%` }} />
+                              <div className="bg-secondary transition-all" style={{ width: `${100 - pctA}%` }} />
                             </div>
                             <span className="text-[10px] text-fg-subtle">{pctA}% — {100 - pctA}%</span>
                           </div>

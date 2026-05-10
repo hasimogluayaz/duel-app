@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 export const dynamic = 'force-dynamic'
 
@@ -94,8 +94,8 @@ function UpdatePasswordForm() {
         ) : (
           <Card>
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-purple-500/20 rounded-xl flex items-center justify-center">
-                <Lock size={20} className="text-purple-400" />
+              <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
+                <Lock size={20} className="text-primary/70" />
               </div>
               <div>
                 <h1 className="text-xl font-black text-fg">Yeni Şifre Belirle</h1>
@@ -105,7 +105,7 @@ function UpdatePasswordForm() {
 
             {!sessionReady ? (
               <div className="text-center py-8">
-                <div className="animate-spin w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full mx-auto mb-3" />
+                <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full mx-auto mb-3" />
                 <p className="text-sm text-fg-subtle">Kimlik doğrulanıyor...</p>
                 <p className="text-xs text-fg-subtle mt-2">
                   Bağlantı gelmedi mi?{' '}

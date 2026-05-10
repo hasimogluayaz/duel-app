@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
@@ -85,7 +85,7 @@ export default function AraPage() {
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Kullanıcı veya senaryo ara..."
-            className="w-full bg-surface border border-stroke rounded-2xl pl-10 pr-10 py-3.5 text-fg placeholder-fg-subtle focus:outline-none focus:border-violet-500/50 text-sm transition-colors"
+            className="w-full bg-surface border border-stroke rounded-2xl pl-10 pr-10 py-3.5 text-fg placeholder-fg-subtle focus:outline-none focus:border-primary/50 text-sm transition-colors"
           />
           {query && (
             <button
@@ -105,7 +105,7 @@ export default function AraPage() {
               onClick={() => setTab(t)}
               className={`flex-1 py-2 px-3 rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-1.5 ${
                 tab === t
-                  ? 'bg-violet-600 text-white shadow-sm'
+                  ? 'bg-primary text-white shadow-sm'
                   : 'text-fg-subtle hover:text-fg-muted hover:bg-surface-2'
               }`}
             >
@@ -117,7 +117,7 @@ export default function AraPage() {
         {/* Loading */}
         {loading && (
           <div className="flex justify-center py-10">
-            <Loader2 size={24} className="text-violet-400 animate-spin" />
+            <Loader2 size={24} className="text-primary/70 animate-spin" />
           </div>
         )}
 
@@ -148,7 +148,7 @@ export default function AraPage() {
               const tier = getTier(u.total_points)
               return (
                 <Link key={u.id} href={`/profil/${u.username}`}>
-                  <div className="flex items-center gap-3 bg-surface border border-stroke hover:border-violet-500/30 hover:bg-violet-500/5 rounded-2xl p-3 transition-all cursor-pointer">
+                  <div className="flex items-center gap-3 bg-surface border border-stroke hover:border-primary/30 hover:bg-primary/5 rounded-2xl p-3 transition-all cursor-pointer">
                     <Avatar src={u.avatar_url} username={u.username} size="md" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
@@ -174,7 +174,7 @@ export default function AraPage() {
           <div className="space-y-2">
             {scenarios.map(s => (
               <Link key={s.id} href={`/arsiv/${s.id}`}>
-                <div className="bg-surface border border-stroke hover:border-violet-500/30 hover:bg-violet-500/5 rounded-2xl p-4 transition-all cursor-pointer">
+                <div className="bg-surface border border-stroke hover:border-primary/30 hover:bg-primary/5 rounded-2xl p-4 transition-all cursor-pointer">
                   <p className="text-sm text-fg leading-relaxed mb-2">{s.content}</p>
                   <div className="flex items-center gap-2 text-xs text-fg-subtle">
                     <span>{s.category}</span>

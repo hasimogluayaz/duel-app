@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState, useCallback } from 'react'
 import { Card } from '@/components/ui/Card'
@@ -81,7 +81,7 @@ export default function AdminMesajlarPage() {
               <Card
                 key={msg.id}
                 className={`cursor-pointer transition-all ${
-                  selected?.id === msg.id ? 'border-purple-500/60 bg-purple-500/5' : ''
+                  selected?.id === msg.id ? 'border-primary/60 bg-primary/5' : ''
                 } ${!msg.is_read ? 'border-blue-500/30' : ''}`}
                 onClick={() => { setSelected(msg); if (!msg.is_read) markRead(msg.id) }}
               >
@@ -141,7 +141,7 @@ export default function AdminMesajlarPage() {
                   <div>
                     <h2 className="text-base font-bold text-fg">{selected.subject}</h2>
                     <p className="text-sm text-fg-muted mt-0.5">{selected.name}</p>
-                    <a href={`mailto:${selected.email}`} className="text-xs text-purple-400 hover:underline">
+                    <a href={`mailto:${selected.email}`} className="text-xs text-primary/70 hover:underline">
                       {selected.email}
                     </a>
                     <p className="text-xs text-fg-subtle mt-1">
@@ -150,7 +150,7 @@ export default function AdminMesajlarPage() {
                   </div>
                   <a
                     href={`mailto:${selected.email}?subject=Re: ${encodeURIComponent(selected.subject)}`}
-                    className="shrink-0 px-3 py-1.5 text-xs font-semibold bg-purple-600 text-white rounded-lg hover:bg-purple-500 transition-colors"
+                    className="shrink-0 px-3 py-1.5 text-xs font-semibold bg-primary text-white rounded-lg hover:bg-primary transition-colors"
                   >
                     Yanıtla
                   </a>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { Card } from '@/components/ui/Card'
@@ -154,7 +154,7 @@ export default function AdminSenaryolarPage() {
       <div className="flex gap-1 bg-surface border border-stroke rounded-xl p-1 mb-4">
         <button
           onClick={() => setTab('scheduled')}
-          className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${tab === 'scheduled' ? 'bg-purple-600 text-white' : 'text-fg-subtle hover:text-fg'}`}
+          className={`flex-1 py-2 rounded-lg text-sm font-semibold transition-all ${tab === 'scheduled' ? 'bg-primary text-white' : 'text-fg-subtle hover:text-fg'}`}
         >Zamanlanmış</button>
         <button
           onClick={() => setTab('pending')}
@@ -167,7 +167,7 @@ export default function AdminSenaryolarPage() {
 
       {/* Manual form */}
       {tab === 'scheduled' && showForm && (
-        <Card className="mb-5 border-purple-500/30">
+        <Card className="mb-5 border-primary/30">
           <h2 className="font-bold text-fg text-sm mb-4">Yeni Senaryo Ekle</h2>
           <form onSubmit={saveScenario} className="flex flex-col gap-3">
             <div>
@@ -176,7 +176,7 @@ export default function AdminSenaryolarPage() {
                 type="date"
                 value={form.active_date}
                 onChange={e => setForm(f => ({ ...f, active_date: e.target.value }))}
-                className="w-full bg-surface-2 border border-stroke rounded-xl px-3 py-2 text-sm text-fg focus:outline-none focus:border-purple-500"
+                className="w-full bg-surface-2 border border-stroke rounded-xl px-3 py-2 text-sm text-fg focus:outline-none focus:border-primary"
                 required
               />
             </div>
@@ -188,7 +188,7 @@ export default function AdminSenaryolarPage() {
                 rows={3}
                 maxLength={300}
                 placeholder="Günün senaryosunu yaz..."
-                className="w-full bg-surface-2 border border-stroke rounded-xl px-3 py-2 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-purple-500 resize-none"
+                className="w-full bg-surface-2 border border-stroke rounded-xl px-3 py-2 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-primary resize-none"
                 required
               />
               <p className="text-xs text-fg-subtle text-right mt-1">{form.content.length}/300</p>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -54,7 +54,7 @@ export default function RematchButton({ duelId, opponentName }: Props) {
       <button
         onClick={request}
         disabled={loading}
-        className="flex items-center gap-2 text-sm font-semibold text-fg-muted hover:text-violet-400 border border-stroke hover:border-violet-500/40 rounded-xl px-4 py-2.5 transition-all disabled:opacity-40 hover:bg-violet-500/5"
+        className="flex items-center gap-2 text-sm font-semibold text-fg-muted hover:text-primary/70 border border-stroke hover:border-primary/40 rounded-xl px-4 py-2.5 transition-all disabled:opacity-40 hover:bg-primary/5"
       >
         <RotateCcw size={14} className={loading ? 'animate-spin' : ''} />
         {loading ? 'Gönderiliyor...' : `Rövanş${opponentName ? ` (${opponentName})` : ''}`}

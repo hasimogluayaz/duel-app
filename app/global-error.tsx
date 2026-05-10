@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 export default function GlobalError({
   reset,
@@ -15,7 +15,7 @@ export default function GlobalError({
           <p className="text-fg-muted mb-6">Uygulama çöktü. Lütfen sayfayı yenileyin.</p>
           <button
             onClick={reset}
-            className="bg-purple-600 text-fg px-6 py-2.5 rounded-xl font-semibold hover:bg-purple-500"
+            className="bg-primary text-fg px-6 py-2.5 rounded-xl font-semibold hover:bg-primary"
           >
             Yenile
           </button>

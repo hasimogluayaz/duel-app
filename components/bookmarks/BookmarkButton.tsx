@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Bookmark, BookmarkCheck } from 'lucide-react'
@@ -47,7 +47,7 @@ export default function BookmarkButton({ type, id, initialBookmarked = false, si
       disabled={loading}
       title={bookmarked ? 'Kaydedildi' : 'Kaydet'}
       className={`flex items-center gap-1 transition-all disabled:opacity-50 ${
-        bookmarked ? 'text-violet-400' : 'text-fg-subtle hover:text-fg-muted'
+        bookmarked ? 'text-primary/70' : 'text-fg-subtle hover:text-fg-muted'
       } ${className}`}
     >
       <Icon size={size} className={loading ? 'animate-pulse' : ''} />

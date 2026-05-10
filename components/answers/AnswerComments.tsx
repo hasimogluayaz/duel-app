@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
 import { MessageSquare, Send, Trash2, ChevronDown, ChevronUp } from 'lucide-react'
@@ -152,12 +152,12 @@ export default function AnswerComments({ answerId, currentUserId, initialCount =
                 onKeyDown={e => e.key === 'Enter' && submit()}
                 placeholder="Yorum ekle..."
                 maxLength={300}
-                className="flex-1 bg-surface border border-stroke rounded-xl px-3 py-2 text-xs text-fg placeholder-fg-subtle focus:outline-none focus:border-violet-500/50"
+                className="flex-1 bg-surface border border-stroke rounded-xl px-3 py-2 text-xs text-fg placeholder-fg-subtle focus:outline-none focus:border-primary/50"
               />
               <button
                 onClick={submit}
                 disabled={!text.trim() || sending}
-                className="w-8 h-8 rounded-xl bg-violet-600 hover:bg-violet-500 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
+                className="w-8 h-8 rounded-xl bg-primary hover:bg-primary disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center transition-colors"
               >
                 <Send size={12} className="text-white" />
               </button>

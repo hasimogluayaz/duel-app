@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Crown, CheckCircle, Lock } from 'lucide-react'
@@ -49,7 +49,7 @@ export default function TitleSelector({ userId, currentTitle }: Props) {
         <Crown size={14} className="text-yellow-400" />
         <span className="text-sm font-bold text-fg">Unvanlar</span>
         {active && (
-          <span className="ml-auto text-xs text-violet-400 bg-violet-500/10 px-2 py-0.5 rounded-full border border-violet-500/20">
+          <span className="ml-auto text-xs text-primary/70 bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
             Aktif: {ALL_TITLES.find(t => t.title === active)?.emoji} {ALL_TITLES.find(t => t.title === active)?.label}
           </span>
         )}
@@ -68,9 +68,9 @@ export default function TitleSelector({ userId, currentTitle }: Props) {
               disabled={!isEarned || !!setting}
               className={`flex items-center gap-3 p-3 rounded-xl text-left transition-all ${
                 isActive
-                  ? 'bg-violet-500/15 border border-violet-500/30'
+                  ? 'bg-primary/15 border border-primary/30'
                   : isEarned
-                  ? 'bg-surface-2 border border-stroke hover:bg-stroke hover:border-purple-500/30 cursor-pointer'
+                  ? 'bg-surface-2 border border-stroke hover:bg-stroke hover:border-primary/30 cursor-pointer'
                   : 'opacity-40 cursor-default bg-surface-2 border border-stroke'
               }`}
             >
@@ -81,9 +81,9 @@ export default function TitleSelector({ userId, currentTitle }: Props) {
               </div>
               <div className="shrink-0">
                 {isPending ? (
-                  <div className="w-5 h-5 rounded-full border-2 border-violet-500 border-t-transparent animate-spin" />
+                  <div className="w-5 h-5 rounded-full border-2 border-primary border-t-transparent animate-spin" />
                 ) : isActive ? (
-                  <CheckCircle size={16} className="text-violet-400" />
+                  <CheckCircle size={16} className="text-primary/70" />
                 ) : !isEarned ? (
                   <Lock size={14} className="text-fg-subtle opacity-50" />
                 ) : null}

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 export const dynamic = 'force-dynamic'
 
@@ -46,7 +46,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   if (checking) return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full" />
+      <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
     </div>
   )
 
@@ -67,7 +67,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             className={cn(
               'flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors',
               pathname === href
-                ? 'bg-purple-500/15 text-purple-300'
+                ? 'bg-primary/15 text-primary/40'
                 : 'text-fg-muted hover:text-fg hover:bg-surface-2'
             )}
           >
@@ -140,7 +140,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 className={cn(
                   'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors',
                   pathname === href
-                    ? 'bg-purple-500/15 text-purple-300'
+                    ? 'bg-primary/15 text-primary/40'
                     : 'text-fg-muted hover:text-fg hover:bg-surface-2'
                 )}
               >

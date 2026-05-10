@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 export const dynamic = 'force-dynamic'
 
@@ -114,7 +114,7 @@ export default function PremiumPage() {
 
       <p className="text-center text-xs text-fg-subtle mt-6">
         Sorun mu var?{' '}
-        <Link href="/iletisim" className="text-purple-400 hover:text-purple-300">İletişime geç</Link>
+        <Link href="/iletisim" className="text-primary/70 hover:text-primary/40">İletişime geç</Link>
       </p>
     </div>
   )

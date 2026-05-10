@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 export const dynamic = 'force-dynamic'
 
@@ -45,7 +45,7 @@ const ACHIEVEMENT_MAP: Record<string, {
   },
   seri_avcisi: {
     emoji: '🎯', label: 'Seri Avcısı', description: '3 düelloyu arka arkaya kazan',
-    how: 'Peş peşe galip gel', icon: Zap, color: 'text-violet-400',
+    how: 'Peş peşe galip gel', icon: Zap, color: 'text-primary/70',
     points: 100,
   },
   efsane_serisi: {
@@ -55,7 +55,7 @@ const ACHIEVEMENT_MAP: Record<string, {
   },
   sosyal_kelebek: {
     emoji: '🦋', label: 'Sosyal Kelebek', description: '10 kişiyi takip et',
-    how: 'Profil sayfalarından takip et', icon: Users, color: 'text-pink-400',
+    how: 'Profil sayfalarından takip et', icon: Users, color: 'text-secondary/70',
     points: 75, progress: p => ({ current: Math.min(p.following_count ?? 0, 10), target: 10 }),
   },
   populer: {
@@ -75,7 +75,7 @@ const ACHIEVEMENT_MAP: Record<string, {
   },
   karisik_kafali: {
     emoji: '🎲', label: 'Karışık Kafalı', description: '5 farklı kategoride cevap ver',
-    how: 'Çeşitli senaryolara cevap ver', icon: Zap, color: 'text-purple-400',
+    how: 'Çeşitli senaryolara cevap ver', icon: Zap, color: 'text-primary/70',
     points: 100,
   },
   davetkar: {

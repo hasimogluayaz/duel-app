@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic'
+﻿export const dynamic = 'force-dynamic'
 
 import Link from 'next/link'
 import Image from 'next/image'
@@ -109,11 +109,11 @@ export default async function HomePage() {
 
         {/* ── Hero ── */}
         <section className="relative overflow-hidden">
-          <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-purple-600/8 rounded-full blur-[120px]" />
+          <div className="pointer-events-none absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-primary/8 rounded-full blur-[120px]" />
 
           <div className="relative max-w-5xl mx-auto px-4 pt-16 pb-12 text-center">
             <div className="inline-flex items-center gap-2 bg-surface border border-stroke rounded-full px-4 py-1.5 text-sm text-fg-muted mb-6">
-              <Sparkles size={12} className="text-purple-400" />
+              <Sparkles size={12} className="text-primary/70" />
               <span>Yapay zeka destekli günlük tartışma platformu</span>
             </div>
 
@@ -129,7 +129,7 @@ export default async function HomePage() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10">
               <Link href="/kayit">
-                <Button size="lg" className="text-base px-8 btn-gradient shadow-lg shadow-purple-500/20">
+                <Button size="lg" className="text-base px-8 btn-gradient shadow-lg shadow-primary/20">
                   Ücretsiz Başla
                   <ArrowRight size={16} />
                 </Button>
@@ -225,7 +225,7 @@ export default async function HomePage() {
                           {blurred && (
                             <Link href="/kayit" className="absolute inset-0 flex items-center justify-center rounded-xl bg-surface/70 backdrop-blur-[3px] hover:bg-surface/60 transition-colors">
                               <div className="flex items-center gap-2 bg-surface border border-stroke rounded-xl px-3 py-2 shadow-md">
-                                <Lock size={13} className="text-purple-400" />
+                                <Lock size={13} className="text-primary/70" />
                                 <span className="text-xs font-semibold text-fg">Görmek için katıl</span>
                               </div>
                             </Link>
@@ -259,7 +259,7 @@ export default async function HomePage() {
                 key={mode.title}
                 className={`relative rounded-2xl border p-5 transition-all ${
                   mode.active
-                    ? 'border-stroke bg-surface hover:bg-surface-2 hover:border-purple-500/30 cursor-pointer'
+                    ? 'border-stroke bg-surface hover:bg-surface-2 hover:border-primary/30 cursor-pointer'
                     : 'border-stroke bg-surface opacity-50'
                 }`}
               >
@@ -330,7 +330,7 @@ export default async function HomePage() {
             </h2>
             <p className="text-fg-muted mb-8 text-sm">Hesap oluştur, cevabını yaz, arkadaşını meydan okumaya çağır.</p>
             <Link href="/kayit">
-              <Button size="lg" className="text-base px-10 btn-gradient shadow-lg shadow-purple-500/20">
+              <Button size="lg" className="text-base px-10 btn-gradient shadow-lg shadow-primary/20">
                 Şimdi Başla
               </Button>
             </Link>

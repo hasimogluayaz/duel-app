@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useRef, useState } from 'react'
 import { Button } from '@/components/ui/Button'
@@ -29,7 +29,7 @@ const PLATFORMS = [
     id: 'instagram',
     label: 'Instagram',
     icon: '📸',
-    color: 'bg-gradient-to-r from-purple-600 via-pink-500 to-orange-400 hover:opacity-90',
+    color: 'bg-gradient-to-r from-primary via-secondary to-orange-400 hover:opacity-90',
   },
 ]
 
@@ -128,7 +128,7 @@ export function ShareCard({ duel, winnerProfile, onClose }: Props) {
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
           <div>
             <h3 className="font-black text-fg text-lg">Düelloyu Paylaş</h3>
-            <p className="text-xs text-purple-400/70 mt-0.5">Arkadaşlarını düelloya davet et</p>
+            <p className="text-xs text-primary/70/70 mt-0.5">Arkadaşlarını düelloya davet et</p>
           </div>
           <button onClick={onClose} className="text-fg-subtle hover:text-fg transition-colors">
             <X size={20} />
@@ -143,7 +143,7 @@ export function ShareCard({ duel, winnerProfile, onClose }: Props) {
               onClick={() => setFormat(f)}
               className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
                 format === f
-                  ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/40'
+                  ? 'bg-primary text-white shadow-lg shadow-purple-900/40'
                   : 'bg-surface-2 text-fg-subtle hover:bg-stroke'
               }`}
             >
@@ -154,7 +154,7 @@ export function ShareCard({ duel, winnerProfile, onClose }: Props) {
 
         {/* Card preview */}
         <div className="px-5 mb-4">
-          <div className="rounded-xl overflow-hidden border border-purple-500/20 bg-black">
+          <div className="rounded-xl overflow-hidden border border-primary/20 bg-black">
             {format === 'square' ? (
               <div style={{ width: '100%', paddingBottom: '100%', position: 'relative' }}>
                 <div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>

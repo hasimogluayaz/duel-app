@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic'
+﻿export const dynamic = 'force-dynamic'
 
 import type { Metadata } from 'next'
 
@@ -85,7 +85,7 @@ export default function CerezPolitikasiPage() {
           <h2 className="text-lg font-bold text-fg mb-3">İletişim</h2>
           <p>
             Çerez politikamız hakkında sorularınız için:{' '}
-            <a href="mailto:info@kapisio.com" className="text-purple-400 hover:underline">
+            <a href="mailto:info@kapisio.com" className="text-primary/70 hover:underline">
               info@kapisio.com
             </a>
           </p>

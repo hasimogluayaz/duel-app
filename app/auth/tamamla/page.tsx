@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 export const dynamic = 'force-dynamic'
 
@@ -128,10 +128,10 @@ export default function TamamlaPage() {
               alt={user.full_name || ''}
               width={72}
               height={72}
-              className="w-18 h-18 rounded-full mx-auto mb-4 ring-2 ring-purple-500/30"
+              className="w-18 h-18 rounded-full mx-auto mb-4 ring-2 ring-primary/30"
             />
           ) : (
-            <div className="w-18 h-18 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">
+            <div className="w-18 h-18 rounded-full bg-gradient-to-br from-primary to-secondary mx-auto mb-4 flex items-center justify-center text-white text-2xl font-black">
               {(user?.full_name || user?.email || '?')[0].toUpperCase()}
             </div>
           )}
@@ -158,7 +158,7 @@ export default function TamamlaPage() {
                 onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
                 placeholder="kullaniciadın"
                 maxLength={20}
-                className="w-full pl-7 pr-10 py-2.5 rounded-xl border border-stroke bg-surface-2 text-fg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/40 focus:border-purple-500/60 transition-colors"
+                className="w-full pl-7 pr-10 py-2.5 rounded-xl border border-stroke bg-surface-2 text-fg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/60 transition-colors"
                 autoComplete="username"
                 autoFocus
               />
@@ -186,9 +186,9 @@ export default function TamamlaPage() {
             maxLength={50}
           />
 
-          <div className="bg-purple-500/5 border border-purple-500/15 rounded-xl px-4 py-3">
+          <div className="bg-primary/5 border border-primary/15 rounded-xl px-4 py-3">
             <div className="flex items-start gap-2">
-              <Sparkles size={14} className="text-purple-400 mt-0.5 shrink-0" />
+              <Sparkles size={14} className="text-primary/70 mt-0.5 shrink-0" />
               <p className="text-xs text-fg-subtle">
                 Kullanıcı adın profilinde ve liderlik tablosunda görünür. Sonradan <span className="text-fg-muted font-medium">Ayarlar</span>&apos;dan değiştirebilirsin.
               </p>

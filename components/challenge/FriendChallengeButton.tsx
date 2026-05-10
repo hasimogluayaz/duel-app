@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Users, Copy, CheckCircle, Loader2 } from 'lucide-react'
@@ -60,7 +60,7 @@ export default function FriendChallengeButton({ scenarioId, answerId, userId }: 
           </div>
           <button
             onClick={copyLink}
-            className="shrink-0 flex items-center gap-1.5 bg-violet-600 hover:bg-violet-500 text-white rounded-xl px-3 py-2 text-xs font-semibold transition-colors"
+            className="shrink-0 flex items-center gap-1.5 bg-primary hover:bg-primary text-white rounded-xl px-3 py-2 text-xs font-semibold transition-colors"
           >
             {copied ? <><CheckCircle size={12} /> Kopyalandı!</> : <><Copy size={12} /> Kopyala</>}
           </button>
@@ -70,7 +70,7 @@ export default function FriendChallengeButton({ scenarioId, answerId, userId }: 
           <button
             onClick={createLink}
             disabled={loading}
-            className="flex items-center gap-2 bg-violet-500/10 hover:bg-violet-500/20 border border-violet-500/20 hover:border-violet-500/40 text-violet-400 hover:text-violet-300 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all w-full justify-center"
+            className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 border border-primary/20 hover:border-primary/40 text-primary/70 hover:text-primary/40 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all w-full justify-center"
           >
             {loading
               ? <><Loader2 size={14} className="animate-spin" /> Link oluşturuluyor...</>

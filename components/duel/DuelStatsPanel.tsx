@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Swords, TrendingUp, TrendingDown, Target, BarChart3 } from 'lucide-react'
@@ -77,8 +77,8 @@ export default function DuelStatsPanel({ username, isOwnProfile }: Props) {
 
       {/* H2H */}
       {stats.h2h && stats.h2h.total > 0 && (
-        <div className="bg-violet-500/8 border border-violet-500/20 rounded-2xl p-4">
-          <p className="text-xs text-violet-400 font-semibold mb-2 flex items-center gap-1.5">
+        <div className="bg-primary/8 border border-primary/20 rounded-2xl p-4">
+          <p className="text-xs text-primary/70 font-semibold mb-2 flex items-center gap-1.5">
             <Swords size={12} /> Aramızdaki Rekabet
           </p>
           <div className="flex items-center gap-3">

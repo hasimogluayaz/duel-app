@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useCallback, useRef } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
@@ -158,7 +158,7 @@ export default function ArsivClient({
             {userId && (
               <button
                 onClick={() => setShowCreate(true)}
-                className="mt-4 text-violet-400 hover:text-violet-300 text-sm underline"
+                className="mt-4 text-primary/70 hover:text-primary/40 text-sm underline"
               >
                 İlk senaryoyu sen oluştur!
               </button>
@@ -264,7 +264,7 @@ function CreateScenarioModal({
               placeholder="Bir durum yaz... (en az 20 karakter)"
               maxLength={280}
               rows={4}
-              className="w-full bg-surface-2 border border-stroke rounded-xl p-3 text-fg placeholder-fg-subtle text-sm resize-none focus:outline-none focus:border-violet-500"
+              className="w-full bg-surface-2 border border-stroke rounded-xl p-3 text-fg placeholder-fg-subtle text-sm resize-none focus:outline-none focus:border-primary"
             />
             <div className={`text-right text-xs mt-1 ${content.length > 250 ? 'text-orange-400' : 'text-fg-subtle'}`}>
               {content.length}/280

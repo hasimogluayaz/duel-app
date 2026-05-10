@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/Button'
@@ -29,7 +29,7 @@ export function CookieBanner() {
       <div className="max-w-2xl mx-auto bg-surface border border-stroke rounded-2xl p-5 shadow-2xl">
         <p className="text-sm text-fg-muted mb-4">
           🍪 Bu site, daha iyi deneyim sunmak için çerezler kullanır. Zorunlu çerezler (oturum) her zaman aktiftir.{' '}
-          <Link href="/cerez-politikasi" className="text-purple-400 hover:underline">Çerez politikamızı</Link> okuyabilirsiniz.
+          <Link href="/cerez-politikasi" className="text-primary/70 hover:underline">Çerez politikamızı</Link> okuyabilirsiniz.
         </p>
         <div className="flex gap-3 flex-wrap">
           <Button onClick={accept} size="sm">Kabul Et</Button>

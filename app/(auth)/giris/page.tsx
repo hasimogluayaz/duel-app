@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 export const dynamic = 'force-dynamic'
 
@@ -89,7 +89,7 @@ function GirisForm() {
   return (
     <div className="min-h-[calc(100vh-4rem)] flex">
       {/* Left branding panel — hidden on mobile */}
-      <div className="hidden lg:flex flex-col justify-between w-[480px] shrink-0 bg-gradient-to-br from-violet-600 via-purple-600 to-pink-500 p-12 text-white relative overflow-hidden">
+      <div className="hidden lg:flex flex-col justify-between w-[480px] shrink-0 bg-gradient-to-br from-primary via-primary to-secondary p-12 text-white relative overflow-hidden">
         {/* Background decoration */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { Bell, BellOff, Check } from 'lucide-react'
@@ -57,8 +57,8 @@ export default function NotificationPrefs() {
   return (
     <div className="bg-surface border border-stroke rounded-2xl overflow-hidden">
       <div className="flex items-center gap-2.5 p-4 border-b border-stroke">
-        <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
-          <Bell size={16} className="text-violet-400" />
+        <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+          <Bell size={16} className="text-primary/70" />
         </div>
         <div>
           <h2 className="text-sm font-bold text-fg">Bildirim Tercihleri</h2>
@@ -90,13 +90,13 @@ export default function NotificationPrefs() {
                   onClick={() => toggle(key)}
                   disabled={!!saving}
                   className={`relative w-11 h-6 rounded-full transition-all shrink-0 ${
-                    isOn ? 'bg-violet-600' : 'bg-stroke'
+                    isOn ? 'bg-primary' : 'bg-stroke'
                   } ${saving ? 'opacity-60' : ''}`}
                 >
                   <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-all ${
                     isOn ? 'translate-x-5' : 'translate-x-0'
                   } ${isSaving ? 'animate-pulse' : ''} left-0.5`}>
-                    {isSaved && <Check size={10} className="absolute inset-0 m-auto text-violet-600" />}
+                    {isSaved && <Check size={10} className="absolute inset-0 m-auto text-primary" />}
                   </div>
                 </button>
               </div>

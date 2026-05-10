@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -48,7 +48,7 @@ export default function FollowListClient({ profile, users, mode, currentUserId }
             href={`/profil/${profile.username}/takip`}
             className={`flex-1 py-3 text-sm font-semibold text-center border-b-2 transition-colors ${
               mode === 'following'
-                ? 'border-purple-500 text-fg'
+                ? 'border-primary text-fg'
                 : 'border-transparent text-fg-subtle hover:text-fg'
             }`}
           >
@@ -58,7 +58,7 @@ export default function FollowListClient({ profile, users, mode, currentUserId }
             href={`/profil/${profile.username}/takipciler`}
             className={`flex-1 py-3 text-sm font-semibold text-center border-b-2 transition-colors ${
               mode === 'followers'
-                ? 'border-purple-500 text-fg'
+                ? 'border-primary text-fg'
                 : 'border-transparent text-fg-subtle hover:text-fg'
             }`}
           >
@@ -87,7 +87,7 @@ export default function FollowListClient({ profile, users, mode, currentUserId }
                 <div className="flex-1 min-w-0">
                   <Link href={`/profil/${u.username}`} className="group">
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="font-semibold text-fg text-sm group-hover:text-purple-400 transition-colors truncate">
+                      <span className="font-semibold text-fg text-sm group-hover:text-primary/70 transition-colors truncate">
                         {u.display_name || u.username}
                       </span>
                       <span className="text-xs">{tier.emoji}</span>

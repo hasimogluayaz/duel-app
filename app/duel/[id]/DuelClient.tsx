@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
@@ -203,9 +203,9 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
     <div className="max-w-3xl mx-auto px-4 py-8">
 
       {/* ── Arena header ─────────────────────────────── */}
-      <div className="relative rounded-2xl overflow-hidden border border-purple-500/20 bg-gradient-to-br from-violet-600/15 via-purple-600/8 to-pink-500/15 p-6 mb-6">
-        <div className="pointer-events-none absolute -top-10 -right-10 w-40 h-40 bg-purple-500/10 rounded-full blur-2xl" />
-        <div className="pointer-events-none absolute -bottom-10 -left-10 w-32 h-32 bg-pink-500/8 rounded-full blur-2xl" />
+      <div className="relative rounded-2xl overflow-hidden border border-primary/20 bg-gradient-to-br from-primary/15 via-primary/8 to-secondary/15 p-6 mb-6">
+        <div className="pointer-events-none absolute -top-10 -right-10 w-40 h-40 bg-primary/10 rounded-full blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-10 -left-10 w-32 h-32 bg-secondary/8 rounded-full blur-2xl" />
 
         <div className="relative">
           {/* Status badge */}
@@ -223,7 +223,7 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
                 </span>
               )}
               {isCompleted && (
-                <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-purple-500/20 border border-purple-500/30 text-purple-400">
+                <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-primary/20 border border-primary/30 text-primary/70">
                   🏁 Tamamlandı
                 </span>
               )}
@@ -262,7 +262,7 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
               </div>
               {isCompleted ? (
                 <>
-                  <Link href={`/profil/${sides[0].profile?.username}`} className="text-sm font-black text-fg hover:text-purple-300 transition-colors">
+                  <Link href={`/profil/${sides[0].profile?.username}`} className="text-sm font-black text-fg hover:text-primary/40 transition-colors">
                     {sides[0].profile?.display_name || sides[0].profile?.username}
                   </Link>
                   <span className={`text-xs font-bold ${sides[0].tier.color} mt-0.5`}>
@@ -279,7 +279,7 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
 
             {/* VS center */}
             <div className="flex flex-col items-center gap-1 shrink-0">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-purple-500/30">
+              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/30">
                 <Swords size={20} className="text-white" />
               </div>
               <span className="text-xs font-black text-fg-subtle tracking-widest">VS</span>
@@ -304,7 +304,7 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
               </div>
               {isCompleted ? (
                 <>
-                  <Link href={`/profil/${sides[1].profile?.username}`} className="text-sm font-black text-fg hover:text-purple-300 transition-colors">
+                  <Link href={`/profil/${sides[1].profile?.username}`} className="text-sm font-black text-fg hover:text-primary/40 transition-colors">
                     {sides[1].profile?.display_name || sides[1].profile?.username}
                   </Link>
                   <span className={`text-xs font-bold ${sides[1].tier.color} mt-0.5`}>
@@ -377,7 +377,7 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
                     ${isWinner ? 'border-amber-500/50 bg-amber-500/5 ring-1 ring-amber-500/20' : ''}
                     ${isLoser ? 'border-stroke bg-surface opacity-70' : ''}
                     ${!isCompleted ? 'border-stroke bg-surface' : ''}
-                    ${leadingNow && !isCompleted ? 'border-purple-500/40 bg-purple-500/5' : ''}
+                    ${leadingNow && !isCompleted ? 'border-primary/40 bg-primary/5' : ''}
                   `}
                 >
                   {isWinner && (
@@ -389,7 +389,7 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
                   )}
                   {leadingNow && !isCompleted && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-purple-600 text-white border border-purple-400/30">
+                      <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-primary text-white border border-primary/70/30">
                         ⚡ Önde
                       </span>
                     </div>
@@ -400,7 +400,7 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
                     <div className="flex items-center gap-2 mb-4">
                       <Avatar src={side.profile?.avatar_url} username={side.profile?.username || '?'} size="sm" />
                       <div>
-                        <Link href={`/profil/${side.profile?.username}`} className="text-sm font-bold text-fg hover:text-purple-400 transition-colors">
+                        <Link href={`/profil/${side.profile?.username}`} className="text-sm font-bold text-fg hover:text-primary/70 transition-colors">
                           {side.profile?.display_name || side.profile?.username}
                         </Link>
                         <div className="flex items-center gap-1.5">
@@ -456,25 +456,25 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
           {totalVotes > 0 && (
             <div className="mb-5">
               <div className="flex items-center justify-between text-xs mb-2 font-bold">
-                <span className={percentA >= percentB ? 'text-purple-400' : 'text-fg-subtle'}>
+                <span className={percentA >= percentB ? 'text-primary/70' : 'text-fg-subtle'}>
                   {isCompleted ? (sides[0].profile?.username || 'A') : 'Taraf A'} · {percentA}%
                 </span>
                 <span className="text-fg-subtle flex items-center gap-1">
                   <Users size={10} />
                   {totalVotes} toplam oy
                 </span>
-                <span className={percentB > percentA ? 'text-purple-400' : 'text-fg-subtle'}>
+                <span className={percentB > percentA ? 'text-primary/70' : 'text-fg-subtle'}>
                   {percentB}% · {isCompleted ? (sides[1].profile?.username || 'B') : 'Taraf B'}
                 </span>
               </div>
               {/* Split bar */}
               <div className="h-3 rounded-full overflow-hidden flex">
                 <div
-                  className="h-full bg-gradient-to-r from-purple-600 to-violet-500 transition-all duration-700 rounded-l-full"
+                  className="h-full bg-gradient-to-r from-primary to-primary transition-all duration-700 rounded-l-full"
                   style={{ width: `${percentA}%` }}
                 />
                 <div
-                  className="h-full bg-gradient-to-r from-pink-500 to-rose-500 transition-all duration-700 rounded-r-full"
+                  className="h-full bg-gradient-to-r from-secondary to-rose-500 transition-all duration-700 rounded-r-full"
                   style={{ width: `${percentB}%` }}
                 />
               </div>
@@ -532,7 +532,7 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
 
           {isParticipant && isActive && (
             <div className="text-center text-sm text-fg-subtle py-4 bg-surface border border-stroke rounded-xl">
-              <Swords size={14} className="inline mr-1.5 text-purple-400" />
+              <Swords size={14} className="inline mr-1.5 text-primary/70" />
               Kendi düellona oy veremezsin. Oylama sürüyor...
             </div>
           )}
@@ -559,7 +559,7 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
               )}
               <button
                 onClick={() => setShowShare(true)}
-                className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-pink-500 text-white text-sm font-bold hover:opacity-90 transition-opacity"
+                className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-primary to-secondary text-white text-sm font-bold hover:opacity-90 transition-opacity"
               >
                 <Share2 size={14} />
                 Paylaş

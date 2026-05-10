@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useCallback } from 'react'
 import { Avatar } from '@/components/ui/Avatar'
@@ -112,7 +112,7 @@ export function DuelFeedCard({ duel: initialDuel, userId, onVoted }: Props) {
   ]
 
   return (
-    <article className="rounded-2xl border border-stroke bg-surface overflow-hidden hover:border-purple-500/30 transition-all group/card">
+    <article className="rounded-2xl border border-stroke bg-surface overflow-hidden hover:border-primary/30 transition-all group/card">
 
       {/* ── Scenario header ─────────────────────────────── */}
       <div className="px-4 pt-4 pb-3 border-b border-stroke/60">
@@ -122,7 +122,7 @@ export function DuelFeedCard({ duel: initialDuel, userId, onVoted }: Props) {
           </p>
           <Link
             href={`/duel/${duel.share_token}`}
-            className="text-fg-subtle hover:text-purple-400 transition-colors shrink-0 mt-0.5 opacity-0 group-hover/card:opacity-100"
+            className="text-fg-subtle hover:text-primary/70 transition-colors shrink-0 mt-0.5 opacity-0 group-hover/card:opacity-100"
           >
             <ExternalLink size={13} />
           </Link>
@@ -160,7 +160,7 @@ export function DuelFeedCard({ duel: initialDuel, userId, onVoted }: Props) {
             <div
               key={s.side}
               className={`p-3.5 flex flex-col gap-2.5 transition-all ${
-                isVotedFor   ? 'bg-purple-500/8' : ''
+                isVotedFor   ? 'bg-primary/8' : ''
               } ${isOtherVoted ? 'opacity-55' : ''}`}
             >
               {/* User info */}
@@ -169,7 +169,7 @@ export function DuelFeedCard({ duel: initialDuel, userId, onVoted }: Props) {
                   <Avatar src={s.profile?.avatar_url} username={s.profile?.username ?? '?'} size="xs" />
                 </div>
                 <div className="min-w-0">
-                  <p className="text-xs font-semibold text-fg truncate group-hover/user:text-purple-300 transition-colors">
+                  <p className="text-xs font-semibold text-fg truncate group-hover/user:text-primary/40 transition-colors">
                     {s.profile?.display_name || s.profile?.username || `Taraf ${s.side}`}
                   </p>
                   <span className={`text-[10px] font-bold ${s.tier.color}`}>{s.tier.emoji} {s.tier.label}</span>
@@ -185,7 +185,7 @@ export function DuelFeedCard({ duel: initialDuel, userId, onVoted }: Props) {
               {voted ? (
                 <div className="space-y-1">
                   <div className="flex items-center justify-between text-[11px]">
-                    <span className={isVotedFor ? 'text-purple-400 font-bold' : 'text-fg-subtle'}>
+                    <span className={isVotedFor ? 'text-primary/70 font-bold' : 'text-fg-subtle'}>
                       {s.pct}%
                     </span>
                     <span className="text-fg-subtle">{s.votes}</span>
@@ -194,8 +194,8 @@ export function DuelFeedCard({ duel: initialDuel, userId, onVoted }: Props) {
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${
                         s.side === 'A'
-                          ? 'bg-gradient-to-r from-purple-600 to-violet-500'
-                          : 'bg-gradient-to-r from-pink-500 to-rose-500'
+                          ? 'bg-gradient-to-r from-primary to-primary'
+                          : 'bg-gradient-to-r from-secondary to-rose-500'
                       }`}
                       style={{ width: `${s.pct}%` }}
                     />
@@ -210,8 +210,8 @@ export function DuelFeedCard({ duel: initialDuel, userId, onVoted }: Props) {
                     ${!canVote
                       ? 'border-stroke text-fg-subtle cursor-not-allowed opacity-40'
                       : s.side === 'A'
-                        ? 'border-purple-500/40 bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 active:scale-95'
-                        : 'border-pink-500/40 bg-pink-500/10 text-pink-400 hover:bg-pink-500/20 active:scale-95'
+                        ? 'border-primary/40 bg-primary/10 text-primary/70 hover:bg-primary/20 active:scale-95'
+                        : 'border-secondary/40 bg-secondary/10 text-secondary/70 hover:bg-secondary/20 active:scale-95'
                     }
                   `}
                 >
@@ -236,11 +236,11 @@ export function DuelFeedCard({ duel: initialDuel, userId, onVoted }: Props) {
       {!voted && totalVotes > 0 && (
         <div className="h-0.5 flex">
           <div
-            className="bg-gradient-to-r from-purple-600 to-violet-500 transition-all duration-500"
+            className="bg-gradient-to-r from-primary to-primary transition-all duration-500"
             style={{ width: `${pctA}%` }}
           />
           <div
-            className="bg-gradient-to-r from-pink-500 to-rose-500 transition-all duration-500"
+            className="bg-gradient-to-r from-secondary to-rose-500 transition-all duration-500"
             style={{ width: `${pctB}%` }}
           />
         </div>
@@ -293,7 +293,7 @@ export function DuelFeedCard({ duel: initialDuel, userId, onVoted }: Props) {
           {/* Share */}
           <button
             onClick={handleShare}
-            className="flex items-center gap-1 text-xs text-fg-subtle hover:text-purple-400 transition-colors"
+            className="flex items-center gap-1 text-xs text-fg-subtle hover:text-primary/70 transition-colors"
             title="Paylaş"
           >
             <Share2 size={13} />
@@ -303,7 +303,7 @@ export function DuelFeedCard({ duel: initialDuel, userId, onVoted }: Props) {
           {/* Go to duel */}
           <Link
             href={`/duel/${duel.share_token}`}
-            className="flex items-center gap-1 text-xs text-fg-subtle hover:text-purple-400 transition-colors"
+            className="flex items-center gap-1 text-xs text-fg-subtle hover:text-primary/70 transition-colors"
             title="Düelloyu görüntüle"
           >
             <MessageCircle size={13} />
@@ -315,9 +315,9 @@ export function DuelFeedCard({ duel: initialDuel, userId, onVoted }: Props) {
       {!userId && (
         <div className="px-4 pb-3 text-center">
           <p className="text-[11px] text-fg-subtle">
-            <Link href="/giris" className="text-purple-400 hover:underline font-semibold">Giriş yap</Link>
+            <Link href="/giris" className="text-primary/70 hover:underline font-semibold">Giriş yap</Link>
             {' '}veya{' '}
-            <Link href="/kayit" className="text-purple-400 hover:underline font-semibold">kayıt ol</Link>
+            <Link href="/kayit" className="text-primary/70 hover:underline font-semibold">kayıt ol</Link>
             {' '}— oy kullan ve beğen
           </p>
         </div>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Modal } from '@/components/ui/Modal'
@@ -79,7 +79,7 @@ export function ReportButton({ targetType, targetId, userId, className }: Props)
                     value={r.value}
                     checked={reason === r.value}
                     onChange={() => setReason(r.value)}
-                    className="accent-purple-500"
+                    className="accent-primary"
                   />
                   <span className={`text-sm ${reason === r.value ? 'text-fg font-semibold' : 'text-fg-muted'} group-hover:text-fg transition-colors`}>
                     {r.label}
@@ -93,7 +93,7 @@ export function ReportButton({ targetType, targetId, userId, className }: Props)
               placeholder="Ek açıklama (isteğe bağlı)..."
               rows={2}
               maxLength={500}
-              className="w-full bg-bg border border-stroke rounded-xl px-3 py-2 text-sm text-fg placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none mb-4"
+              className="w-full bg-bg border border-stroke rounded-xl px-3 py-2 text-sm text-fg placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary resize-none mb-4"
             />
             <div className="flex gap-2">
               <Button className="flex-1 btn-gradient" loading={loading} disabled={!reason} onClick={submit}>

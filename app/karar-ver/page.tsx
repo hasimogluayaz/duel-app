@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+﻿import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
 import KararVerCard from '@/components/karar-ver/KararVerCard'
 import { Swords, TrendingUp, Users } from 'lucide-react'
@@ -36,9 +36,9 @@ export default async function KararVerPage() {
 
         {/* Header */}
         <div className="mb-8 text-center">
-          <div className="inline-flex items-center gap-2 bg-violet-500/10 border border-violet-500/20 rounded-full px-4 py-1.5 mb-4">
-            <Swords size={14} className="text-violet-400" />
-            <span className="text-xs font-semibold text-violet-400 uppercase tracking-wider">Karar Ver Modu</span>
+          <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-full px-4 py-1.5 mb-4">
+            <Swords size={14} className="text-primary/70" />
+            <span className="text-xs font-semibold text-primary/70 uppercase tracking-wider">Karar Ver Modu</span>
           </div>
           <h1 className="text-2xl font-bold text-fg mb-2">Hangisi Daha İyi?</h1>
           <p className="text-fg-subtle text-sm max-w-sm mx-auto">
@@ -50,7 +50,7 @@ export default async function KararVerPage() {
         <div className="grid grid-cols-2 gap-3 mb-6">
           <div className="rounded-xl bg-surface border border-stroke p-3 text-center">
             <div className="flex items-center justify-center gap-1.5 mb-1">
-              <TrendingUp size={12} className="text-violet-400" />
+              <TrendingUp size={12} className="text-primary/70" />
               <span className="text-xs text-fg-subtle">Toplam Karar</span>
             </div>
             <p className="text-xl font-bold text-fg">{(totalVerdicts ?? 0).toLocaleString('tr-TR')}</p>
@@ -82,19 +82,19 @@ export default async function KararVerPage() {
           <h2 className="text-xs font-semibold text-fg-subtle uppercase tracking-wider mb-3">Nasıl Çalışır?</h2>
           <ul className="space-y-2 text-sm text-fg-muted">
             <li className="flex items-start gap-2">
-              <span className="text-violet-400 mt-0.5 shrink-0">①</span>
+              <span className="text-primary/70 mt-0.5 shrink-0">①</span>
               Aynı senaryoya verilen iki cevap gösterilir.
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-violet-400 mt-0.5 shrink-0">②</span>
+              <span className="text-primary/70 mt-0.5 shrink-0">②</span>
               Hangisi daha iyi, daha yaratıcı veya daha samimiyse onu seç.
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-violet-400 mt-0.5 shrink-0">③</span>
+              <span className="text-primary/70 mt-0.5 shrink-0">③</span>
               Seçimlerin cevapların topluluk sıralamasını belirler.
             </li>
             <li className="flex items-start gap-2">
-              <span className="text-violet-400 mt-0.5 shrink-0">④</span>
+              <span className="text-primary/70 mt-0.5 shrink-0">④</span>
               En çok kazanan cevap haftalık şampiyon olabilir.
             </li>
           </ul>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
@@ -86,7 +86,7 @@ export default function WeeklyChampionCard() {
           <div className="min-w-0">
             <Link
               href={`/profil/${champion.user?.username}`}
-              className="text-sm font-semibold text-fg hover:text-violet-400 transition-colors"
+              className="text-sm font-semibold text-fg hover:text-primary/70 transition-colors"
             >
               {champion.user?.display_name || champion.user?.username}
             </Link>

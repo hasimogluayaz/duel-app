@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 export const dynamic = 'force-dynamic'
 
@@ -101,14 +101,14 @@ export default function IletisimPage() {
 
         <div className="flex flex-col gap-4">
           <div className="p-4 bg-surface border border-stroke rounded-xl">
-            <Mail size={20} className="text-purple-400 mb-2" />
+            <Mail size={20} className="text-primary/70 mb-2" />
             <p className="text-sm font-medium text-fg mb-1">Email</p>
-            <a href="mailto:info@kapisio.com" className="text-xs text-purple-400 hover:underline">
+            <a href="mailto:info@kapisio.com" className="text-xs text-primary/70 hover:underline">
               info@kapisio.com
             </a>
           </div>
           <div className="p-4 bg-surface border border-stroke rounded-xl">
-            <Clock size={20} className="text-purple-400 mb-2" />
+            <Clock size={20} className="text-primary/70 mb-2" />
             <p className="text-sm font-medium text-fg mb-1">Yanıt Süresi</p>
             <p className="text-xs text-fg-muted">Genellikle 48 saat içinde yanıt veriyoruz.</p>
           </div>

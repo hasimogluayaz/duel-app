@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -9,7 +9,7 @@ const STEPS = [
     emoji: '⚔️',
     title: "Kapisio'ya Hoş Geldin!",
     desc: 'Her gün yeni bir senaryo gelir. Cevapla, düello yap, kazan!',
-    color: 'from-violet-600 to-purple-600',
+    color: 'from-primary to-primary',
   },
   {
     emoji: '📝',
@@ -21,7 +21,7 @@ const STEPS = [
     emoji: '⚡',
     title: 'Düello Yap',
     desc: 'Aynı senaryoyu yanıtlayan birini seç, düelloya çağır. Topluluk oylasın, AI karar versin!',
-    color: 'from-pink-600 to-rose-600',
+    color: 'from-secondary to-rose-600',
   },
   {
     emoji: '🏆',

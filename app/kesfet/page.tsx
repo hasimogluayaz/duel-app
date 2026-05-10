@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 export const dynamic = 'force-dynamic'
 
@@ -48,7 +48,7 @@ function FeedCard({ duel }: { duel: FeedDuel }) {
 
         {/* Scenario */}
         {duel.scenario?.content && (
-          <p className="text-xs text-fg-subtle italic mb-3 line-clamp-1 border-l-2 border-purple-500/40 pl-2">
+          <p className="text-xs text-fg-subtle italic mb-3 line-clamp-1 border-l-2 border-primary/40 pl-2">
             &ldquo;{duel.scenario.content}&rdquo;
           </p>
         )}
@@ -211,7 +211,7 @@ function SearchTab() {
           placeholder={mode === 'users' ? 'Kullanıcı adı veya isim ara...' : 'Senaryo içeriği ara...'}
           value={query}
           onChange={e => setQuery(e.target.value)}
-          className="w-full bg-surface border border-stroke rounded-xl pl-10 pr-4 py-3 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-purple-500 transition-colors"
+          className="w-full bg-surface border border-stroke rounded-xl pl-10 pr-4 py-3 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-primary transition-colors"
           autoFocus
         />
       </div>
@@ -299,8 +299,8 @@ function SearchTab() {
             {scenarios.map((s: any) => (
               <Link key={s.id} href={`/arsiv/${s.id}`}>
                 <div className="flex items-start gap-3 px-4 py-3.5 rounded-xl bg-surface border border-stroke hover:bg-surface-2 transition-all cursor-pointer group">
-                  <div className="w-8 h-8 rounded-lg bg-purple-500/15 flex items-center justify-center shrink-0 mt-0.5">
-                    <FileText size={14} className="text-purple-400" />
+                  <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center shrink-0 mt-0.5">
+                    <FileText size={14} className="text-primary/70" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-fg leading-relaxed line-clamp-2">

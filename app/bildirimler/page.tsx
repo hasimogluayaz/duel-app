@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 export const dynamic = 'force-dynamic'
 
@@ -92,7 +92,7 @@ const TYPE_ICONS: Record<string, string> = {
 }
 
 const TYPE_COLORS: Record<string, string> = {
-  duel_invite:            'bg-purple-500/20 text-purple-300',
+  duel_invite:            'bg-primary/20 text-primary/40',
   duel_result:            'bg-amber-500/20 text-amber-300',
   duel_accepted:          'bg-green-500/20 text-green-300',
   vote_milestone:         'bg-yellow-500/20 text-yellow-300',
@@ -105,7 +105,7 @@ const TYPE_COLORS: Record<string, string> = {
   comment_reply:          'bg-cyan-500/20 text-cyan-300',
   answer_comment:         'bg-cyan-500/20 text-cyan-300',
   achievement:            'bg-amber-500/20 text-amber-300',
-  tier_up:                'bg-violet-500/20 text-violet-300',
+  tier_up:                'bg-primary/20 text-primary/40',
   weekly_mission_complete:'bg-emerald-500/20 text-emerald-300',
 }
 
@@ -170,8 +170,8 @@ export default function BildirimlerPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center relative">
-            <Bell size={20} className="text-purple-400" />
+          <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center relative">
+            <Bell size={20} className="text-primary/70" />
             {unread > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center">
                 {unread > 9 ? '9+' : unread}
@@ -222,7 +222,7 @@ export default function BildirimlerPage() {
           {unread > 0 && (
             <div className="flex items-center gap-2 mb-1">
               <div className="h-px flex-1 bg-stroke" />
-              <span className="text-xs text-purple-400 font-semibold px-2">{unread} yeni</span>
+              <span className="text-xs text-primary/70 font-semibold px-2">{unread} yeni</span>
               <div className="h-px flex-1 bg-stroke" />
             </div>
           )}
@@ -242,8 +242,8 @@ export default function BildirimlerPage() {
                 className={cn(
                   'flex items-start gap-3.5 p-4 rounded-xl border transition-all',
                   !n.is_read
-                    ? 'bg-purple-500/5 border-purple-500/20 hover:border-purple-500/40'
-                    : 'bg-surface border-stroke hover:border-purple-500/20',
+                    ? 'bg-primary/5 border-primary/20 hover:border-primary/40'
+                    : 'bg-surface border-stroke hover:border-primary/20',
                   url && 'cursor-pointer',
                 )}
               >
@@ -259,7 +259,7 @@ export default function BildirimlerPage() {
                 </div>
 
                 {!n.is_read && (
-                  <div className="w-2 h-2 bg-purple-500 rounded-full flex-shrink-0 mt-2 animate-pulse" />
+                  <div className="w-2 h-2 bg-primary rounded-full flex-shrink-0 mt-2 animate-pulse" />
                 )}
               </div>
             )
