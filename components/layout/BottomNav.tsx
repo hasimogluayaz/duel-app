@@ -104,7 +104,7 @@ export function BottomNav({ userId, username }: Props) {
               href={tab.href}
               className={cn(
                 'flex-1 flex flex-col items-center justify-center gap-1 transition-colors relative',
-                active ? 'text-purple-400' : 'text-fg-subtle hover:text-fg-muted'
+                active ? 'text-primary' : 'text-fg-subtle hover:text-fg-muted'
               )}
             >
               <div className="relative">
@@ -115,11 +115,11 @@ export function BottomNav({ userId, username }: Props) {
                   </span>
                 ) : null}
               </div>
-              <span className={cn('text-[10px] font-medium', active ? 'text-purple-400' : '')}>
+              <span className={cn('text-[10px] font-medium', active ? 'text-primary' : '')}>
                 {tab.label}
               </span>
               {active && (
-                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-purple-500 rounded-full" />
+                <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full" />
               )}
             </Link>
           )

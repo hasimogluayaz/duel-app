@@ -3,8 +3,9 @@ import { Suspense } from 'react'
 import './globals.css'
 import { Navbar } from '@/components/layout/Navbar'
 import { BottomNav } from '@/components/layout/BottomNav'
+import { LeftSidebar } from '@/components/layout/LeftSidebar'
+import { RightSidebar } from '@/components/layout/RightSidebar'
 import { CreateFAB } from '@/components/layout/CreateFAB'
-import OnboardingModal from '@/components/onboarding/OnboardingModal'
 import { Footer } from '@/components/layout/Footer'
 import { CookieBanner } from '@/components/layout/CookieBanner'
 import { ToastProvider } from '@/components/ui/Toast'
@@ -20,22 +21,22 @@ import type { Profile } from '@/types'
 
 export const metadata: Metadata = {
   title: {
-    default: 'Kapisio — AI Destekli Günlük Kapışma',
+    default: 'Kapisio — Günlük Senaryo Kapışmaları',
     template: '%s | Kapisio',
   },
-  description: 'Her gün yeni senaryo, arkadaşınla kapış, topluluktan oy topla, AI kazananı ilan etsin! Türkiye\'nin eğlenceli kapışma platformu.',
-  keywords: ['kapisio', 'kapışma', 'oyun', 'ai', 'yapay zeka', 'türkçe', 'senaryo', 'eğlence'],
+  description: 'Her gün yeni senaryo, arkadaşınla kapış, topluluktan oy topla, AI kazananı ilan etsin! Türkiye\'nin tartışma platformu.',
+  keywords: ['kapisio', 'kapışma', 'oyun', 'ai', 'yapay zeka', 'türkçe', 'senaryo', 'tartışma'],
   authors: [{ name: 'Kapisio' }],
   openGraph: {
     type: 'website',
     locale: 'tr_TR',
-    title: 'Kapisio — AI Destekli Günlük Kapışma',
+    title: 'Kapisio — Günlük Senaryo Kapışmaları',
     description: 'Her gün yeni senaryo, arkadaşınla kapış ve kazan!',
     siteName: 'Kapisio',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Kapisio — AI Destekli Günlük Kapışma',
+    title: 'Kapisio — Günlük Senaryo Kapışmaları',
     description: 'Her gün yeni senaryo, arkadaşınla kapış ve kazan!',
   },
   manifest: '/manifest.json',
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#0c0a18',
+  themeColor: '#000000',
   width: 'device-width',
   initialScale: 1,
 }
@@ -65,27 +66,55 @@ export default async function RootLayout({
       initialProfile = data
     }
   } catch {
-    // session yok veya fetch başarısız — client-side fallback devreye girer
+    // session yok veya fetch başarısız
   }
 
   return (
     <html lang="tr" suppressHydrationWarning>
-      <body className="flex flex-col min-h-screen bg-bg text-fg">
+      <body className="min-h-screen bg-bg text-fg">
         <PostHogProvider>
         <ThemeProvider>
           <ToastProvider>
-            <Navbar initialProfile={initialProfile} />
-            <main className="flex-1 pb-16 md:pb-0">
-              {children}
-            </main>
-            <Footer />
-            <BottomNav userId={initialProfile?.id ?? null} username={initialProfile?.username ?? null} />
-            {initialProfile && <CreateFAB />}
+
+            {initialProfile ? (
+              /* ── Logged-in: Twitter 3-column layout ── */
+              <div className="flex min-h-screen">
+
+                {/* Left sidebar — desktop only */}
+                <LeftSidebar profile={initialProfile} />
+
+                {/* Main content */}
+                <main className="flex-1 lg:ml-64 xl:mr-80 min-h-screen pb-20 md:pb-0 lg:pt-14">
+                  {children}
+                </main>
+
+                {/* Right sidebar — xl only */}
+                <RightSidebar />
+
+                {/* Mobile bottom nav */}
+                <BottomNav userId={initialProfile.id} username={initialProfile.username} />
+
+                {/* Mobile FAB */}
+                <CreateFAB />
+
+                {/* Mobile top bar (logo + notifications) */}
+                <Navbar initialProfile={initialProfile} />
+              </div>
+            ) : (
+              /* ── Guest: classic full-width layout ── */
+              <div className="flex flex-col min-h-screen">
+                <Navbar initialProfile={null} />
+                <main className="flex-1 pb-16 md:pb-0">
+                  {children}
+                </main>
+                <Footer />
+              </div>
+            )}
+
             <CookieBanner />
             <ServiceWorkerRegister />
             <InstallPrompt />
             {initialProfile && <PushSubscriber />}
-            {/* OnboardingModal is rendered in /oyun page with isNew check */}
             <Suspense fallback={null}><PostHogPageView /></Suspense>
             <Analytics />
           </ToastProvider>

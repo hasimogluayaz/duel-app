@@ -43,9 +43,9 @@ export default function VoteButton({ answerId, initialVotes, userId }: Props) {
       disabled={!userId || voted || loading}
       className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-xl transition-colors shrink-0 ${
         voted
-          ? 'text-violet-400 bg-violet-500/10'
+          ? 'text-primary bg-primary/10'
           : userId
-            ? 'text-fg-subtle hover:text-violet-400 hover:bg-violet-500/10'
+            ? 'text-fg-subtle hover:text-primary hover:bg-primary/10'
             : 'text-fg-subtle opacity-60 cursor-default'
       }`}
       title={!userId ? 'Oy vermek için giriş yap' : voted ? 'Oylandı' : 'Oyla'}

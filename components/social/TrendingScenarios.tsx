@@ -39,7 +39,7 @@ export default function TrendingScenarios() {
   return (
     <div className="rounded-2xl bg-surface border border-stroke overflow-hidden">
       <div className="flex items-center gap-2 px-4 py-3 border-b border-stroke">
-        <TrendingUp size={14} className="text-purple-400" />
+        <TrendingUp size={14} className="text-primary" />
         <span className="text-xs font-semibold text-fg-subtle uppercase tracking-wider">Son 48 Saatte Trend</span>
       </div>
       <div>
@@ -50,7 +50,7 @@ export default function TrendingScenarios() {
                 {i + 1}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-fg group-hover:text-purple-300 transition-colors line-clamp-2 leading-snug">
+                <p className="text-sm text-fg group-hover:text-primary/80 transition-colors line-clamp-2 leading-snug">
                   {s.content}
                 </p>
                 <div className="flex items-center gap-2 mt-1">
@@ -67,7 +67,7 @@ export default function TrendingScenarios() {
           </Link>
         ))}
       </div>
-      <Link href="/arsiv" className="block px-4 py-3 text-xs text-center text-purple-400 hover:text-purple-300 transition-colors">
+      <Link href="/arsiv" className="block px-4 py-3 text-xs text-center text-primary hover:text-primary/80 transition-colors">
         Tüm senaryoları gör →
       </Link>
     </div>

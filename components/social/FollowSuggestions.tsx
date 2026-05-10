@@ -57,7 +57,7 @@ export default function FollowSuggestions() {
               <div className="flex-1 min-w-0">
                 <Link href={`/profil/${s.username}`} className="group">
                   <div className="flex items-center gap-1">
-                    <span className="text-sm font-semibold text-fg group-hover:text-purple-400 transition-colors truncate">
+                    <span className="text-sm font-semibold text-fg group-hover:text-primary transition-colors truncate">
                       {s.display_name || s.username}
                     </span>
                     <span className="text-xs">{tier.emoji}</span>

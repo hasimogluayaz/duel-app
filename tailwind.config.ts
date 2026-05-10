@@ -19,9 +19,9 @@ const config: Config = {
         'fg-muted': 'var(--fg-muted)',
         'fg-subtle': 'var(--fg-subtle)',
         // Brand colors (same in both modes)
-        primary: '#8b5cf6',
-        'primary-dark': '#6d28d9',
-        secondary: '#ec4899',
+        primary: '#1967d2',
+        'primary-dark': '#1558b8',
+        secondary: '#0099cc',
         accent: '#f97316',
       },
       fontFamily: {

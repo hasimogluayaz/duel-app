@@ -5,31 +5,31 @@
 @tailwind utilities;
 
 /* =============================================
-   LIGHT MODE (default)
+   LIGHT MODE (default) — clean & professional
    ============================================= */
 :root {
   color-scheme: light;
-  --bg:         #f7f4ff;
+  --bg:         #f5f7fa;
   --surface:    #ffffff;
-  --surface-2:  #f0ebff;
-  --stroke:     #e2d5ff;
-  --fg:         #1a0a35;
-  --fg-muted:   #6d55a0;
-  --fg-subtle:  #a090c0;
+  --surface-2:  #eef1f6;
+  --stroke:     #e1e6ed;
+  --fg:         #0d1117;
+  --fg-muted:   #4a5568;
+  --fg-subtle:  #8a95a3;
 }
 
 /* =============================================
-   DARK MODE
+   DARK MODE — X/Twitter-inspired deep dark
    ============================================= */
 .dark {
   color-scheme: dark;
-  --bg:         #0c0a18;
-  --surface:    #160f2d;
-  --surface-2:  #1f1640;
-  --stroke:     #2d1f52;
-  --fg:         #f5f0ff;
-  --fg-muted:   #a89bc0;
-  --fg-subtle:  #6b5b9e;
+  --bg:         #000000;
+  --surface:    #0f0f0f;
+  --surface-2:  #161616;
+  --stroke:     #2a2a2a;
+  --fg:         #e7e9ea;
+  --fg-muted:   #71767b;
+  --fg-subtle:  #3f4447;
 }
 
 /* =============================================
@@ -48,31 +48,17 @@
     color: var(--fg);
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
-    transition: background-color 0.2s, color 0.2s;
-  }
-
-  /* Light mode body gradient */
-  html:not(.dark) body {
-    background-image:
-      radial-gradient(ellipse 70% 40% at 10% 0%, rgba(139, 92, 246, 0.08) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 30% at 90% 100%, rgba(236, 72, 153, 0.05) 0%, transparent 60%);
-  }
-
-  /* Dark mode body gradient */
-  html.dark body {
-    background-image:
-      radial-gradient(ellipse 80% 50% at 20% -10%, rgba(168, 85, 247, 0.12) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 80% 100%, rgba(236, 72, 153, 0.08) 0%, transparent 60%);
+    transition: background-color 0.15s, color 0.15s;
   }
 
   ::selection {
-    background-color: #8b5cf6;
+    background-color: #1967d2;
     color: white;
   }
 
-  ::-webkit-scrollbar { width: 6px; height: 6px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--stroke); border-radius: 3px; }
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--stroke); border-radius: 4px; }
   ::-webkit-scrollbar-thumb:hover { background: var(--fg-subtle); }
 }
 
@@ -80,13 +66,14 @@
    UTILITIES
    ============================================= */
 @layer utilities {
-  .animate-slide-up  { animation: slideUp 0.2s ease-out; }
-  .animate-fade-in   { animation: fadeIn 0.3s ease-out; }
+  .animate-slide-up   { animation: slideUp 0.2s ease-out; }
+  .animate-fade-in    { animation: fadeIn 0.3s ease-out; }
   .animate-pulse-soft { animation: pulseSoft 2s ease-in-out infinite; }
-  .animate-float     { animation: float 3s ease-in-out infinite; }
+  .animate-float      { animation: float 3s ease-in-out infinite; }
 
+  /* Brand wordmark gradient — blue-based */
   .text-gradient {
-    background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #f97316 100%);
+    background: linear-gradient(135deg, #1967d2 0%, #1e90ff 60%, #00b4d8 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -99,29 +86,32 @@
     background-clip: text;
   }
 
-  .glow-purple { box-shadow: 0 0 30px rgba(139, 92, 246, 0.3); }
-  .glow-gold   { box-shadow: 0 0 20px rgba(249, 115, 22, 0.25); }
+  .glow-blue   { box-shadow: 0 0 24px rgba(25, 103, 210, 0.25); }
+  .glow-gold   { box-shadow: 0 0 20px rgba(249, 115, 22, 0.20); }
 
+  /* Primary action button — solid professional blue */
   .btn-gradient {
-    background: linear-gradient(135deg, #8b5cf6, #ec4899) !important;
+    background: #1967d2 !important;
     color: white !important;
     border: none !important;
-    transition: opacity 0.2s, transform 0.1s;
+    transition: background-color 0.15s, opacity 0.15s, transform 0.1s;
   }
-  .btn-gradient:hover { opacity: 0.9; }
+  .btn-gradient:hover  { background: #1558b8 !important; opacity: 1; }
   .btn-gradient:active { transform: scale(0.98); }
 
-  /* Card hover effect */
+  /* Card hover — subtle blue lift */
   .card-hover {
-    transition: border-color 0.2s, box-shadow 0.2s, transform 0.15s;
+    transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
   }
   .card-hover:hover {
-    border-color: rgba(139, 92, 246, 0.4) !important;
-    box-shadow: 0 4px 24px rgba(139, 92, 246, 0.08);
+    border-color: rgba(25, 103, 210, 0.3) !important;
+    box-shadow: 0 2px 16px rgba(25, 103, 210, 0.06);
     transform: translateY(-1px);
   }
 
   .text-balance { text-wrap: balance; }
+  .scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
 }
 
 /* =============================================
