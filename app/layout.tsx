@@ -95,8 +95,8 @@ export default async function RootLayout({
                   {/* Left sidebar — desktop only */}
                   <LeftSidebar profile={initialProfile} />
 
-                  {/* Main content */}
-                  <main className="flex-1 min-w-0 lg:ml-64 xl:mr-80 min-h-screen pb-24 md:pb-6">
+                  {/* Main content — lg:pt-14 offsets the fixed desktop top bar (h-14 = 56px) */}
+                  <main className="flex-1 min-w-0 lg:ml-64 xl:mr-80 min-h-screen pb-24 md:pb-6 lg:pt-14">
                     {children}
                   </main>
 
