@@ -135,24 +135,29 @@ export default async function ScenarioDetailPage({ params, searchParams }: Props
         )}
 
         {/* Answers */}
-        <div className="mt-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-semibold text-fg-subtle uppercase tracking-wider">
-              {(answers ?? []).length} Cevap
+        <div className="mt-4">
+          {/* Sort bar */}
+          <div className="flex items-center justify-between mb-3 px-1">
+            <h2 className="text-sm font-semibold text-fg-subtle">
+              <span className="text-fg font-bold">{(answers ?? []).length}</span> cevap
             </h2>
-            <div className="flex bg-surface-2 border border-stroke rounded-xl p-0.5 gap-0.5">
-              {(['popular', 'recent'] as const).map(s => (
+            <div className="flex gap-1">
+              {([
+                { s: 'popular', l: '🔥 Top' },
+                { s: 'recent',  l: '🕐 Yeni' },
+              ] as const).map(({ s, l }) => (
                 <Link
                   key={s}
                   href={`/arsiv/${params.id}?sort=${s}`}
                   className={cn(
-                    'px-3 py-1 rounded-lg text-xs font-medium transition-colors',
+                    'px-3 py-1 rounded-full text-xs font-semibold transition-colors border',
                     answerSort === s
-                      ? 'bg-surface text-fg border border-stroke shadow-sm'
-                      : 'text-fg-subtle hover:text-fg'
+                      ? 'text-white border-transparent'
+                      : 'bg-surface border-stroke text-fg-subtle hover:text-fg'
                   )}
+                  style={answerSort === s ? { background: 'var(--k-blue-500)' } : undefined}
                 >
-                  {s === 'popular' ? '🔥 Popüler' : '🕐 Yeni'}
+                  {l}
                 </Link>
               ))}
             </div>
@@ -164,58 +169,54 @@ export default async function ScenarioDetailPage({ params, searchParams }: Props
               <p className="font-medium">Henüz cevap yok. İlk cevaplayan sen ol!</p>
             </div>
           ) : (
-            <div className="space-y-3">
-              {(answers ?? []).map((answer: any, i: number) => (
-                <div
-                  key={answer.id}
-                  className="bg-surface border border-stroke rounded-2xl p-4"
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="flex items-center gap-1 text-fg-subtle/40 text-xs font-mono mt-1 w-5 shrink-0">
-                      #{i + 1}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      {/* Answer author */}
-                      <div className="flex items-center gap-2 mb-2">
-                        <Link href={`/profil/${answer.user?.username}`}>
-                          <Avatar src={answer.user?.avatar_url} username={answer.user?.username ?? '?'} size="xs" />
-                        </Link>
-                        <Link
-                          href={`/profil/${answer.user?.username}`}
-                          className="text-sm font-semibold text-fg hover:text-primary transition-colors"
-                        >
-                          {answer.user?.display_name ?? answer.user?.username ?? 'Anonim'}
-                        </Link>
-                        <span className="text-xs text-fg-subtle">{timeAgo(answer.created_at)}</span>
-                      </div>
-
-                      <p className="text-fg text-sm leading-relaxed mb-3">{answer.content}</p>
-
-                      <div className="flex items-center gap-3 flex-wrap">
-                        <ReactionBar answerId={answer.id} userId={user?.id ?? null} compact />
-                        {user && <BookmarkButton type="answer" id={answer.id} size={13} showLabel />}
-                        {user && (answer as any).user?.id !== user.id && (
-                          <ReportButton targetType="answer" targetId={answer.id} userId={user.id} />
-                        )}
-                        {user && (answer as any).user?.id === user.id && (
-                          <>
-                            <EditAnswerButton
-                              answerId={answer.id}
-                              initialContent={answer.content}
-                              editCount={(answer as any).edit_count ?? 0}
-                              createdAt={answer.created_at}
-                            />
-                            <DeleteAnswerButton answerId={answer.id} />
-                          </>
-                        )}
-                      </div>
-                      <AnswerComments answerId={answer.id} currentUserId={user?.id ?? null} />
-                    </div>
+            <div className="bg-surface border border-stroke rounded-2xl overflow-hidden divide-y divide-stroke">
+              {(answers ?? []).map((answer: any) => (
+                <div key={answer.id} className="flex gap-3 px-4 py-4 hover:bg-surface-2 transition-colors">
+                  {/* Vote button — left rail */}
+                  <div className="shrink-0 mt-0.5">
                     <VoteButton
                       answerId={answer.id}
                       initialVotes={answer.vote_count}
                       userId={user?.id ?? null}
                     />
+                  </div>
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                      <Link href={`/profil/${answer.user?.username}`}>
+                        <Avatar src={answer.user?.avatar_url} username={answer.user?.username ?? '?'} size="xs" />
+                      </Link>
+                      <Link
+                        href={`/profil/${answer.user?.username}`}
+                        className="text-[13.5px] font-semibold text-fg hover:underline"
+                      >
+                        {answer.user?.display_name ?? answer.user?.username ?? 'Anonim'}
+                      </Link>
+                      <span className="text-xs text-fg-subtle">{timeAgo(answer.created_at)}</span>
+                      {(answer as any).edit_count > 0 && (
+                        <span className="text-[10px] text-fg-subtle italic">düzenlendi</span>
+                      )}
+                    </div>
+                    <p className="text-[14.5px] text-fg leading-relaxed mb-2.5">{answer.content}</p>
+                    <div className="flex items-center gap-1 flex-wrap">
+                      <ReactionBar answerId={answer.id} userId={user?.id ?? null} compact />
+                      {user && <BookmarkButton type="answer" id={answer.id} size={13} />}
+                      {user && (answer as any).user?.id !== user.id && (
+                        <ReportButton targetType="answer" targetId={answer.id} userId={user.id} />
+                      )}
+                      {user && (answer as any).user?.id === user.id && (
+                        <>
+                          <EditAnswerButton
+                            answerId={answer.id}
+                            initialContent={answer.content}
+                            editCount={(answer as any).edit_count ?? 0}
+                            createdAt={answer.created_at}
+                          />
+                          <DeleteAnswerButton answerId={answer.id} />
+                        </>
+                      )}
+                    </div>
+                    <AnswerComments answerId={answer.id} currentUserId={user?.id ?? null} />
                   </div>
                 </div>
               ))}

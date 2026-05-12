@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { useToast } from '@/components/ui/Toast'
 import { cn } from '@/lib/utils/cn'
-import { FileText, Flame, Smile, Mic2, Tag, X, ArrowLeft } from 'lucide-react'
+import { FileText, Flame, Smile, Mic2, Tag, X, ArrowLeft, Plus } from 'lucide-react'
 import Link from 'next/link'
 
 const CATEGORIES = [
@@ -106,45 +106,64 @@ export function SenaryoOlusturClient({ profile }: Props) {
     router.push('/kesfet?tab=senaryolar')
   }
 
+  const MODE_COLORS: Record<string, string> = {
+    scenario:  'var(--k-blue-500)',
+    debate:    'var(--k-navy-500)',
+    emoji:     'var(--k-sky-500)',
+    character: 'var(--k-blue-700)',
+  }
+  const MODE_EMOJIS: Record<string, string> = {
+    scenario: '📖', debate: '🔥', emoji: '😄', character: '🎭',
+  }
+
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6 space-y-5">
-
-      {/* Back */}
-      <Link href="/kesfet" className="inline-flex items-center gap-1.5 text-sm text-fg-subtle hover:text-fg transition-colors">
-        <ArrowLeft size={14} />
-        Geri
-      </Link>
-
-      <div>
-        <h1 className="text-xl font-black text-fg">Senaryo Oluştur</h1>
-        <p className="text-sm text-fg-subtle mt-0.5">Topluluğa bir soru sun — insanlar cevaplasın</p>
+    <div className="max-w-xl mx-auto">
+      {/* Header */}
+      <div
+        className="mx-4 mt-4 mb-5 rounded-[18px] px-5 py-4 text-white"
+        style={{ background: 'linear-gradient(135deg, #1442a8, #2a6cf0)' }}
+      >
+        <div className="flex items-center gap-3">
+          <Link href="/kesfet" className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center hover:bg-white/25 transition-colors shrink-0">
+            <ArrowLeft size={16} />
+          </Link>
+          <div>
+            <h1 className="text-[20px] font-black tracking-tight">Senaryo Oluştur</h1>
+            <p className="text-[12px] text-white/75 mt-0.5">Topluluğa bir soru sun — +30 puan</p>
+          </div>
+        </div>
       </div>
 
-      {/* Type selector */}
+      <div className="px-4 space-y-5">
+
+      {/* Type selector — pill chips like CreateModal */}
       <div>
-        <p className="text-xs font-semibold text-fg-subtle uppercase tracking-wider mb-2">Tür</p>
-        <div className="grid grid-cols-2 gap-2">
-          {SCENARIO_TYPES.map(t => (
-            <button
-              key={t.key}
-              onClick={() => setScenarioType(t.key)}
-              className={cn(
-                'flex items-start gap-3 p-3 rounded-xl border text-left transition-all',
-                scenarioType === t.key
-                  ? 'border-fg/30 bg-surface-2 text-fg'
-                  : 'border-stroke bg-surface text-fg-subtle hover:bg-surface-2'
-              )}
-            >
-              <span className={cn('mt-0.5', scenarioType === t.key ? 'text-fg' : 'text-fg-subtle')}>
-                {t.icon}
-              </span>
-              <div>
-                <p className="text-sm font-semibold">{t.label}</p>
-                <p className="text-xs mt-0.5 opacity-70">{t.desc}</p>
-              </div>
-            </button>
-          ))}
+        <p className="text-[11px] font-bold text-fg-subtle uppercase tracking-widest mb-2.5">Tür</p>
+        <div className="flex flex-wrap gap-2">
+          {SCENARIO_TYPES.map(t => {
+            const color = MODE_COLORS[t.key]
+            const emoji = MODE_EMOJIS[t.key]
+            const active = scenarioType === t.key
+            return (
+              <button
+                key={t.key}
+                onClick={() => setScenarioType(t.key)}
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-[13px] font-semibold border transition-all"
+                style={{
+                  background: active ? `color-mix(in oklab, ${color} 12%, white)` : 'var(--surface)',
+                  color: active ? color : 'var(--fg-muted)',
+                  borderColor: active ? `color-mix(in oklab, ${color} 35%, transparent)` : 'var(--stroke)',
+                }}
+              >
+                <span>{emoji}</span>
+                {t.label}
+              </button>
+            )
+          })}
         </div>
+        {selectedType && (
+          <p className="text-xs text-fg-subtle mt-2 ml-1">{selectedType.desc}</p>
+        )}
       </div>
 
       {/* Content */}
@@ -245,18 +264,33 @@ export function SenaryoOlusturClient({ profile }: Props) {
         </div>
       )}
 
-      <Button
-        className="btn-gradient w-full"
-        disabled={!isValid || submitting}
-        onClick={submit}
-      >
-        {submitting ? 'Gönderiliyor...' : 'İncelemeye Gönder — +30 puan'}
-      </Button>
+      {/* Action row */}
+      <div className="flex items-center gap-3 pb-8">
+        <span className="text-xs font-mono text-fg-subtle">{contentLen}/280</span>
+        <div className="ml-auto flex gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={submitting}
+            onClick={() => {
+              // Draft save — just show toast for now
+              if (content.trim()) toast('Taslak kaydedildi', 'success')
+            }}
+          >
+            Taslak kaydet
+          </Button>
+          <Button
+            className="btn-gradient"
+            size="sm"
+            disabled={!isValid || submitting}
+            onClick={submit}
+          >
+            {submitting ? 'Gönderiliyor…' : <><Plus size={14} /> Yayınla</>}
+          </Button>
+        </div>
+      </div>
 
-      <p className="text-center text-xs text-fg-subtle">
-        Senaryolar editörlerimiz tarafından incelendikten sonra toplulukta görünür.
-        Onaylanan senaryolar düellolarda da kullanılabilir.
-      </p>
+      </div>
     </div>
   )
 }

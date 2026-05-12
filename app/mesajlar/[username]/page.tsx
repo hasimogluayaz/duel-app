@@ -9,7 +9,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { Spinner } from '@/components/ui/Spinner'
 import { timeAgo } from '@/lib/utils/formatting'
 import type { Message, Profile } from '@/types'
-import { ArrowLeft, Send } from 'lucide-react'
+import { ArrowLeft, Send, Swords } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils/cn'
 
@@ -21,6 +21,7 @@ export default function ConversationPage() {
 
   const [messages, setMessages] = useState<Message[]>([])
   const [partner, setPartner] = useState<Profile | null>(null)
+  const [partnerOnline, setPartnerOnline] = useState(false)
   const [myId, setMyId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [input, setInput] = useState('')
@@ -43,6 +44,12 @@ export default function ConversationPage() {
       setMessages(json.messages ?? [])
       setPartner(json.partner)
       setLoading(false)
+
+      // Check if partner was active in the last 5 minutes via presence
+      if (json.partner?.last_seen) {
+        const diff = Date.now() - new Date(json.partner.last_seen).getTime()
+        setPartnerOnline(diff < 5 * 60 * 1000)
+      }
     }
     load()
   }, [username])
@@ -117,11 +124,24 @@ export default function ConversationPage() {
           <ArrowLeft size={18} />
         </Link>
         <Link href={`/profil/${partner.username}`} className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
-          <Avatar src={partner.avatar_url} username={partner.username} size="sm" />
+          <div className="relative shrink-0">
+            <Avatar src={partner.avatar_url} username={partner.username} size="sm" />
+            {partnerOnline && (
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-green-500 border-2 border-surface" />
+            )}
+          </div>
           <div className="min-w-0">
             <p className="text-[14px] font-bold text-fg truncate">{partner.display_name || partner.username}</p>
-            <p className="text-[12px] text-fg-subtle">@{partner.username}</p>
+            <p className="text-[12px]" style={{ color: partnerOnline ? 'var(--k-success, #16a34a)' : 'var(--fg-subtle)' }}>
+              {partnerOnline ? '● çevrimiçi' : `@${partner.username}`}
+            </p>
           </div>
+        </Link>
+        <Link
+          href="/oyun"
+          className="shrink-0 flex items-center gap-1.5 px-3 h-8 rounded-full border border-stroke text-xs font-semibold text-fg-muted hover:border-primary/40 hover:text-primary transition-colors"
+        >
+          <Swords size={12} /> Düello
         </Link>
       </div>
 

@@ -129,38 +129,40 @@ export default function BasarimlarPage() {
   const totalPoints = ORDER.filter(k => earnedSet.has(k)).reduce((s, k) => s + (ACHIEVEMENT_MAP[k]?.points ?? 0), 0)
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-5">
-        <div className="w-10 h-10 rounded-2xl bg-amber-500/15 flex items-center justify-center">
-          <Medal size={20} className="text-amber-400" />
+    <div className="max-w-2xl mx-auto">
+      {/* Hero header */}
+      <div
+        className="mx-4 mt-4 mb-5 rounded-[18px] px-5 py-4 text-white"
+        style={{ background: 'linear-gradient(135deg, #1442a8, #2a6cf0)' }}
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-[22px] font-black tracking-tight">Başarımlar</h1>
+            <p className="text-[13px] text-white/75 mt-0.5">{earnedCount}/{ORDER.length} kazanıldı · {totalPoints} puan</p>
+          </div>
+          <div className="w-11 h-11 rounded-2xl bg-white/15 flex items-center justify-center">
+            <Medal size={22} />
+          </div>
         </div>
-        <div>
-          <h1 className="text-xl font-black text-fg">Başarımlar</h1>
-          <p className="text-xs text-fg-subtle">{earnedCount}/{ORDER.length} kazanıldı · {totalPoints} puan</p>
+        {/* Progress bar */}
+        <div className="mt-3">
+          <div className="flex justify-between text-[11px] text-white/70 mb-1.5">
+            <span>Genel ilerleme</span>
+            <span className="font-bold text-white">{Math.round((earnedCount / ORDER.length) * 100)}%</span>
+          </div>
+          <div className="h-2 rounded-full bg-white/20 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-white transition-all duration-500"
+              style={{ width: `${(earnedCount / ORDER.length) * 100}%` }}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Overall progress */}
-      <div className="bg-surface border border-stroke rounded-2xl p-4 mb-5">
-        <div className="flex items-center justify-between text-xs text-fg-subtle mb-2">
-          <span>Genel İlerleme</span>
-          <span className="font-bold text-amber-400">{Math.round((earnedCount / ORDER.length) * 100)}%</span>
-        </div>
-        <div className="h-2 bg-stroke rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-amber-500 to-yellow-400 rounded-full transition-all duration-500"
-            style={{ width: `${(earnedCount / ORDER.length) * 100}%` }}
-          />
-        </div>
-        <div className="flex justify-between mt-2 text-[10px] text-fg-subtle">
-          <span>{earnedCount} kazanıldı</span>
-          <span>{ORDER.length - earnedCount} kaldı</span>
-        </div>
-      </div>
+      <div className="px-4">
 
       {/* Achievement grid */}
-      <div className="space-y-2">
+      <div className="space-y-2 pb-8">
         {ORDER.map(key => {
           const def = ACHIEVEMENT_MAP[key]
           if (!def) return null
@@ -232,6 +234,7 @@ export default function BasarimlarPage() {
             </div>
           )
         })}
+      </div>
       </div>
     </div>
   )
