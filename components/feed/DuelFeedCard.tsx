@@ -17,7 +17,7 @@ interface FeedDuel {
   created_at: string
   challenger_id: string
   challenged_id: string
-  scenario: { content: string } | null
+  scenario: { content: string; mode?: string | null; category?: string | null } | null
   challenger:    { id: string; username: string; display_name: string | null; avatar_url: string | null; total_points: number } | null
   challenged:    { id: string; username: string; display_name: string | null; avatar_url: string | null; total_points: number } | null
   challenger_answer: { content: string } | null
@@ -27,6 +27,22 @@ interface FeedDuel {
   like_count: number
   view_count: number
   user_liked: boolean
+}
+
+// Mode badge config
+const MODE_META: Record<string, { label: string; color: string; bg: string }> = {
+  senaryo:  { label: 'Senaryo',  color: '#2a6cf0', bg: '#eef4ff' },
+  tartisma: { label: 'Tartışma', color: '#1c2f6e', bg: '#e7ecf7' },
+  emoji:    { label: 'Emoji',    color: '#1572c4', bg: '#d3eaff' },
+  karakter: { label: 'Karakter', color: '#1442a8', bg: '#dbe7ff' },
+  // category aliases
+  ask:        { label: 'Aşk',     color: '#c05a8a', bg: '#fdf0f7' },
+  aile:       { label: 'Aile',    color: '#d97706', bg: '#fff1e6' },
+  is:         { label: 'İş',      color: '#16a34a', bg: '#ecfdf3' },
+  teknoloji:  { label: 'Teknoloji', color: '#1442a8', bg: '#dbe7ff' },
+  mizah:      { label: 'Mizah',   color: '#7c3aed', bg: '#f5f0ff' },
+  sosyal:     { label: 'Sosyal',  color: '#0369a1', bg: '#e0f2fe' },
+  genel:      { label: 'Senaryo', color: '#2a6cf0', bg: '#eef4ff' },
 }
 
 interface Props {
@@ -111,11 +127,27 @@ export function DuelFeedCard({ duel: initialDuel, userId, onVoted }: Props) {
     { side: 'B', profile: duel.challenged, answer: duel.challenged_answer, votes: duel.votesB, pct: pctB, tier: tierB, id: duel.challenged_id },
   ]
 
+  const mode = duel.scenario?.mode ?? duel.scenario?.category ?? 'senaryo'
+  const modeMeta = MODE_META[mode] ?? MODE_META.senaryo
+
   return (
     <article className="rounded-2xl border border-stroke bg-surface overflow-hidden hover:border-primary/30 transition-all group/card">
 
       {/* ── Scenario header ─────────────────────────────── */}
       <div className="px-4 pt-4 pb-3 border-b border-stroke/60">
+        {/* Mode type badge */}
+        <div className="flex items-center gap-2 mb-2.5">
+          <span style={{
+            display: 'inline-flex', alignItems: 'center',
+            padding: '2px 9px', borderRadius: 99,
+            background: modeMeta.bg,
+            color: modeMeta.color,
+            font: '700 11px Geist, sans-serif',
+            letterSpacing: '0.02em',
+          }}>
+            {modeMeta.label}
+          </span>
+        </div>
         <div className="flex items-start justify-between gap-3">
           <p className="text-sm font-semibold text-fg leading-relaxed flex-1 line-clamp-2">
             {duel.scenario?.content ?? '—'}

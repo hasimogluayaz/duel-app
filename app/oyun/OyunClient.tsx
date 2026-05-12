@@ -74,7 +74,7 @@ export function OyunClient({
   const [searchLoading, setSearchLoading] = useState(false)
   const [inviting, setInviting] = useState<string | null>(null)
   const [quickMatching, setQuickMatching] = useState(false)
-  const [feedFilter, setFeedFilter] = useState<'top' | 'new' | 'duels' | 'follow'>('top')
+  const [feedFilter, setFeedFilter] = useState<'top' | 'new' | 'duels' | 'follow' | 'live'>('top')
   const [followFeed, setFollowFeed] = useState<any[]>([])
   const [followLoading, setFollowLoading] = useState(false)
   const [expanded, setExpanded] = useState(false)
@@ -429,7 +429,7 @@ export function OyunClient({
       )}
 
       {/* ── Community Feed ── */}
-      {communityAnswers.length > 0 && feedFilter !== 'duels' && feedFilter !== 'follow' && (
+      {communityAnswers.length > 0 && feedFilter !== 'duels' && feedFilter !== 'follow' && feedFilter !== 'live' && (
         <div>
           {/* Feed header */}
           <div className="px-3 py-3 border-b border-stroke">
@@ -444,6 +444,7 @@ export function OyunClient({
                 { id: 'new',    label: 'Yeni',            icon: <Zap size={13} /> },
                 { id: 'duels',  label: 'Düellolar',       icon: <Swords size={13} /> },
                 { id: 'follow', label: 'Takip',           icon: <Users size={13} /> },
+                { id: 'live',   label: 'Canlı Akış',      icon: <span className="live-dot" style={{ background: '#16a34a', flexShrink: 0 }} /> },
               ] as const).map(f => (
                 <button
                   key={f.id}
@@ -717,8 +718,68 @@ export function OyunClient({
         </div>
       )}
 
+      {/* ── Canlı Akış feed ── */}
+      {feedFilter === 'live' && (
+        <div>
+          <div className="px-3 py-3 border-b border-stroke flex items-center gap-2">
+            <span className="live-dot" style={{ background: '#16a34a' }} />
+            <h2 className="text-base font-bold text-fg tracking-tight" style={{ letterSpacing: '-0.01em' }}>
+              Canlı Akış
+            </h2>
+          </div>
+          {recentDuels.length === 0 ? (
+            <div className="text-center py-16">
+              <p className="text-sm text-fg-muted">Henüz aktif düello yok</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-stroke">
+              {recentDuels.slice(0, 10).map((duel: any) => {
+                const totalVotes = (duel.votes_a ?? 0) + (duel.votes_b ?? 0)
+                const pctA = totalVotes > 0 ? Math.round(((duel.votes_a ?? 0) / totalVotes) * 100) : 50
+                const pctB = 100 - pctA
+                return (
+                  <Link key={duel.id} href={`/duel/${duel.share_token}`}>
+                    <div className="bg-surface px-4 py-4 hover:bg-surface-2 transition-colors">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span style={{
+                          display: 'inline-flex', alignItems: 'center', gap: 5,
+                          padding: '2px 9px', borderRadius: 99,
+                          background: duel.status === 'active' ? 'var(--k-success-50, #ecfdf3)' : 'var(--surface-2)',
+                          color: duel.status === 'active' ? 'var(--k-success, #16a34a)' : 'var(--fg-subtle)',
+                          font: '600 11px Geist, sans-serif',
+                        }}>
+                          {duel.status === 'active' && <span className="live-dot" style={{ background: '#16a34a' }} />}
+                          {duel.status === 'active' ? 'Oylanıyor' : duel.status === 'pending' ? 'Bekliyor' : 'Bitti'}
+                        </span>
+                        <div className="flex items-center gap-1 ml-auto">
+                          <Avatar src={duel.challenger?.avatar_url} username={duel.challenger?.username || '?'} size="xs" />
+                          <span className="text-[10px] font-black text-fg-subtle">vs</span>
+                          <Avatar src={duel.challenged?.avatar_url} username={duel.challenged?.username || '?'} size="xs" />
+                          <span className="text-xs text-fg-muted ml-1">
+                            {duel.challenger?.username} vs {duel.challenged?.username}
+                          </span>
+                        </div>
+                      </div>
+                      {duel.scenario?.content && (
+                        <p className="text-sm font-semibold text-fg mb-2 line-clamp-2">{duel.scenario.content}</p>
+                      )}
+                      {totalVotes > 0 && (
+                        <div>
+                          <TugBar warm={pctA} cool={pctB} compact />
+                          <p className="tab-nums text-[10px] text-fg-subtle mt-1">{totalVotes} oy</p>
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* ── Recent duels feed (shown on default tabs only) ── */}
-      {feedFilter !== 'duels' && feedFilter !== 'follow' && recentDuels.length > 0 && (
+      {feedFilter !== 'duels' && feedFilter !== 'follow' && feedFilter !== 'live' && recentDuels.length > 0 && (
         <div>
           <div className="flex items-center justify-between px-4 py-3 border-b border-stroke">
             <h2 className="text-sm font-bold text-fg">Son Düellolar</h2>

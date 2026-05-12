@@ -21,7 +21,7 @@ export async function GET(req: Request) {
       challenged:profiles!duels_challenged_id_fkey(id, username, display_name, avatar_url, total_points),
       challenger_answer:answers!duels_challenger_answer_id_fkey(content, vote_count),
       challenged_answer:answers!duels_challenged_answer_id_fkey(content, vote_count),
-      scenario:scenarios(content)
+      scenario:scenarios(content, category, mode)
     `)
     .in('status', ['active', 'completed'])
     .gte('created_at', since)
