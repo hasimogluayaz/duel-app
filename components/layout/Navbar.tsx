@@ -13,8 +13,8 @@ import { MessageBell } from './MessageBell'
 import { formatPoints } from '@/lib/utils/formatting'
 import { getTier } from '@/lib/utils/tier'
 import type { Profile } from '@/types'
-import { Menu, X, User, Settings, LogOut, Sun, Moon, Star, Flame, Shield,
-  Search, Bookmark, Medal, Swords, Compass, BookOpen, Bell, Trophy } from 'lucide-react'
+import { X, User, Settings, LogOut, Sun, Moon, Flame, Shield,
+  Search, Bookmark, Medal, Swords, Compass, BookOpen, Bell, Trophy, MessageCircle, Menu } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import Image from 'next/image'
 
@@ -50,96 +50,51 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
   // Hide on admin pages
   if (pathname.startsWith('/admin')) return null
 
-  // ── LOGGED-IN: mobile-only slim top bar ──────────────────────────────────
+  // ── LOGGED-IN: mobile slim top bar (design: logo + search + msg + bell) ──
   if (profile) {
     return (
       <>
-        {/* Mobile top bar: logo + actions (lg:hidden) */}
-        <header className="lg:hidden sticky top-0 z-40 border-b border-stroke bg-surface/92 backdrop-blur-md">
-          <div className="flex items-center justify-between px-4 h-[54px]">
-            <Link href="/oyun" className="flex items-center gap-2">
-              <Image src="/logo.png" alt="Kapisio" width={28} height={28} className="w-7 h-7 object-contain" />
-              <span className="font-black text-lg text-gradient">Kapisio</span>
+        {/* Mobile top bar (lg:hidden) — design spec: 54px, logo left, 3 icons right */}
+        <header
+          className="lg:hidden sticky top-0 z-40 border-b border-stroke"
+          style={{
+            height: 54,
+            background: 'rgba(247,248,250,0.92)',
+            backdropFilter: 'blur(10px)',
+            WebkitBackdropFilter: 'blur(10px)',
+          }}
+        >
+          <div className="flex items-center gap-2.5 px-3.5 h-full">
+            {/* Logo left */}
+            <Link href="/oyun" className="shrink-0">
+              <Image src="/logo.png" alt="Kapisio" width={26} height={26} className="w-[26px] h-[26px] object-contain" />
             </Link>
-            <div className="flex items-center gap-1">
+
+            {/* Right: theme + search + msg + bell */}
+            <div className="ml-auto flex items-center gap-0.5">
               {mounted && (
                 <button
                   onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className="p-2 rounded-xl text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors"
+                  className="w-[38px] h-[38px] flex items-center justify-center rounded-full text-fg-muted hover:bg-surface-2 transition-colors"
+                  aria-label="Tema"
                 >
-                  {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+                  {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
                 </button>
               )}
-              <MessageBell userId={profile.id} />
-              <NotificationBell userId={profile.id} />
-              <button
-                className="p-2 text-fg-muted hover:text-fg hover:bg-surface-2 rounded-xl transition-colors"
-                onClick={() => setMobileOpen(!mobileOpen)}
+              <Link
+                href="/ara"
+                className="w-[38px] h-[38px] flex items-center justify-center rounded-full text-fg-muted hover:bg-surface-2 transition-colors"
+                aria-label="Ara"
               >
-                {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-              </button>
+                <Search size={19} />
+              </Link>
+              <MessageBell userId={profile.id} size={19} />
+              <NotificationBell userId={profile.id} size={19} />
             </div>
           </div>
-
-          {/* Mobile slide-down menu */}
-          {mobileOpen && (
-            <div className="border-t border-stroke bg-surface px-4 py-4 flex flex-col gap-1">
-              {/* User card */}
-              <div className="flex items-center gap-3 px-3 py-3 bg-surface-2 rounded-2xl mb-2">
-                {(() => { const t = getTier(profile.total_points); return (
-                  <div className={`p-0.5 rounded-full ring-2 ${t.ringColor}`}>
-                    <Avatar src={profile.avatar_url} username={profile.username} size="md" />
-                  </div>
-                )})()}
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-fg truncate">{profile.display_name || profile.username}</p>
-                  <p className="text-xs text-fg-subtle">@{profile.username}</p>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Star size={11} className="text-amber-400 fill-amber-400" />
-                  <span className="text-sm font-black text-fg">{formatPoints(profile.total_points)}</span>
-                </div>
-              </div>
-
-              {[
-                { href: '/oyun', label: 'Anasayfa', icon: Swords },
-                { href: '/kesfet', label: 'Keşfet', icon: Compass },
-                { href: '/arsiv', label: 'Arşiv', icon: BookOpen },
-                { href: '/bildirimler', label: 'Bildirimler', icon: Bell },
-                { href: '/liderlik', label: 'Liderlik', icon: Trophy },
-                { href: `/profil/${profile.username}`, label: 'Profil', icon: User },
-                { href: '/basarimlar', label: 'Başarımlar', icon: Medal },
-                { href: '/kayitlarim', label: 'Kaydettiklerim', icon: Bookmark },
-                { href: '/profil/ayarlar', label: 'Ayarlar', icon: Settings },
-              ].map(({ href, label, icon: Icon }) => (
-                <Link key={href} href={href} onClick={() => setMobileOpen(false)}
-                  className={cn(
-                    'flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-colors',
-                    pathname === href ? 'bg-primary/10 text-primary font-semibold' : 'text-fg-muted hover:text-fg hover:bg-surface-2'
-                  )}>
-                  <Icon size={16} /> {label}
-                </Link>
-              ))}
-
-              {(profile as any).is_admin && (
-                <Link href="/admin" onClick={() => setMobileOpen(false)}
-                  className="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm text-primary hover:bg-primary/10 transition-colors">
-                  <Shield size={16} /> Admin Panel
-                </Link>
-              )}
-              <div className="h-px bg-stroke my-1" />
-              {profile.streak_count > 0 && (
-                <div className="flex items-center gap-2 px-4 py-1 text-xs text-amber-400">
-                  <Flame size={13} /> {profile.streak_count} günlük seri
-                </div>
-              )}
-              <button onClick={() => { handleSignOut(); setMobileOpen(false) }}
-                className="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm text-red-500 hover:bg-red-500/5 transition-colors">
-                <LogOut size={16} /> Çıkış Yap
-              </button>
-            </div>
-          )}
         </header>
+
+        {/* Mobile drawer removed — BottomNav "Daha" tab handles secondary menu */}
 
         {/* Desktop top bar: very minimal — just theme + notifications (behind left sidebar) */}
         <header className="hidden lg:flex fixed top-0 left-64 right-0 xl:right-80 z-20 border-b border-stroke bg-surface/85 backdrop-blur-md h-14 items-center justify-end px-4 gap-1">
@@ -148,17 +103,17 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
               className="p-2 rounded-xl text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors"
             >
-              {theme === 'dark' ? <Sun size={16} /> : <Moon size={16} />}
+              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
             </button>
           )}
           <Link href="/ara" className="p-2 rounded-xl text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors">
-            <Search size={16} />
+            <Search size={18} />
           </Link>
-          <MessageBell userId={profile.id} />
-          <NotificationBell userId={profile.id} />
+          <MessageBell userId={profile.id} size={18} />
+          <NotificationBell userId={profile.id} size={18} />
           {(profile as any).is_admin && (
             <Link href="/admin" className="p-2 rounded-xl text-primary hover:bg-primary/10 transition-colors">
-              <Shield size={16} />
+              <Shield size={18} />
             </Link>
           )}
         </header>
@@ -179,8 +134,8 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
     <nav className="sticky top-0 z-40 border-b border-stroke bg-surface/90 backdrop-blur-md">
       <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity shrink-0">
-          <Image src="/logo.png" alt="Kapisio" width={28} height={28} className="w-7 h-7 object-contain" />
-          <span className="font-black text-xl text-gradient">Kapisio</span>
+          <Image src="/logo.png" alt="Kapisio" width={32} height={32} className="w-8 h-8 object-contain" />
+          <span className="font-black text-xl text-gradient hidden sm:inline">Kapisio</span>
         </Link>
 
         <div className="hidden md:flex items-center gap-1">

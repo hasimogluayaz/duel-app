@@ -109,15 +109,18 @@ export default function ConversationPage() {
     <div className="max-w-xl mx-auto flex flex-col h-[calc(100vh-4rem)]">
 
       {/* Header */}
-      <div className="flex items-center gap-3 px-4 py-3 border-b border-stroke bg-surface/80 backdrop-blur-md sticky top-16 z-10">
-        <Link href="/mesajlar" className="p-2 -ml-2 rounded-xl hover:bg-surface-2 transition-colors text-fg-muted hover:text-fg">
+      <div
+        className="flex items-center gap-3 px-4 py-3 border-b border-stroke bg-surface/90 backdrop-blur-md sticky z-10"
+        style={{ top: 54 }}
+      >
+        <Link href="/mesajlar" className="p-2 -ml-2 rounded-xl hover:bg-surface-2 transition-colors text-fg-muted hover:text-fg shrink-0">
           <ArrowLeft size={18} />
         </Link>
         <Link href={`/profil/${partner.username}`} className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
           <Avatar src={partner.avatar_url} username={partner.username} size="sm" />
           <div className="min-w-0">
-            <p className="text-sm font-bold text-fg truncate">{partner.display_name || partner.username}</p>
-            <p className="text-xs text-fg-subtle">@{partner.username}</p>
+            <p className="text-[14px] font-bold text-fg truncate">{partner.display_name || partner.username}</p>
+            <p className="text-[12px] text-fg-subtle">@{partner.username}</p>
           </div>
         </Link>
       </div>
@@ -183,7 +186,8 @@ export default function ConversationPage() {
         <button
           type="submit"
           disabled={!input.trim() || sending}
-          className="w-10 h-10 bg-primary rounded-2xl flex items-center justify-center hover:bg-primary disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
+          className="w-10 h-10 rounded-2xl flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
+          style={{ background: 'linear-gradient(135deg, var(--k-blue-400), var(--k-blue-600))' }}
         >
           <Send size={16} className="text-white" />
         </button>

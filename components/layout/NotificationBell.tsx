@@ -45,9 +45,10 @@ function getNotificationUrl(n: Notification): string | null {
 
 interface NotificationBellProps {
   userId: string
+  size?: number
 }
 
-export function NotificationBell({ userId }: NotificationBellProps) {
+export function NotificationBell({ userId, size = 18 }: NotificationBellProps) {
   const supabase = createClient()
   const router = useRouter()
   const [notifications, setNotifications] = useState<Notification[]>([])
@@ -59,19 +60,35 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   useEffect(() => {
     loadNotifications()
 
-    const channel = supabase
-      .channel(`notifications:${userId}`)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (payload: any) => {
-          setNotifications(prev => [payload.new as Notification, ...prev])
-        }
-      )
-      .subscribe()
+    let channel: ReturnType<typeof supabase.channel> | null = null
+    try {
+      channel = supabase
+        .channel(`notifications:${userId}`)
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (payload: any) => {
+            setNotifications(prev => [payload.new as Notification, ...prev])
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
+          () => {
+            loadNotifications()
+          }
+        )
+        .subscribe()
+    } catch (e) {
+      console.error('[NotificationBell] Realtime subscription failed:', e)
+    }
 
-    return () => { supabase.removeChannel(channel) }
+    return () => {
+      if (channel) {
+        try { supabase.removeChannel(channel) } catch {}
+      }
+    }
   }, [userId])
 
   async function loadNotifications() {
@@ -116,7 +133,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
         className="relative p-2 rounded-xl text-fg-muted hover:text-fg hover:bg-surface transition-colors"
         aria-label="Bildirimler"
       >
-        <Bell size={20} />
+        <Bell size={size} />
         {unreadCount > 0 && (
           <span className="absolute top-1 right-1 w-4 h-4 bg-primary text-fg text-[10px] font-bold rounded-full flex items-center justify-center">
             {unreadCount > 9 ? '9+' : unreadCount}
@@ -149,6 +166,9 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                     <div
                       key={n.id}
                       onClick={() => handleNotificationClick(n)}
+                      role={url ? 'button' : undefined}
+                      tabIndex={url ? 0 : undefined}
+                      onKeyDown={url ? (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleNotificationClick(n) } } : undefined}
                       className={`px-4 py-3 border-b border-stroke last:border-0 transition-colors ${
                         !n.is_read ? 'bg-primary/5' : ''
                       } ${url ? 'cursor-pointer hover:bg-surface-2' : ''}`}

@@ -1,9 +1,8 @@
-﻿'use client'
+'use client'
 
 export const dynamic = 'force-dynamic'
 
 import { useEffect, useState } from 'react'
-import { Card } from '@/components/ui/Card'
 import { Avatar } from '@/components/ui/Avatar'
 import { Spinner } from '@/components/ui/Spinner'
 import { formatPoints } from '@/lib/utils/formatting'
@@ -30,15 +29,9 @@ interface Entry {
 const PERIOD_LABELS: Record<Period, string> = {
   weekly: 'Bu Hafta',
   monthly: 'Bu Ay',
-  all_time: 'Tüm Zamanlar',
+  all_time: 'Tüm Zaman',
   friends: 'Arkadaşlar',
 }
-
-const PODIUM_STYLES = [
-  { rank: '#1', border: 'border-amber-500/30', text: 'text-amber-400' },
-  { rank: '#2', border: 'border-stroke', text: 'text-fg-subtle' },
-  { rank: '#3', border: 'border-stroke', text: 'text-fg-subtle' },
-]
 
 export default function LiderlikPage() {
   const [period, setPeriod] = useState<Period>('weekly')
@@ -46,9 +39,7 @@ export default function LiderlikPage() {
   const [loading, setLoading] = useState(true)
   const [myEntry, setMyEntry] = useState<Entry | null>(null)
 
-  useEffect(() => {
-    loadLeaderboard()
-  }, [period])
+  useEffect(() => { loadLeaderboard() }, [period])
 
   async function loadLeaderboard() {
     setLoading(true)
@@ -63,33 +54,46 @@ export default function LiderlikPage() {
   const rest = entries.slice(3)
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+    <div className="max-w-2xl mx-auto px-4 py-6" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-black text-fg">Liderlik Tablosu</h1>
-        <p className="text-sm text-fg-subtle mt-1">En iyi düellucular sıralanıyor</p>
-      </div>
-
-      {/* Period tabs */}
-      <div className="flex border-b border-stroke mb-6 overflow-x-auto scrollbar-none">
-        {(Object.keys(PERIOD_LABELS) as Period[]).map(p => (
-          <button
-            key={p}
-            onClick={() => setPeriod(p)}
-            className={`shrink-0 px-4 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px whitespace-nowrap ${
-              period === p
-                ? 'border-fg text-fg'
-                : 'border-transparent text-fg-subtle hover:text-fg-muted hover:border-stroke'
-            }`}
-          >
-            {PERIOD_LABELS[p]}
-          </button>
-        ))}
+      {/* ── Gradient hero ── */}
+      <div style={{
+        background: 'linear-gradient(135deg, #5188fa, #1c2f6e)',
+        color: '#fff',
+        padding: '20px 22px',
+        borderRadius: 20,
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        <div aria-hidden style={{
+          position: 'absolute', right: -40, top: -40, width: 200, height: 200,
+          borderRadius: '50%', background: 'rgba(255,255,255,0.06)',
+        }}/>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Trophy size={24} />
+          <h1 style={{ margin: 0, font: '700 22px/1.1 -apple-system, BlinkMacSystemFont, sans-serif', letterSpacing: '-0.02em' }}>
+            Liderlik
+          </h1>
+        </div>
+        <p style={{ margin: '8px 0 0', fontSize: 14, opacity: 0.9 }}>
+          En çok oy alan, en çok düello kazanan oyuncular.
+        </p>
+        {/* Period pills */}
+        <div style={{ display: 'flex', gap: 6, marginTop: 14, flexWrap: 'wrap' }}>
+          {(Object.entries(PERIOD_LABELS) as [Period, string][]).map(([id, label]) => (
+            <button key={id} onClick={() => setPeriod(id)} style={{
+              padding: '6px 12px', borderRadius: 999, border: 'none',
+              background: period === id ? '#fff' : 'rgba(255,255,255,0.18)',
+              color: period === id ? 'var(--k-navy-600, #122351)' : '#fff',
+              font: `${period === id ? 600 : 500} 12.5px -apple-system, sans-serif`,
+              cursor: 'pointer', transition: 'background .12s',
+            }}>{label}</button>
+          ))}
+        </div>
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-24"><Spinner size="lg" /></div>
+        <div className="flex justify-center py-16"><Spinner size="lg" /></div>
       ) : entries.length === 0 ? (
         <div className="text-center py-16">
           <Trophy size={32} className="text-fg-subtle mx-auto mb-4 opacity-25" />
@@ -101,108 +105,133 @@ export default function LiderlikPage() {
         </div>
       ) : (
         <>
-          {/* ── Podium (top 3) ── */}
-          {top3.length > 0 && (
-            <div className="grid grid-cols-3 gap-2 mb-4">
-              {top3.map((entry, i) => {
-                const t = getTier(entry.points)
-                const style = PODIUM_STYLES[i]
+          {/* ── Desktop podium ── */}
+          {top3.length >= 3 && (
+            <div className="hidden md:grid grid-cols-3 gap-4" style={{
+              background: 'var(--surface, #fff)',
+              border: '1px solid var(--stroke, #e4e7ed)',
+              borderRadius: 14,
+              padding: 20,
+              alignItems: 'end',
+            }}>
+              {([1, 0, 2] as const).map((idx) => {
+                const u = top3[idx]
+                const t = getTier(u.points)
+                const podiumH = [120, 150, 100][idx]
+                const podiumC = ['#cbd5e1', '#fbbf24', '#f97316'][idx]
                 return (
-                  <Link key={entry.id} href={`/profil/${entry.username}`}>
-                    <div className={`flex flex-col items-center text-center p-3 sm:p-4 rounded-2xl border bg-surface hover:bg-surface-2 transition-all ${style.border}`}>
-                      {/* Rank badge */}
-                      <div className={`text-sm font-black mb-2 ${style.text}`}>{style.rank}</div>
-                      <div className={`p-0.5 rounded-full ring-2 mb-2 ${t.ringColor}`}>
-                        <Avatar src={entry.avatar_url} username={entry.username} size="md" />
-                      </div>
-                      <p className="text-xs sm:text-sm font-bold text-fg truncate w-full">
-                        {entry.display_name || entry.username}
-                      </p>
-                      <span className={`text-xs font-bold ${t.color} mt-0.5`}>{t.emoji} {t.label}</span>
-                      <p className={`font-black mt-2 text-sm sm:text-base ${style.text}`}>
-                        {formatPoints(entry.points)}
-                      </p>
-                      <p className="text-xs text-fg-subtle">puan</p>
-                      {entry.duel_count > 0 && (
-                        <div className="flex items-center gap-1 mt-1.5 text-xs text-fg-subtle">
-                          <Swords size={9} />
-                          %{Math.round((entry.win_count / entry.duel_count) * 100)}
-                        </div>
-                      )}
+                  <div key={u.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                    <div style={{ position: 'relative' }}>
+                      <Avatar src={u.avatar_url} username={u.username} size="lg" />
                     </div>
-                  </Link>
+                    <div style={{ font: '600 14px -apple-system, sans-serif', textAlign: 'center' }}>
+                      {u.display_name || u.username}
+                    </div>
+                    <div style={{ font: '500 12px monospace', color: 'var(--k-text-3, #8e96a6)' }}>
+                      {formatPoints(u.points)} puan
+                    </div>
+                    <div style={{
+                      width: '100%', height: podiumH,
+                      background: podiumC,
+                      borderRadius: '10px 10px 0 0',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      font: '800 32px -apple-system, sans-serif',
+                      color: '#fff',
+                    }}>{u.rank}</div>
+                  </div>
                 )
               })}
             </div>
           )}
 
-          {/* ── Rest of the list ── */}
-          {rest.length > 0 && (
-            <div className="flex flex-col gap-1.5">
-              {rest.map((entry) => {
-                const t = getTier(entry.points)
-                return (
-                  <Link key={entry.id} href={`/profil/${entry.username}`}>
-                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-surface border border-stroke hover:bg-surface-2 transition-all cursor-pointer group">
-                      <div className="w-7 text-center flex-shrink-0">
-                        <span className="text-sm font-bold text-fg-subtle">#{entry.rank}</span>
+          {/* ── Ranked list ── */}
+          <div style={{
+            background: 'var(--surface, #fff)',
+            border: '1px solid var(--stroke, #e4e7ed)',
+            borderRadius: 14,
+            overflow: 'hidden',
+          }}>
+            {entries.map((u, i) => {
+              const t = getTier(u.points)
+              const isMe = u.is_me
+              return (
+                <Link key={u.id} href={`/profil/${u.username}`} style={{ textDecoration: 'none' }}>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
+                    borderBottom: i === entries.length - 1 ? 'none' : '1px solid var(--stroke, #e4e7ed)',
+                    background: isMe ? 'var(--k-blue-50, #eef4ff)' : 'transparent',
+                    cursor: 'pointer', transition: 'background .12s',
+                  }}>
+                    <span style={{
+                      width: 28, textAlign: 'center',
+                      font: `700 14px monospace`,
+                      color: u.rank <= 3 ? 'var(--k-blue-500, #2a6cf0)' : 'var(--k-text-3, #8e96a6)',
+                    }}>{u.rank}</span>
+                    <Avatar src={u.avatar_url} username={u.username} size="sm" />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                        <span style={{ font: '600 14px -apple-system, sans-serif', color: 'var(--fg, #0f1320)' }}>
+                          {u.display_name || u.username}
+                          {isMe && <span style={{ marginLeft: 6, fontSize: 11, color: 'var(--k-blue-500, #2a6cf0)', fontWeight: 400 }}>(sen)</span>}
+                        </span>
+                        <span className={`text-xs font-bold ${t.color} shrink-0`}>{t.emoji} {t.label}</span>
                       </div>
-                      <Avatar src={entry.avatar_url} username={entry.username} size="sm" />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <p className={`font-semibold text-sm truncate transition-colors ${entry.is_me ? 'text-primary/70' : 'text-fg'}`}>
-                            {entry.display_name || entry.username}
-                            {entry.is_me && <span className="ml-1 text-xs text-primary/70 font-normal">(sen)</span>}
-                          </p>
-                          <span className={`text-xs font-bold ${t.color} shrink-0`}>{t.emoji} {t.label}</span>
-                        </div>
-                        <p className="text-xs text-fg-subtle">
-                          @{entry.username}
-                          {entry.active_title && <span className="ml-2 text-primary/70">· {entry.active_title}</span>}
-                        </p>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <p className="font-black text-fg text-sm">{formatPoints(entry.points)}</p>
-                        <p className="text-xs text-fg-subtle">puan</p>
-                      </div>
-                      <div className="text-right flex-shrink-0 hidden sm:block w-14">
-                        <p className="text-sm font-bold text-green-400">
-                          %{entry.duel_count > 0 ? Math.round((entry.win_count / entry.duel_count) * 100) : 0}
-                        </p>
-                        <p className="text-xs text-fg-subtle">kazanma</p>
+                      <div style={{ font: '400 12px monospace', color: 'var(--k-text-3, #8e96a6)' }}>
+                        @{u.username}
+                        {u.active_title && <span style={{ marginLeft: 8, color: 'var(--k-blue-500, #2a6cf0)' }}>· {u.active_title}</span>}
                       </div>
                     </div>
-                  </Link>
-                )
-              })}
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <div style={{ font: '700 14px monospace', color: 'var(--fg, #0f1320)' }}>{formatPoints(u.points)}</div>
+                      <div style={{ font: '400 11px monospace', color: 'var(--k-text-3, #8e96a6)' }}>puan</div>
+                    </div>
+                    {u.duel_count > 0 && (
+                      <div style={{ textAlign: 'right', flexShrink: 0, minWidth: 52 }} className="hidden sm:block">
+                        <div style={{ font: '600 13px monospace', color: '#16a34a' }}>
+                          %{Math.round((u.win_count / u.duel_count) * 100)}
+                        </div>
+                        <div style={{ font: '400 11px monospace', color: 'var(--k-text-3, #8e96a6)' }}>kazanma</div>
+                      </div>
+                    )}
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+
+          {/* ── My rank ── */}
+          {myEntry && (
+            <div style={{ paddingTop: 12, borderTop: '1px solid var(--stroke, #e4e7ed)' }}>
+              <p style={{ textAlign: 'center', fontSize: 11, fontWeight: 700, color: 'var(--k-text-3, #8e96a6)',
+                           textTransform: 'uppercase', letterSpacing: '.06em', marginBottom: 8 }}>
+                Senin Sıralamanı
+              </p>
+              <Link href={`/profil/${myEntry.username}`} style={{ textDecoration: 'none' }}>
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
+                  border: '1px solid var(--k-blue-200, #b8cfff)',
+                  background: 'var(--k-blue-50, #eef4ff)',
+                  borderRadius: 12, cursor: 'pointer',
+                }}>
+                  <span style={{ width: 28, textAlign: 'center', font: '700 14px monospace', color: 'var(--k-blue-500, #2a6cf0)' }}>
+                    #{myEntry.rank}
+                  </span>
+                  <Avatar src={myEntry.avatar_url} username={myEntry.username} size="sm" />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ font: '600 14px -apple-system, sans-serif', color: 'var(--fg, #0f1320)' }}>
+                      {myEntry.display_name || myEntry.username}
+                    </div>
+                    <div style={{ font: '400 12px monospace', color: 'var(--k-text-3, #8e96a6)' }}>@{myEntry.username}</div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ font: '700 14px monospace', color: 'var(--k-blue-500, #2a6cf0)' }}>{formatPoints(myEntry.points)}</div>
+                    <div style={{ font: '400 11px monospace', color: 'var(--k-text-3, #8e96a6)' }}>puan</div>
+                  </div>
+                </div>
+              </Link>
             </div>
           )}
         </>
-      )}
-
-      {/* ── My rank ── */}
-      {myEntry && (
-        <div className="mt-5 pt-4 border-t border-stroke">
-          <p className="text-xs font-semibold text-fg-subtle uppercase tracking-wider mb-2 text-center">
-            Senin Sıralamanı
-          </p>
-          <Link href={`/profil/${myEntry.username}`}>
-            <div className="flex items-center gap-3 px-4 py-3 border border-primary/30 bg-primary/5 rounded-xl hover:bg-primary/10 transition-all cursor-pointer">
-              <div className="w-7 text-center flex-shrink-0">
-                <span className="text-sm font-black text-primary/70">#{myEntry.rank}</span>
-              </div>
-              <Avatar src={myEntry.avatar_url} username={myEntry.username} size="sm" />
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-fg text-sm truncate">{myEntry.display_name || myEntry.username}</p>
-                <p className="text-xs text-fg-subtle">@{myEntry.username}</p>
-              </div>
-              <div className="text-right flex-shrink-0">
-                <p className="font-black text-primary/70">{formatPoints(myEntry.points)}</p>
-                <p className="text-xs text-fg-subtle">puan</p>
-              </div>
-            </div>
-          </Link>
-        </div>
       )}
     </div>
   )

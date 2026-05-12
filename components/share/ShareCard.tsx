@@ -79,6 +79,7 @@ export function ShareCard({ duel, winnerProfile, onClose }: Props) {
       link.click()
     } catch (e) {
       console.error(e)
+      window.alert('Görsel indirilemedi. Lütfen tekrar dene.')
     }
     setDownloading(false)
   }
@@ -117,12 +118,12 @@ export function ShareCard({ duel, winnerProfile, onClose }: Props) {
   }
 
   // Card style helpers
-  const cardBg = 'linear-gradient(135deg, #0d0b1e 0%, #130f30 50%, #0d0b1e 100%)'
-  const accentGlow = 'rgba(139,92,246,0.25)'
+  const cardBg = 'linear-gradient(135deg, #000000 0%, #0a0a0a 50%, #000000 100%)'
+  const accentGlow = 'rgba(25,103,210,0.25)'
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 bg-black/80 backdrop-blur-md">
-      <div className="bg-surface border border-stroke rounded-2xl w-full max-w-lg max-h-[95vh] overflow-y-auto shadow-2xl shadow-purple-900/30">
+      <div className="bg-surface border border-stroke rounded-2xl w-full max-w-lg max-h-[95vh] overflow-y-auto shadow-2xl shadow-primary/20">
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3">
@@ -143,7 +144,7 @@ export function ShareCard({ duel, winnerProfile, onClose }: Props) {
               onClick={() => setFormat(f)}
               className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all ${
                 format === f
-                  ? 'bg-primary text-white shadow-lg shadow-purple-900/40'
+                  ? 'bg-primary text-white shadow-lg shadow-primary/40'
                   : 'bg-surface-2 text-fg-subtle hover:bg-stroke'
               }`}
             >
@@ -291,8 +292,8 @@ function SquareCardContent({ scenario, winnerName, loserName, winnerAnswer, lose
       </div>
 
       {/* Scenario */}
-      <div style={{ background: 'rgba(139,92,246,0.12)', border: '1.5px solid rgba(139,92,246,0.3)', borderRadius: 20, padding: '36px 44px', marginBottom: 40, position: 'relative' }}>
-        <p style={{ fontSize: 30, color: '#c4b5fd', fontStyle: 'italic', lineHeight: 1.5, margin: 0 }}>
+      <div style={{ background: 'rgba(25,103,210,0.12)', border: '1.5px solid rgba(25,103,210,0.3)', borderRadius: 20, padding: '36px 44px', marginBottom: 40, position: 'relative' }}>
+        <p style={{ fontSize: 30, color: '#93c5fd', fontStyle: 'italic', lineHeight: 1.5, margin: 0 }}>
           &ldquo;{scenario.slice(0, 120)}{scenario.length > 120 ? '...' : ''}&rdquo;
         </p>
       </div>
@@ -300,16 +301,16 @@ function SquareCardContent({ scenario, winnerName, loserName, winnerAnswer, lose
       {/* Answers */}
       <div style={{ display: 'flex', gap: 24, marginBottom: 40, flex: 1, position: 'relative' }}>
         {/* Winner */}
-        <div style={{ flex: 1, background: 'linear-gradient(135deg, rgba(139,92,246,0.25) 0%, rgba(109,40,217,0.15) 100%)', border: '2px solid rgba(139,92,246,0.6)', borderRadius: 20, padding: '32px 36px' }}>
+        <div style={{ flex: 1, background: 'linear-gradient(135deg, rgba(25,103,210,0.25) 0%, rgba(21,88,184,0.15) 100%)', border: '2px solid rgba(25,103,210,0.6)', borderRadius: 20, padding: '32px 36px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
             <span style={{ fontSize: 28 }}>🏆</span>
-            <span style={{ fontSize: 26, fontWeight: 800, color: '#a78bfa' }}>{winnerName}</span>
+            <span style={{ fontSize: 26, fontWeight: 800, color: '#60a5fa' }}>{winnerName}</span>
           </div>
           <p style={{ fontSize: 26, color: '#ffffff', lineHeight: 1.5, margin: 0, fontWeight: 600 }}>
             &ldquo;{(winnerAnswer ?? '').slice(0, 80)}{(winnerAnswer ?? '').length > 80 ? '...' : ''}&rdquo;
           </p>
-          <div style={{ marginTop: 16, display: 'inline-block', background: 'rgba(139,92,246,0.3)', borderRadius: 999, padding: '6px 20px' }}>
-            <span style={{ fontSize: 20, color: '#c4b5fd', fontWeight: 700 }}>KAZANDI</span>
+          <div style={{ marginTop: 16, display: 'inline-block', background: 'rgba(25,103,210,0.3)', borderRadius: 999, padding: '6px 20px' }}>
+            <span style={{ fontSize: 20, color: '#93c5fd', fontWeight: 700 }}>KAZANDI</span>
           </div>
         </div>
 
@@ -357,18 +358,18 @@ function StoryCardContent({ scenario, winnerName, loserName, winnerAnswer, loser
       </div>
 
       {/* Scenario */}
-      <div style={{ background: 'rgba(139,92,246,0.12)', border: '2px solid rgba(139,92,246,0.3)', borderRadius: 24, padding: '48px 56px', marginBottom: 52, position: 'relative' }}>
-        <p style={{ fontSize: 40, color: '#c4b5fd', fontStyle: 'italic', lineHeight: 1.5, margin: 0, fontWeight: 600 }}>
+      <div style={{ background: 'rgba(25,103,210,0.12)', border: '2px solid rgba(25,103,210,0.3)', borderRadius: 24, padding: '48px 56px', marginBottom: 52, position: 'relative' }}>
+        <p style={{ fontSize: 40, color: '#93c5fd', fontStyle: 'italic', lineHeight: 1.5, margin: 0, fontWeight: 600 }}>
           &ldquo;{scenario.slice(0, 160)}{scenario.length > 160 ? '...' : ''}&rdquo;
         </p>
       </div>
 
       {/* Winner answer */}
-      <div style={{ background: 'linear-gradient(135deg, rgba(139,92,246,0.3) 0%, rgba(109,40,217,0.2) 100%)', border: '2.5px solid rgba(139,92,246,0.7)', borderRadius: 24, padding: '44px 56px', marginBottom: 32, position: 'relative' }}>
+      <div style={{ background: 'linear-gradient(135deg, rgba(25,103,210,0.3) 0%, rgba(21,88,184,0.2) 100%)', border: '2.5px solid rgba(139,92,246,0.7)', borderRadius: 24, padding: '44px 56px', marginBottom: 32, position: 'relative' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
           <span style={{ fontSize: 40 }}>🏆</span>
-          <span style={{ fontSize: 38, fontWeight: 900, color: '#a78bfa' }}>{winnerName}</span>
-          <span style={{ marginLeft: 'auto', background: 'rgba(139,92,246,0.4)', borderRadius: 999, padding: '8px 24px', fontSize: 24, color: '#c4b5fd', fontWeight: 800 }}>KAZANDI</span>
+          <span style={{ fontSize: 38, fontWeight: 900, color: '#60a5fa' }}>{winnerName}</span>
+          <span style={{ marginLeft: 'auto', background: 'rgba(25,103,210,0.4)', borderRadius: 999, padding: '8px 24px', fontSize: 24, color: '#93c5fd', fontWeight: 800 }}>KAZANDI</span>
         </div>
         <p style={{ fontSize: 38, color: '#ffffff', lineHeight: 1.5, margin: 0, fontWeight: 600 }}>
           &ldquo;{(winnerAnswer ?? '').slice(0, 120)}{(winnerAnswer ?? '').length > 120 ? '...' : ''}&rdquo;

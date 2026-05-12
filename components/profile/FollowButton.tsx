@@ -20,26 +20,30 @@ export function FollowButton({ targetId, initialFollowing, size = 'sm', onFollow
 
   async function toggle() {
     setLoading(true)
-    const res = await fetch('/api/follow', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        following_id: targetId,
-        action: following ? 'unfollow' : 'follow',
-      }),
-    })
-    const json = await res.json()
-    if (!res.ok) {
-      toast(json.error || 'İşlem başarısız.', 'error')
-    } else {
-      setFollowing(json.following)
-      if (json.following) {
-        toast('Takip edildi! 👥', 'success')
-        onFollow?.()
+    try {
+      const res = await fetch('/api/follow', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          following_id: targetId,
+          action: following ? 'unfollow' : 'follow',
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) {
+        toast(json.error || 'İşlem başarısız.', 'error')
       } else {
-        toast('Takip bırakıldı.', 'success')
-        onUnfollow?.()
+        setFollowing(json.following)
+        if (json.following) {
+          toast('Takip edildi! 👥', 'success')
+          onFollow?.()
+        } else {
+          toast('Takip bırakıldı.', 'success')
+          onUnfollow?.()
+        }
       }
+    } catch {
+      toast('Bağlantı hatası. Tekrar dene.', 'error')
     }
     setLoading(false)
   }

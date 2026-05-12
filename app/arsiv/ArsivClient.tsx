@@ -1,9 +1,10 @@
-﻿'use client'
+'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import ScenarioCard from '@/components/scenarios/ScenarioCard'
+import { Archive } from 'lucide-react'
 
 interface Scenario {
   id: string
@@ -70,120 +71,160 @@ export default function ArsivClient({
     }
   }, [nextCursor, loading, activeCategory, activeSort])
 
+  const answeredCount = scenarios.filter(s => s.answered).length
+
   return (
-    <div className="min-h-screen bg-bg pb-24">
-      {/* Header */}
-      <div className="bg-bg/80 backdrop-blur-md border-b border-stroke sticky top-0 z-10">
-        <div className="max-w-3xl mx-auto px-4">
-          <div className="flex items-center justify-between py-4">
-            <div>
-              <h1 className="text-xl font-bold text-fg">📚 Senaryo Arşivi</h1>
-              <p className="text-xs text-fg-subtle mt-0.5">Tüm senaryolara cevap ver, puanları topla</p>
-            </div>
-            {userId && (
-              <button
-                onClick={() => setShowCreate(true)}
-                className="flex items-center gap-2 btn-gradient text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
-              >
-                <span>✍️</span>
-                <span className="hidden sm:inline">Senaryo Oluştur</span>
-              </button>
-            )}
-          </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }} className="max-w-3xl mx-auto px-4 py-6">
 
-          {/* Category filter */}
-          <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-hide">
-            {categories.map((cat) => (
-              <button
-                key={cat.value}
-                onClick={() => navigate({ category: cat.value, sort: activeSort })}
-                className={`shrink-0 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                  activeCategory === cat.value
-                    ? 'bg-primary text-white'
-                    : 'bg-surface-2 text-fg-muted hover:bg-stroke'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
+      {/* ── Blue gradient hero ── */}
+      <div style={{
+        padding: '20px 22px',
+        display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
+        background: 'linear-gradient(135deg, #1442a8, #2a6cf0)',
+        color: '#fff', borderRadius: 20, border: 'none', position: 'relative', overflow: 'hidden',
+      }}>
+        <div aria-hidden style={{
+          position: 'absolute', right: -40, top: -40, width: 200, height: 200,
+          borderRadius: '50%', background: 'rgba(255,255,255,0.06)',
+        }} />
+        <div style={{
+          width: 48, height: 48, borderRadius: 12, background: 'rgba(255,255,255,0.16)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <Archive size={24} />
+        </div>
+        <div style={{ flex: 1, minWidth: 200, position: 'relative' }}>
+          <h1 style={{ margin: 0, font: '700 22px/1.1 -apple-system, BlinkMacSystemFont, sans-serif', letterSpacing: '-0.02em' }}>
+            Senaryo Arşivi
+          </h1>
+          <p style={{ margin: '4px 0 0', font: '400 13.5px -apple-system, sans-serif', opacity: 0.88 }}>
+            Geçmiş günlerin senaryolarını oku, cevap ver, puan topla.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: 22, padding: '4px 8px', position: 'relative' }}>
+          <div>
+            <div style={{ font: '700 22px monospace' }}>{scenarios.length}</div>
+            <div style={{ font: '500 11px -apple-system, sans-serif', opacity: 0.88, textTransform: 'uppercase', letterSpacing: '.04em' }}>Görüntülenen</div>
           </div>
-
-          {/* Sort + filter row */}
-          <div className="flex items-center gap-2 pb-3 flex-wrap">
-            {(['recent', 'popular'] as const).map((s) => (
-              <button
-                key={s}
-                onClick={() => navigate({ category: activeCategory, sort: s, filter: activeFilter })}
-                className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-                  activeSort === s
-                    ? 'bg-surface-2 text-fg'
-                    : 'text-fg-subtle hover:text-fg-muted'
-                }`}
-              >
-                {s === 'recent' ? '🕐 Yeni' : '🔥 Popüler'}
-              </button>
-            ))}
-            {userId && (
-              <>
-                <div className="w-px h-4 bg-stroke mx-1" />
-                {([
-                  { v: 'all', label: 'Hepsi' },
-                  { v: 'unanswered', label: '📭 Cevaplanmamış' },
-                  { v: 'answered', label: '✅ Cevapladım' },
-                ] as const).map(f => (
-                  <button
-                    key={f.v}
-                    onClick={() => navigate({ category: activeCategory, sort: activeSort, filter: f.v })}
-                    className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
-                      activeFilter === f.v
-                        ? 'bg-primary/30 text-primary'
-                        : 'text-fg-subtle hover:text-fg-muted'
-                    }`}
-                  >
-                    {f.label}
-                  </button>
-                ))}
-              </>
-            )}
+          <div>
+            <div style={{ font: '700 22px monospace' }}>{answeredCount}</div>
+            <div style={{ font: '500 11px -apple-system, sans-serif', opacity: 0.88, textTransform: 'uppercase', letterSpacing: '.04em' }}>Cevapladığın</div>
           </div>
         </div>
       </div>
 
-      {/* Scenarios grid */}
-      <div className="max-w-3xl mx-auto px-4 pt-4 space-y-3">
-        {scenarios.length === 0 ? (
-          <div className="text-center py-20 text-fg-subtle">
-            <div className="text-4xl mb-3">🤔</div>
-            <p>Bu kategoride henüz senaryo yok.</p>
-            {userId && (
-              <button
-                onClick={() => setShowCreate(true)}
-                className="mt-4 text-primary/70 hover:text-primary/40 text-sm underline"
-              >
-                İlk senaryoyu sen oluştur!
-              </button>
-            )}
-          </div>
-        ) : (
-          scenarios.map((scenario) => (
-            <ScenarioCard
-              key={scenario.id}
-              scenario={scenario}
-              userId={userId}
-            />
-          ))
-        )}
+      {/* ── Filters row ── */}
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
+        {/* Category pills */}
+        <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
+          {categories.map((cat) => (
+            <button
+              key={cat.value}
+              onClick={() => navigate({ category: cat.value, sort: activeSort })}
+              style={{
+                padding: '8px 14px', borderRadius: 999, whiteSpace: 'nowrap',
+                border: `1px solid ${activeCategory === cat.value ? 'transparent' : 'var(--stroke, #e4e7ed)'}`,
+                background: activeCategory === cat.value ? 'var(--fg, #0f1320)' : 'var(--surface, #fff)',
+                color: activeCategory === cat.value ? '#fff' : 'var(--fg-muted)',
+                font: '500 13px -apple-system, sans-serif', cursor: 'pointer',
+              }}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
 
-        {nextCursor && (
-          <button
-            onClick={loadMore}
-            disabled={loading}
-            className="w-full py-3 text-sm text-fg-subtle hover:text-fg-muted transition-colors"
-          >
-            {loading ? 'Yükleniyor...' : 'Daha fazla göster'}
-          </button>
-        )}
+        {/* Sort pills */}
+        <div style={{ display: 'flex', gap: 4, marginLeft: 'auto' }}>
+          {(['recent', 'popular'] as const).map((s) => (
+            <button
+              key={s}
+              onClick={() => navigate({ category: activeCategory, sort: s, filter: activeFilter })}
+              style={{
+                padding: '6px 12px', borderRadius: 999,
+                border: `1px solid ${activeSort === s ? 'transparent' : 'var(--stroke, #e4e7ed)'}`,
+                background: activeSort === s ? 'var(--k-blue-500, #2a6cf0)' : 'var(--surface, #fff)',
+                color: activeSort === s ? '#fff' : 'var(--fg-muted)',
+                font: '500 12px -apple-system, sans-serif', cursor: 'pointer',
+              }}
+            >
+              {s === 'recent' ? '🕐 Yeni' : '🔥 Popüler'}
+            </button>
+          ))}
+        </div>
       </div>
+
+      {/* ── Answer filter (logged in only) ── */}
+      {userId && (
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+          {([
+            { v: 'all', label: 'Tümü' },
+            { v: 'unanswered', label: '📭 Cevaplanmamış' },
+            { v: 'answered', label: '✅ Cevapladım' },
+          ] as const).map(f => (
+            <button
+              key={f.v}
+              onClick={() => navigate({ category: activeCategory, sort: activeSort, filter: f.v })}
+              style={{
+                padding: '7px 12px', borderRadius: 999,
+                border: `1px solid ${activeFilter === f.v ? 'var(--k-blue-200, #b8cfff)' : 'var(--stroke, #e4e7ed)'}`,
+                background: activeFilter === f.v ? 'var(--k-blue-50, #eef4ff)' : 'var(--surface, #fff)',
+                color: activeFilter === f.v ? 'var(--k-blue-700, #1442a8)' : 'var(--fg-muted)',
+                font: `${activeFilter === f.v ? 600 : 500} 12px -apple-system, sans-serif`,
+                cursor: 'pointer',
+              }}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ── Scenarios list ── */}
+      {scenarios.length === 0 ? (
+        <div style={{
+          background: 'var(--surface, #fff)', border: '1px solid var(--stroke, #e4e7ed)',
+          borderRadius: 14, padding: '48px 24px', textAlign: 'center',
+        }}>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>🤔</div>
+          <p style={{ margin: 0, font: '600 15px -apple-system, sans-serif', color: 'var(--fg)' }}>Bu kategoride henüz senaryo yok</p>
+          {userId && (
+            <button
+              onClick={() => setShowCreate(true)}
+              style={{
+                marginTop: 16, padding: '10px 20px', borderRadius: 999, border: 'none',
+                background: 'var(--k-blue-500, #2a6cf0)', color: '#fff',
+                font: '600 13px -apple-system, sans-serif', cursor: 'pointer',
+              }}
+            >
+              İlk senaryoyu sen oluştur!
+            </button>
+          )}
+        </div>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {scenarios.map((scenario) => (
+            <ScenarioCard key={scenario.id} scenario={scenario} userId={userId} />
+          ))}
+        </div>
+      )}
+
+      {nextCursor && (
+        <button
+          onClick={loadMore}
+          disabled={loading}
+          style={{
+            width: '100%', padding: '12px', borderRadius: 12,
+            border: '1px solid var(--stroke, #e4e7ed)',
+            background: 'var(--surface, #fff)',
+            color: 'var(--k-blue-500, #2a6cf0)',
+            font: '500 13px -apple-system, sans-serif', cursor: 'pointer',
+            opacity: loading ? 0.6 : 1,
+          }}
+        >
+          {loading ? 'Yükleniyor...' : 'Daha fazla göster'}
+        </button>
+      )}
 
       {/* Create scenario modal */}
       {showCreate && userId && (
@@ -236,10 +277,7 @@ function CreateScenarioModal({
         body: JSON.stringify({ content, category }),
       })
       const data = await res.json()
-      if (!res.ok) {
-        setError(data.error ?? 'Bir hata oluştu.')
-        return
-      }
+      if (!res.ok) { setError(data.error ?? 'Bir hata oluştu.'); return }
       onCreated({ ...data.scenario, answered: false })
     } catch {
       setError('Bağlantı hatası.')
@@ -249,54 +287,88 @@ function CreateScenarioModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-      <div className="w-full max-w-lg bg-surface rounded-2xl border border-stroke overflow-hidden">
-        <div className="flex items-center justify-between p-4 border-b border-stroke">
-          <h2 className="font-bold text-fg">✍️ Senaryo Oluştur</h2>
-          <button onClick={onClose} className="text-fg-subtle hover:text-fg text-xl">×</button>
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 50,
+      display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+      background: 'rgba(15,19,32,0.45)', backdropFilter: 'blur(4px)',
+    }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: 'var(--surface, #fff)', borderRadius: '20px 20px 0 0',
+        width: '100%', maxWidth: 560, padding: 20, maxHeight: '90vh', overflowY: 'auto',
+        boxShadow: '0 18px 50px rgba(15,19,32,.18)',
+      }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16,
+        }}>
+          <h2 style={{ margin: 0, font: '700 18px -apple-system, sans-serif', color: 'var(--fg)' }}>
+            Senaryo oluştur
+          </h2>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--fg-subtle)', fontSize: 20 }}>×</button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-4 space-y-4">
-          <div>
-            <textarea
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="Bir durum yaz... (en az 20 karakter)"
-              maxLength={280}
-              rows={4}
-              className="w-full bg-surface-2 border border-stroke rounded-xl p-3 text-fg placeholder-fg-subtle text-sm resize-none focus:outline-none focus:border-primary"
-            />
-            <div className={`text-right text-xs mt-1 ${content.length > 250 ? 'text-orange-400' : 'text-fg-subtle'}`}>
-              {content.length}/280
-            </div>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <textarea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="Senaryonu yaz — bir karar, bir ikilem, bir soru…"
+            maxLength={280}
+            rows={5}
+            style={{
+              width: '100%', resize: 'none',
+              font: '400 15px/1.5 -apple-system, sans-serif',
+              border: '1px solid var(--stroke, #e4e7ed)',
+              borderRadius: 10, padding: '14px 16px',
+              background: 'var(--surface-2, #f7f8fa)',
+              color: 'var(--fg)', outline: 'none', boxSizing: 'border-box',
+            }}
+          />
+          <div style={{ textAlign: 'right', font: '400 12px monospace', color: content.length > 250 ? '#f97316' : 'var(--fg-subtle)' }}>
+            {content.length}/280
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
             {CATEGORIES.map((cat) => (
               <button
                 key={cat.value}
                 type="button"
                 onClick={() => setCategory(cat.value)}
-                className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                  category === cat.value
-                    ? 'bg-primary text-white'
-                    : 'bg-surface-2 text-fg-muted hover:bg-stroke'
-                }`}
+                style={{
+                  padding: '8px 12px', borderRadius: 999,
+                  border: `1px solid ${category === cat.value ? 'transparent' : 'var(--stroke, #e4e7ed)'}`,
+                  background: category === cat.value ? 'var(--k-blue-500, #2a6cf0)' : 'var(--surface-2, #f7f8fa)',
+                  color: category === cat.value ? '#fff' : 'var(--fg-muted)',
+                  font: `${category === cat.value ? 600 : 500} 12.5px -apple-system, sans-serif`,
+                  cursor: 'pointer',
+                }}
               >
                 {cat.label}
               </button>
             ))}
           </div>
 
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          {error && <p style={{ color: '#dc2626', fontSize: 13, margin: 0 }}>{error}</p>}
 
-          <button
-            type="submit"
-            disabled={loading || content.trim().length < 20}
-            className="w-full py-3 btn-gradient disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors"
-          >
-            {loading ? 'Yayınlanıyor...' : 'Yayınla'}
-          </button>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+            <button type="button" onClick={onClose} style={{
+              padding: '10px 18px', borderRadius: 999, border: '1px solid var(--stroke, #e4e7ed)',
+              background: 'transparent', color: 'var(--fg-muted)',
+              font: '500 13px -apple-system, sans-serif', cursor: 'pointer',
+            }}>
+              İptal
+            </button>
+            <button
+              type="submit"
+              disabled={loading || content.trim().length < 20}
+              style={{
+                padding: '10px 20px', borderRadius: 999, border: 'none',
+                background: 'var(--k-blue-500, #2a6cf0)', color: '#fff',
+                font: '600 13px -apple-system, sans-serif', cursor: 'pointer',
+                opacity: (loading || content.trim().length < 20) ? 0.5 : 1,
+              }}
+            >
+              {loading ? 'Yayınlanıyor...' : 'Yayınla'}
+            </button>
+          </div>
         </form>
       </div>
     </div>

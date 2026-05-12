@@ -1,23 +1,71 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Geist+Mono:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* =============================================
-   LIGHT MODE (default) — refined blue palette
+   LIGHT MODE — Kapisio refined palette (Geist + blue family)
    ============================================= */
 :root {
   color-scheme: light;
-  --bg:         #f7f8fa;
-  --surface:    #ffffff;
-  --surface-2:  #eef0f4;
-  --bg-soft:    #eef0f4;
-  --stroke:     #e4e7ed;
+
+  /* ── Brand blue scale (design tokens) ── */
+  --k-blue-50:  #eef4ff;
+  --k-blue-100: #dbe7ff;
+  --k-blue-200: #b8cfff;
+  --k-blue-300: #88aeff;
+  --k-blue-400: #5188fa;
+  --k-blue-500: #2a6cf0;
+  --k-blue-600: #1a56d6;
+  --k-blue-700: #1442a8;
+  --k-blue-900: #0a1f55;
+
+  --k-sky-400:  #4aa8ff;
+  --k-sky-500:  #1f8df0;
+  --k-sky-600:  #1572c4;
+
+  --k-navy-400: #2c4288;
+  --k-navy-500: #1c2f6e;
+  --k-navy-600: #122351;
+
+  /* Legacy coral aliases → navy */
+  --k-coral-50:  #e7ecf7;
+  --k-coral-100: #ccd5ea;
+  --k-coral-500: #1c2f6e;
+  --k-coral-600: #122351;
+
+  /* Mode chip colors */
+  --k-mode-senaryo:  #2a6cf0;
+  --k-mode-emoji:    #4aa8ff;
+  --k-mode-karakter: #1442a8;
+  --k-mode-tartisma: #1c2f6e;
+
+  /* Radii */
+  --k-r-sm: 6px;
+  --k-r-md: 10px;
+  --k-r-lg: 14px;
+  --k-r-xl: 20px;
+  --k-r-pill: 999px;
+
+  /* Shadows */
+  --k-shadow-sm: 0 1px 2px rgba(15,19,32,.04), 0 1px 1px rgba(15,19,32,.03);
+  --k-shadow-md: 0 4px 12px rgba(15,19,32,.06), 0 2px 4px rgba(15,19,32,.04);
+  --k-shadow-lg: 0 12px 32px rgba(15,19,32,.10), 0 4px 8px rgba(15,19,32,.05);
+  --k-shadow-pop: 0 18px 50px rgba(15,19,32,.18);
+
+  /* ── Semantic tokens ── */
+  --primary:       #2a6cf0;
+  --secondary:     #1c2f6e;
+  --bg:            #f7f8fa;
+  --surface:       #ffffff;
+  --surface-2:     #eef0f4;
+  --bg-soft:       #eef0f4;
+  --stroke:        #e4e7ed;
   --stroke-strong: #d6dae3;
-  --fg:         #0f1320;
-  --fg-muted:   #464d5c;
-  --fg-subtle:  #8e96a6;
+  --fg:            #0f1320;
+  --fg-muted:      #464d5c;
+  --fg-subtle:     #8e96a6;
 }
 
 /* =============================================
@@ -32,6 +80,12 @@
   --fg:         #e7e9ea;
   --fg-muted:   #71767b;
   --fg-subtle:  #3f4447;
+
+  /* Keep brand tokens in dark mode */
+  --k-blue-50:  rgba(42,108,240,0.12);
+  --k-blue-100: rgba(42,108,240,0.18);
+  --k-blue-200: rgba(42,108,240,0.25);
+  --k-navy-100: rgba(28,47,110,0.25);
 }
 
 /* =============================================
@@ -43,6 +97,8 @@
   html {
     font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
     scroll-behavior: smooth;
+    overflow-x: hidden;
+    width: 100%;
     font-feature-settings: 'cv11', 'ss01', 'ss03';
   }
 
@@ -52,10 +108,23 @@
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     transition: background-color 0.15s, color 0.15s;
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+    position: relative;
+  }
+
+  @keyframes slideInLeft {
+    from { transform: translateX(-100%); }
+    to   { transform: translateX(0); }
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
   }
 
   ::selection {
-    background-color: #1967d2;
+    background-color: var(--primary, #1967d2);
     color: white;
   }
 
@@ -120,6 +189,13 @@
   .text-balance { text-wrap: balance; }
   .scrollbar-none { scrollbar-width: none; -ms-overflow-style: none; }
   .scrollbar-none::-webkit-scrollbar { display: none; }
+
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 0.5rem);
+  }
 }
 
 /* =============================================

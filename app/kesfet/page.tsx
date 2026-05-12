@@ -607,23 +607,38 @@ function CategoriesTab() {
 
       {/* Category grid */}
       <div>
-        <p className="text-xs text-fg-subtle font-bold mb-3 uppercase tracking-wider">Kategoriler</p>
-        <div className="grid grid-cols-3 gap-2">
-          {CATEGORIES.map(cat => (
-            <button
-              key={cat.key}
-              onClick={() => setSelected(s => s === cat.key ? null : cat.key)}
-              className={cn(
-                'flex flex-col items-center gap-1 py-3 rounded-xl border transition-all text-sm font-semibold',
-                selected === cat.key
-                  ? 'bg-surface-2 border-fg text-fg'
-                  : 'bg-surface border-stroke text-fg-subtle hover:bg-surface-2'
-              )}
-            >
-              <span className="text-xl">{cat.emoji}</span>
-              <span className="text-xs">{cat.label}</span>
-            </button>
-          ))}
+        <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-subtle)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 10 }}>
+          Kategoriler
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
+          {CATEGORIES.map((cat, i) => {
+            const colors = ['#2a6cf0','#dc2626','#1442a8','#1c2f6e','#16a34a','#1f8df0','#4aa8ff','#f97316','#8b5cf6']
+            const c = colors[i % colors.length]
+            return (
+              <button
+                key={cat.key}
+                onClick={() => setSelected(s => s === cat.key ? null : cat.key)}
+                style={{
+                  padding: 14, borderRadius: 14,
+                  background: selected === cat.key
+                    ? `color-mix(in oklab, ${c} 10%, white)`
+                    : 'var(--surface, #fff)',
+                  border: selected === cat.key
+                    ? `2px solid ${c}`
+                    : '1px solid var(--stroke, #e4e7ed)',
+                  cursor: 'pointer', textAlign: 'left',
+                  display: 'flex', flexDirection: 'column', gap: 6,
+                  transition: 'border .12s, background .12s',
+                }}>
+                <span style={{
+                  width: 36, height: 36, borderRadius: 10,
+                  background: `color-mix(in oklab, ${c} 14%, white)`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
+                }}>{cat.emoji}</span>
+                <span style={{ font: '600 14px -apple-system, sans-serif', color: 'var(--fg)' }}>{cat.label}</span>
+              </button>
+            )
+          })}
         </div>
       </div>
 
@@ -759,42 +774,59 @@ function SenaryolarTab() {
 export default function KesfetPage() {
   const [tab, setTab] = useState<'feed' | 'senaryolar' | 'friends' | 'ara' | 'kategoriler'>('feed')
 
-  return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
+  const TABS = [
+    { id: 'feed',        label: 'Akış' },
+    { id: 'senaryolar',  label: 'Senaryolar' },
+    { id: 'friends',     label: 'Arkadaşlar' },
+    { id: 'ara',         label: 'Ara' },
+    { id: 'kategoriler', label: 'Kategoriler' },
+  ] as const
 
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+  return (
+    <div className="max-w-2xl mx-auto px-4 py-6" style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+
+      {/* ── Header ── */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <div>
-          <h1 className="text-2xl font-black text-fg">Keşfet</h1>
-          <p className="text-sm text-fg-subtle mt-0.5">Topluluk akışı ve senaryolar</p>
+          <h1 style={{ margin: 0, font: '700 22px -apple-system, BlinkMacSystemFont, sans-serif', letterSpacing: '-0.02em', color: 'var(--fg)' }}>
+            Keşfet
+          </h1>
+          <p style={{ margin: '2px 0 0', font: '400 13px -apple-system, sans-serif', color: 'var(--fg-subtle)' }}>
+            Topluluk akışı ve senaryolar
+          </p>
         </div>
         <Link
           href="/senaryo-olustur"
-          className="flex items-center gap-1.5 btn-gradient text-sm font-semibold px-3 py-2 rounded-xl text-white"
+          style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '8px 14px', borderRadius: 999, border: 'none',
+            background: 'var(--k-blue-500, #2a6cf0)', color: '#fff',
+            font: '600 13px -apple-system, sans-serif', textDecoration: 'none',
+          }}
         >
           <Plus size={15} />
           <span className="hidden sm:inline">Senaryo</span>
         </Link>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-stroke mb-6 overflow-x-auto scrollbar-none">
-        {([
-          { id: 'feed',        label: 'Akış' },
-          { id: 'senaryolar',  label: 'Senaryolar' },
-          { id: 'friends',     label: 'Arkadaşlar' },
-          { id: 'ara',         label: 'Ara' },
-          { id: 'kategoriler', label: 'Kategoriler' },
-        ] as const).map(t => (
+      {/* ── Tab bar ── */}
+      <div style={{
+        display: 'flex', borderBottom: '1px solid var(--stroke)',
+        overflowX: 'auto', scrollbarWidth: 'none', marginBottom: 20,
+      }}>
+        {TABS.map(t => (
           <button
             key={t.id}
             onClick={() => setTab(t.id)}
-            className={cn(
-              'shrink-0 px-4 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px whitespace-nowrap',
-              tab === t.id
-                ? 'border-fg text-fg'
-                : 'border-transparent text-fg-subtle hover:text-fg-muted hover:border-stroke'
-            )}
+            style={{
+              flexShrink: 0, padding: '10px 16px',
+              font: `${tab === t.id ? 600 : 500} 13.5px -apple-system, sans-serif`,
+              color: tab === t.id ? 'var(--fg)' : 'var(--fg-subtle)',
+              background: 'transparent', border: 'none',
+              borderBottom: `2px solid ${tab === t.id ? 'var(--k-blue-500, #2a6cf0)' : 'transparent'}`,
+              cursor: 'pointer', whiteSpace: 'nowrap',
+              transition: 'color .12s, border-color .12s',
+            }}
           >
             {t.label}
           </button>

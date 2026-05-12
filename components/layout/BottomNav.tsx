@@ -1,12 +1,12 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
-  Home, Compass, Plus, User, MoreHorizontal,
-  MessageCircle, BookOpen, Bookmark, Trophy, Settings, Bell, ChevronRight,
+  Home, Compass, User, MoreHorizontal, Plus,
+  MessageCircle, Bookmark, Trophy, BookOpen, Settings, ChevronRight, Bell, Medal,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
@@ -16,197 +16,286 @@ interface Props {
 }
 
 // ──────────────────────────────────────────────────────
-// "Daha" bottom sheet
-// ──────────────────────────────────────────────────────
-function MoreSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  if (!open) return null
-
-  const items = [
-    { href: '/bildirimler', label: 'Bildirimler',    hint: 'Yeni bildirimler',        icon: Bell },
-    { href: '/mesajlar',    label: 'Mesajlar',       hint: 'Özel mesajlar',            icon: MessageCircle },
-    { href: '/arsiv',       label: 'Arşiv',          hint: 'Geçmiş senaryolar',        icon: BookOpen },
-    { href: '/kayitlarim',  label: 'Kaydettiklerim', hint: 'Kaydettiğin içerikler',    icon: Bookmark },
-    { href: '/liderlik',    label: 'Liderlik',       hint: 'En iyi oyuncular',         icon: Trophy },
-    { href: '/profil/ayarlar', label: 'Ayarlar',     hint: 'Hesap ve tercihler',       icon: Settings },
-  ]
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex flex-col justify-end"
-      onClick={onClose}
-    >
-      <div className="absolute inset-0 bg-black/45" />
-      <div
-        className="relative bg-surface border-t border-stroke rounded-t-[20px] pb-6 animate-slide-up"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Drag handle */}
-        <div className="w-10 h-1 bg-stroke-strong rounded-full mx-auto mt-3 mb-3" />
-        <p className="px-5 pb-2 text-[11px] font-semibold text-fg-subtle uppercase tracking-widest">Menü</p>
-
-        {items.map(({ href, label, hint, icon: Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            onClick={onClose}
-            className="flex items-center gap-3 px-5 py-3 hover:bg-surface-2 transition-colors"
-          >
-            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary flex-none">
-              <Icon size={18} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-[14.5px] font-semibold text-fg">{label}</div>
-              <div className="text-[12px] text-fg-subtle mt-0.5">{hint}</div>
-            </div>
-            <ChevronRight size={15} className="text-fg-subtle flex-none" />
-          </Link>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// ──────────────────────────────────────────────────────
-// Bottom nav tab (non-FAB)
-// ──────────────────────────────────────────────────────
-function Tab({
-  label, active, badge, children, onClick, href,
-}: {
-  label: string
-  active: boolean
-  badge?: number
-  children: React.ReactNode
-  onClick?: () => void
-  href?: string
-}) {
-  const cls = cn(
-    'flex-1 flex flex-col items-center justify-center gap-[3px] transition-colors relative h-full',
-    active ? 'text-primary' : 'text-fg-subtle'
-  )
-  const inner = (
-    <>
-      {active && (
-        <span className="absolute top-0 left-1/2 -translate-x-1/2 w-7 h-0.5 bg-primary rounded-full" />
-      )}
-      <div className="relative">
-        {children}
-        {badge && badge > 0 ? (
-          <span className="absolute -top-1 -right-2 min-w-[14px] h-[14px] px-0.5 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center border border-surface">
-            {badge > 9 ? '9+' : badge}
-          </span>
-        ) : null}
-      </div>
-      <span className={cn('text-[10px]', active ? 'font-semibold' : 'font-medium')}>{label}</span>
-    </>
-  )
-
-  if (href) {
-    return <Link href={href} className={cls}>{inner}</Link>
-  }
-  return <button onClick={onClick} className={cls}>{inner}</button>
-}
-
-// ──────────────────────────────────────────────────────
 // Main export
 // ──────────────────────────────────────────────────────
 export function BottomNav({ userId, username }: Props) {
   const pathname = usePathname()
+  const router = useRouter()
   const supabase = createClient()
-  const [unreadCount, setUnreadCount] = useState(0)
+  const [unreadNotif, setUnreadNotif] = useState(0)
+  const [unreadMsg, setUnreadMsg] = useState(0)
   const [moreOpen, setMoreOpen] = useState(false)
 
   useEffect(() => {
     if (!userId) return
 
+    // notifications
     supabase
       .from('notifications')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', userId)
       .eq('is_read', false)
-      .then((res: { count: number | null }) => setUnreadCount(res.count ?? 0))
+      .then((res: { count: number | null }) => setUnreadNotif(res.count ?? 0))
 
-    const channel = supabase
-      .channel(`bottom-nav-notif:${userId}`)
-      .on(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
-        () => setUnreadCount(c => c + 1)
-      )
-      .on(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
-        () => {
-          supabase
-            .from('notifications')
-            .select('id', { count: 'exact', head: true })
-            .eq('user_id', userId)
-            .eq('is_read', false)
-            .then((res: { count: number | null }) => setUnreadCount(res.count ?? 0))
-        }
-      )
-      .subscribe()
+    // messages
+    fetch('/api/messages/unread-count')
+      .then(r => r.ok ? r.json() : { count: 0 })
+      .then(d => setUnreadMsg(d.count ?? 0))
+      .catch(() => {})
 
-    return () => { supabase.removeChannel(channel) }
+    let channel: ReturnType<typeof supabase.channel> | null = null
+    try {
+      channel = supabase
+        .channel(`bottom-nav:${userId}`)
+        .on('postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
+          () => setUnreadNotif(c => c + 1)
+        )
+        .on('postgres_changes',
+          { event: 'UPDATE', schema: 'public', table: 'notifications', filter: `user_id=eq.${userId}` },
+          () => {
+            supabase
+              .from('notifications')
+              .select('id', { count: 'exact', head: true })
+              .eq('user_id', userId)
+              .eq('is_read', false)
+              .then((res: { count: number | null }) => setUnreadNotif(res.count ?? 0))
+          }
+        )
+        .subscribe()
+    } catch (e) {
+      console.error('[BottomNav] Realtime subscription failed:', e)
+    }
+
+    return () => {
+      if (channel) {
+        try { supabase.removeChannel(channel) } catch {}
+      }
+    }
   }, [userId])
 
-  const isMoreActive = [
-    '/arsiv', '/mesajlar', '/kayitlarim', '/liderlik', '/bildirimler', '/profil/ayarlar', '/basarimlar',
-  ].some(p => pathname.startsWith(p))
-
+  // Hide on auth pages and admin
   const hideOn = ['/giris', '/kayit', '/sifre-sifirla', '/admin']
   if (hideOn.some(p => pathname.startsWith(p))) return null
 
-  const isHome    = pathname.startsWith('/oyun') || pathname.startsWith('/duel')
-  const isKesfet  = pathname.startsWith('/kesfet')
-  const isProfil  = pathname.startsWith('/profil') && !pathname.startsWith('/profil/ayarlar')
+  const isActive = (paths: string[]) => paths.some(p => pathname === p || pathname.startsWith(p + '/'))
 
   return (
     <>
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface/95 backdrop-blur-xl border-t border-stroke">
-        <div className="flex items-stretch h-16 px-1">
+      <nav
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface border-t border-stroke max-w-full"
+        style={{
+          paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+          boxShadow: '0 -2px 12px rgba(15,19,32,0.04)',
+        }}
+      >
+        <div className="flex items-center justify-around h-16 px-1">
+          <TabItem
+            icon={<Home size={22} />}
+            label="Anasayfa"
+            active={isActive(['/oyun', '/duel', '/emoji', '/karakter', '/tartisma'])}
+            href="/oyun"
+          />
+          <TabItem
+            icon={<Compass size={22} />}
+            label="Keşfet"
+            active={isActive(['/kesfet'])}
+            href="/kesfet"
+          />
 
-          {/* Anasayfa */}
-          <Tab label="Anasayfa" active={isHome} href="/oyun">
-            <Home size={21} strokeWidth={isHome ? 2.4 : 1.8} />
-          </Tab>
+          {/* Center FAB */}
+          <Link
+            href="/senaryo-olustur"
+            aria-label="Senaryo oluştur"
+            className="flex items-center justify-center text-white -translate-y-3"
+            style={{
+              width: 52, height: 52, borderRadius: 16,
+              background: 'linear-gradient(135deg, var(--k-blue-400), var(--k-blue-600))',
+              boxShadow: '0 6px 16px rgba(42,108,240,0.35)',
+            }}
+          >
+            <Plus size={24} strokeWidth={2.5} />
+          </Link>
 
-          {/* Keşfet */}
-          <Tab label="Keşfet" active={isKesfet} href="/kesfet">
-            <Compass size={21} strokeWidth={isKesfet ? 2.4 : 1.8} />
-          </Tab>
+          <TabItem
+            icon={<User size={22} />}
+            label="Profil"
+            active={isActive(['/profil', '/basarimlar', '/kayitlarim'])}
+            href={username ? `/profil/${username}` : '/giris'}
+          />
 
-          {/* FAB — center raised button */}
-          <div className="flex-1 flex items-center justify-center">
-            <Link
-              href="/senaryo-olustur"
-              aria-label="Senaryo oluştur"
-              className="flex items-center justify-center rounded-2xl shadow-lg active:scale-95 transition-transform"
-              style={{
-                width: 52,
-                height: 52,
-                background: 'linear-gradient(135deg, #5188fa 0%, #2a6cf0 60%, #1442a8 100%)',
-                boxShadow: '0 6px 18px rgba(42,108,240,0.38)',
-                transform: 'translateY(-13px)',
-              }}
-            >
-              <Plus size={24} className="text-white" strokeWidth={2.5} />
-            </Link>
-          </div>
-
-          {/* Profil */}
-          <Tab label="Profil" active={isProfil} href={username ? `/profil/${username}` : '/giris'}>
-            <User size={21} strokeWidth={isProfil ? 2.4 : 1.8} />
-          </Tab>
-
-          {/* Daha */}
-          <Tab label="Daha" active={isMoreActive} badge={isMoreActive ? 0 : unreadCount} onClick={() => setMoreOpen(true)}>
-            <MoreHorizontal size={21} strokeWidth={isMoreActive ? 2.4 : 1.8} />
-          </Tab>
-
+          {/* More — opens bottom sheet */}
+          <button
+            onClick={() => setMoreOpen(true)}
+            className={cn(
+              'flex-1 flex flex-col items-center justify-center gap-0.5 relative',
+              isActive(['/mesajlar', '/arsiv', '/liderlik', '/bildirimler', '/profil/ayarlar'])
+                ? 'text-primary'
+                : 'text-fg-subtle'
+            )}
+          >
+            <span className="relative">
+              <MoreHorizontal size={22} />
+              {(unreadMsg + unreadNotif) > 0 && (
+                <span className="absolute -top-1 -right-2 min-w-4 h-4 px-1 bg-primary text-white text-[9px] font-bold rounded-full flex items-center justify-center border-[1.5px] border-surface">
+                  {unreadMsg + unreadNotif > 9 ? '9+' : unreadMsg + unreadNotif}
+                </span>
+              )}
+            </span>
+            <span className="text-[10px] font-semibold">Daha</span>
+          </button>
         </div>
       </nav>
 
-      <MoreSheet open={moreOpen} onClose={() => setMoreOpen(false)} />
+      {/* "Daha" bottom sheet */}
+      {moreOpen && (
+        <>
+          {/* Backdrop */}
+          <div
+            className="md:hidden fixed inset-0 z-50 bg-black/45"
+            onClick={() => setMoreOpen(false)}
+          />
+          {/* Sheet */}
+          <div
+            className="md:hidden fixed left-0 right-0 bottom-0 z-50 bg-surface border-t border-stroke pb-4"
+            style={{
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)',
+              animation: 'slideUp .22s ease-out',
+            }}
+          >
+            {/* Drag handle */}
+            <div
+              className="mx-auto my-2 bg-stroke rounded-full"
+              style={{ width: 38, height: 4 }}
+            />
+            <div className="px-5 pb-1.5 pt-1 text-[11px] font-bold uppercase tracking-wider text-fg-subtle">
+              Menü
+            </div>
+
+            <MoreItem
+              icon={<MessageCircle size={18} />}
+              label="Mesajlar"
+              hint={unreadMsg > 0 ? `${unreadMsg} yeni mesaj` : 'Konuşmaların'}
+              color="var(--k-blue-500)"
+              badge={unreadMsg > 0 ? unreadMsg : undefined}
+              onClick={() => { setMoreOpen(false); router.push('/mesajlar') }}
+            />
+            <MoreItem
+              icon={<Bell size={18} />}
+              label="Bildirimler"
+              hint={unreadNotif > 0 ? `${unreadNotif} yeni bildirim` : 'Son güncellemeler'}
+              color="var(--k-sky-500)"
+              badge={unreadNotif > 0 ? unreadNotif : undefined}
+              onClick={() => { setMoreOpen(false); router.push('/bildirimler') }}
+            />
+            <MoreItem
+              icon={<BookOpen size={18} />}
+              label="Arşiv"
+              hint="Geçmiş senaryolar"
+              color="var(--fg-muted)"
+              onClick={() => { setMoreOpen(false); router.push('/arsiv') }}
+            />
+            <MoreItem
+              icon={<Bookmark size={18} />}
+              label="Kaydettiklerim"
+              hint="Beğendiklerin"
+              color="var(--k-navy-500)"
+              onClick={() => { setMoreOpen(false); router.push('/kayitlarim') }}
+            />
+            <MoreItem
+              icon={<Trophy size={18} />}
+              label="Liderlik"
+              hint="Bu hafta sıralaması"
+              color="var(--k-sky-500)"
+              onClick={() => { setMoreOpen(false); router.push('/liderlik') }}
+            />
+            <MoreItem
+              icon={<Medal size={18} />}
+              label="Başarımlar"
+              hint="Rozetlerin"
+              color="var(--k-blue-700)"
+              onClick={() => { setMoreOpen(false); router.push('/basarimlar') }}
+            />
+            <MoreItem
+              icon={<Settings size={18} />}
+              label="Ayarlar"
+              hint="Tema · bildirim · gizlilik"
+              color="var(--fg-muted)"
+              onClick={() => { setMoreOpen(false); router.push('/profil/ayarlar') }}
+            />
+          </div>
+        </>
+      )}
     </>
+  )
+}
+
+function TabItem({
+  icon, label, active, href, badge,
+}: {
+  icon: React.ReactNode
+  label: string
+  active: boolean
+  href: string
+  badge?: number
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        'flex-1 flex flex-col items-center justify-center gap-0.5 relative h-full',
+        active ? 'text-primary' : 'text-fg-subtle'
+      )}
+    >
+      <span className="relative">
+        {icon}
+        {badge && badge > 0 ? (
+          <span className="absolute -top-1 -right-2 min-w-4 h-4 px-1 bg-primary text-white text-[9px] font-bold rounded-full flex items-center justify-center border-[1.5px] border-surface">
+            {badge > 9 ? '9+' : badge}
+          </span>
+        ) : null}
+      </span>
+      <span className={cn('text-[10px]', active ? 'font-semibold' : 'font-medium')}>{label}</span>
+    </Link>
+  )
+}
+
+function MoreItem({
+  icon, label, hint, color, badge, onClick,
+}: {
+  icon: React.ReactNode
+  label: string
+  hint: string
+  color: string
+  badge?: number
+  onClick: () => void
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="flex items-center gap-3 w-full text-left px-5 py-3 hover:bg-surface-2 transition-colors"
+    >
+      <span
+        className="w-9 h-9 rounded-[10px] flex items-center justify-center shrink-0"
+        style={{
+          background: `color-mix(in oklab, ${color} 12%, white)`,
+          color: color,
+        }}
+      >
+        {icon}
+      </span>
+      <span className="flex-1 min-w-0">
+        <span className="block text-[14.5px] font-semibold text-fg truncate">{label}</span>
+        <span className="block text-xs text-fg-subtle mt-0.5 truncate">{hint}</span>
+      </span>
+      {badge ? (
+        <span className="bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+          {badge > 9 ? '9+' : badge}
+        </span>
+      ) : null}
+      <ChevronRight size={16} className="text-fg-subtle shrink-0" />
+    </button>
   )
 }

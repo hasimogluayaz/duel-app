@@ -5,10 +5,10 @@ import { Swords, TrendingUp, Users } from 'lucide-react'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Karar Ver | Duel',
+  title: 'Karar Ver',
   description: 'İki cevabı karşılaştır, hangisi daha iyiyse seç. Toplu yargılama modu.',
   openGraph: {
-    title: 'Karar Ver — Duel',
+    title: 'Karar Ver | Kapisio',
     description: 'İki cevabı karşılaştır, hangisi daha iyiyse seç.',
   },
 }

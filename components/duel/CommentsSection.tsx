@@ -133,7 +133,7 @@ export function CommentsSection({ duelId, userId }: Props) {
             placeholder="Yorum yaz... (Enter ile gönder)"
             rows={2}
             maxLength={300}
-            className="flex-1 bg-bg border border-stroke rounded-xl px-3 py-2 text-sm text-fg placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+            className="flex-1 bg-bg border border-stroke rounded-xl px-3 py-2 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:ring-2 focus:ring-primary resize-none"
           />
           <Button
             size="sm"

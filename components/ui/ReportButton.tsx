@@ -93,7 +93,7 @@ export function ReportButton({ targetType, targetId, userId, className }: Props)
               placeholder="Ek açıklama (isteğe bağlı)..."
               rows={2}
               maxLength={500}
-              className="w-full bg-bg border border-stroke rounded-xl px-3 py-2 text-sm text-fg placeholder-zinc-600 focus:outline-none focus:ring-2 focus:ring-primary resize-none mb-4"
+              className="w-full bg-bg border border-stroke rounded-xl px-3 py-2 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:ring-2 focus:ring-primary resize-none mb-4"
             />
             <div className="flex gap-2">
               <Button className="flex-1 btn-gradient" loading={loading} disabled={!reason} onClick={submit}>

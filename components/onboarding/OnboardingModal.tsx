@@ -21,7 +21,7 @@ const STEPS = [
     emoji: '⚡',
     title: 'Düello Yap',
     desc: 'Aynı senaryoyu yanıtlayan birini seç, düelloya çağır. Topluluk oylasın, AI karar versin!',
-    color: 'from-secondary to-rose-600',
+    color: 'from-primary to-secondary',
   },
   {
     emoji: '🏆',

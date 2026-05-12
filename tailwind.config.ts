@@ -22,7 +22,7 @@ const config: Config = {
         'bg-soft': 'var(--bg-soft)',
         'stroke-strong': 'var(--stroke-strong)',
         // Brand colors (same in both modes)
-        primary: '#2a6cf0',
+        primary: 'var(--primary, #2a6cf0)',
         'primary-dark': '#1a56d6',
         'primary-light': '#eef4ff',
         secondary: '#1f8df0',

@@ -92,22 +92,26 @@ export default function ProfilClient({
 
       {/* ── Banner ── */}
       <div className="relative">
-        <div className="h-36 sm:h-44 relative overflow-hidden bg-surface">
-          {/* Tier-tinted gradient wash — very subtle */}
-          <div className={`absolute inset-0 bg-gradient-to-br ${tier.gradient} opacity-15`} />
-          {/* Dark vignette for depth */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/10 to-black/50" />
-          {/* Geometric rings — architectural, no emoji */}
-          <div className="absolute -top-24 -right-24 w-96 h-96 border border-white/[0.04] rounded-full" />
-          <div className="absolute -top-12 -right-12 w-64 h-64 border border-white/[0.04] rounded-full" />
-          <div className="absolute -bottom-28 left-8 w-72 h-72 border border-white/[0.03] rounded-full" />
-          {/* Tier indicator — bottom-left, text only */}
-          <div className={`absolute bottom-3 left-4 text-xs font-semibold ${tier.color} opacity-70 tracking-wide`}>
-            {tier.emoji} {tier.label.toUpperCase()}
+        <div
+          className="h-40 sm:h-48 relative overflow-hidden"
+          style={{ background: 'linear-gradient(135deg, #1442a8 0%, #2a6cf0 55%, #5188fa 100%)' }}
+        >
+          {/* Decorative rings */}
+          <div className="absolute -top-20 -right-20 w-80 h-80 border-2 border-white/10 rounded-full" />
+          <div className="absolute -top-8 -right-8 w-52 h-52 border border-white/10 rounded-full" />
+          <div className="absolute -bottom-24 left-6 w-64 h-64 border border-white/[0.07] rounded-full" />
+          <div className="absolute top-6 left-1/3 w-32 h-32 border border-white/[0.06] rounded-full" />
+          {/* Bottom fade for avatar overlap */}
+          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/30 to-transparent" />
+          {/* Tier badge */}
+          <div className="absolute bottom-3 left-4">
+            <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-black/30 backdrop-blur-sm border border-white/10 text-white">
+              {tier.emoji} {tier.label}
+            </span>
           </div>
           {isOwnProfile && (
             <Link href="/profil/ayarlar" className="absolute top-3 right-3">
-              <div className="flex items-center gap-1.5 text-xs text-white/80 bg-black/40 backdrop-blur-sm border border-white/10 rounded-lg px-3 py-1.5 hover:bg-black/60 transition-all font-medium">
+              <div className="flex items-center gap-1.5 text-xs text-white/90 bg-black/40 backdrop-blur-sm border border-white/15 rounded-lg px-3 py-1.5 hover:bg-black/60 transition-all font-medium">
                 <Settings size={12} />
                 Düzenle
               </div>
@@ -118,7 +122,7 @@ export default function ProfilClient({
         {/* ── Avatar row ── */}
         <div className="px-4">
           <div className="flex items-end justify-between -mt-10 sm:-mt-12 mb-4">
-            <div className={`p-[3px] bg-bg rounded-full ring-2 ${tier.ringColor} shadow-xl`}>
+            <div className="p-[3px] bg-bg rounded-full shadow-xl" style={{ boxShadow: '0 0 0 2.5px var(--k-blue-500, #2a6cf0), 0 4px 16px rgba(42,108,240,0.25)' }}>
               <Avatar src={profile.avatar_url} username={profile.username} size="xl" className="w-20 h-20 sm:w-24 sm:h-24" />
             </div>
 
@@ -220,16 +224,29 @@ export default function ProfilClient({
         </div>
 
         {/* ── Tab bar — scrollable ── */}
-        <div className="flex border-b border-stroke overflow-x-auto scrollbar-none">
+        <div
+          role="tablist"
+          className="flex overflow-x-auto scrollbar-none border-b border-stroke"
+        >
           {tabs.map(tab => (
             <button
               key={tab.id}
+              role="tab"
+              aria-selected={activeTab === tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`shrink-0 px-4 py-3 text-sm font-semibold border-b-2 transition-colors -mb-px whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'border-fg text-fg'
-                  : 'border-transparent text-fg-subtle hover:text-fg-muted hover:border-stroke'
-              }`}
+              style={{
+                flexShrink: 0,
+                padding: '10px 16px',
+                font: `${activeTab === tab.id ? 600 : 500} 13.5px -apple-system, sans-serif`,
+                color: activeTab === tab.id ? 'var(--fg)' : 'var(--fg-subtle)',
+                background: 'transparent',
+                border: 'none',
+                borderBottom: `2px solid ${activeTab === tab.id ? 'var(--k-blue-500, #2a6cf0)' : 'transparent'}`,
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                transition: 'color .12s, border-color .12s',
+                marginBottom: -1,
+              }}
             >
               {tab.label}
             </button>

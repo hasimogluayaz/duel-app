@@ -41,13 +41,21 @@ export const metadata: Metadata = {
   },
   manifest: '/manifest.json',
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
+    ],
     apple: '/apple-touch-icon.png',
+    shortcut: '/favicon-32x32.png',
   },
 }
 
 export const viewport: Viewport = {
-  themeColor: '#000000',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#000000' },
+  ],
   width: 'device-width',
   initialScale: 1,
 }
@@ -78,33 +86,35 @@ export default async function RootLayout({
 
             {initialProfile ? (
               /* ── Logged-in: Twitter 3-column layout ── */
-              <div className="flex min-h-screen">
-
-                {/* Left sidebar — desktop only */}
-                <LeftSidebar profile={initialProfile} />
-
-                {/* Main content */}
-                <main className="flex-1 lg:ml-64 xl:mr-80 min-h-screen pb-20 md:pb-0 lg:pt-14">
-                  {children}
-                </main>
-
-                {/* Right sidebar — xl only */}
-                <RightSidebar />
-
-                {/* Mobile bottom nav */}
-                <BottomNav userId={initialProfile.id} username={initialProfile.username} />
-
-                {/* Mobile FAB */}
-                <CreateFAB />
-
-                {/* Mobile top bar (logo + notifications) */}
+              <>
+                {/* Navbar OUTSIDE flex container — mobile sticky bar must not be a flex sibling */}
                 <Navbar initialProfile={initialProfile} />
-              </div>
+
+                <div className="flex min-h-screen w-full max-w-full">
+
+                  {/* Left sidebar — desktop only */}
+                  <LeftSidebar profile={initialProfile} />
+
+                  {/* Main content */}
+                  <main className="flex-1 min-w-0 lg:ml-64 xl:mr-80 min-h-screen pb-24 md:pb-6">
+                    {children}
+                  </main>
+
+                  {/* Right sidebar — xl only */}
+                  <RightSidebar />
+
+                  {/* Mobile bottom nav (fixed) */}
+                  <BottomNav userId={initialProfile.id} username={initialProfile.username} />
+
+                  {/* Mobile FAB (fixed, only on browse pages) */}
+                  <CreateFAB />
+                </div>
+              </>
             ) : (
               /* ── Guest: classic full-width layout ── */
               <div className="flex flex-col min-h-screen">
                 <Navbar initialProfile={null} />
-                <main className="flex-1 pb-16 md:pb-0">
+                <main className="flex-1">
                   {children}
                 </main>
                 <Footer />

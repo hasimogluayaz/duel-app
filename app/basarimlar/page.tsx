@@ -97,17 +97,21 @@ export default function BasarimlarPage() {
 
   useEffect(() => {
     const load = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) { router.push('/giris'); return }
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) { router.push('/giris'); return }
 
-      const [{ data: prof }, achRes] = await Promise.all([
-        supabase.from('profiles').select('*').eq('id', user.id).single(),
-        fetch('/api/titles'),
-      ])
-      const achJson = await achRes.json()
-      setProfile(prof)
-      setAchievements(achJson.earned ?? [])
-      setLoading(false)
+        const [{ data: prof }, achRes] = await Promise.all([
+          supabase.from('profiles').select('*').eq('id', user.id).single(),
+          fetch('/api/titles'),
+        ])
+        const achJson = await achRes.json()
+        setProfile(prof)
+        setAchievements(achJson.earned ?? [])
+        setLoading(false)
+      } catch {
+        setLoading(false)
+      }
     }
     load()
   }, [])

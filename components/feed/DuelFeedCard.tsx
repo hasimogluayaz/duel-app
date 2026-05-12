@@ -195,7 +195,7 @@ export function DuelFeedCard({ duel: initialDuel, userId, onVoted }: Props) {
                       className={`h-full rounded-full transition-all duration-700 ${
                         s.side === 'A'
                           ? 'bg-gradient-to-r from-primary to-primary'
-                          : 'bg-gradient-to-r from-secondary to-rose-500'
+                          : 'bg-gradient-to-r from-primary to-secondary'
                       }`}
                       style={{ width: `${s.pct}%` }}
                     />
@@ -240,7 +240,7 @@ export function DuelFeedCard({ duel: initialDuel, userId, onVoted }: Props) {
             style={{ width: `${pctA}%` }}
           />
           <div
-            className="bg-gradient-to-r from-secondary to-rose-500 transition-all duration-500"
+            className="bg-gradient-to-r from-primary to-secondary transition-all duration-500"
             style={{ width: `${pctB}%` }}
           />
         </div>
@@ -257,9 +257,9 @@ export function DuelFeedCard({ duel: initialDuel, userId, onVoted }: Props) {
             title={userId ? (liked ? 'Beğeniyi kaldır' : 'Beğen') : 'Beğenmek için giriş yap'}
             className={`flex items-center gap-1.5 text-xs transition-all group/like ${
               liked
-                ? 'text-rose-400'
+                ? 'text-secondary'
                 : userId
-                  ? 'text-fg-subtle hover:text-rose-400'
+                  ? 'text-fg-subtle hover:text-secondary'
                   : 'text-fg-subtle opacity-40 cursor-not-allowed'
             }`}
           >

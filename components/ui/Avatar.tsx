@@ -34,7 +34,7 @@ function getColor(username: string) {
     'from-blue-500 to-cyan-600',
     'from-green-500 to-emerald-600',
     'from-amber-500 to-orange-600',
-    'from-secondary to-rose-600',
+    'from-primary to-secondary',
     'from-primary to-primary',
   ]
   const idx = username.charCodeAt(0) % colors.length

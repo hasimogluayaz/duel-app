@@ -5,35 +5,24 @@ import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Avatar } from '@/components/ui/Avatar'
-import { getTier } from '@/lib/utils/tier'
 import { cn } from '@/lib/utils/cn'
 import { createClient } from '@/lib/supabase/client'
 import type { Profile } from '@/types'
 import {
-  Home, Compass, Bell, User, Settings,
-  BookOpen, Trophy, Plus, LogOut, MessageCircle, Bookmark, Flame,
+  Home, Compass, Bell, MessageCircle, Trophy, BookOpen,
+  Bookmark, User, Settings, Plus, Flame, MoreHorizontal, LogOut,
 } from 'lucide-react'
 
 interface Props {
   profile: Profile
 }
 
-const NAV = [
-  { href: '/oyun',        label: 'Anasayfa',      icon: Home },
-  { href: '/kesfet',      label: 'Keşfet',        icon: Compass },
-  { href: '/bildirimler', label: 'Bildirimler',    icon: Bell },
-  { href: '/mesajlar',    label: 'Mesajlar',       icon: MessageCircle },
-  { href: '/liderlik',    label: 'Liderlik',       icon: Trophy },
-  { href: '/arsiv',       label: 'Arşiv',          icon: BookOpen },
-  { href: '/kayitlarim',  label: 'Kaydettiklerim', icon: Bookmark },
-]
-
 export function LeftSidebar({ profile }: Props) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
   const [signingOut, setSigningOut] = useState(false)
-  const tier = getTier(profile.total_points)
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const handleSignOut = async () => {
     setSigningOut(true)
@@ -42,119 +31,133 @@ export function LeftSidebar({ profile }: Props) {
     router.refresh()
   }
 
+  const NAV = [
+    { href: '/oyun',        label: 'Anasayfa',       icon: Home,           match: ['/oyun', '/duel', '/emoji', '/karakter', '/tartisma'] },
+    { href: '/kesfet',      label: 'Keşfet',         icon: Compass,        match: ['/kesfet'] },
+    { href: '/bildirimler', label: 'Bildirimler',    icon: Bell,           match: ['/bildirimler'] },
+    { href: '/mesajlar',    label: 'Mesajlar',       icon: MessageCircle,  match: ['/mesajlar'] },
+    { href: '/liderlik',    label: 'Liderlik',       icon: Trophy,         match: ['/liderlik'] },
+    { href: '/arsiv',       label: 'Arşiv',          icon: BookOpen,       match: ['/arsiv'] },
+    { href: '/kayitlarim',  label: 'Kaydettiklerim', icon: Bookmark,       match: ['/kayitlarim'] },
+    { href: `/profil/${profile.username}`, label: 'Profil', icon: User,    match: ['/profil/' + profile.username, '/basarimlar'] },
+    { href: '/profil/ayarlar', label: 'Ayarlar',     icon: Settings,       match: ['/profil/ayarlar'] },
+  ]
+
+  const isActive = (matches: string[]) => matches.some(m => pathname === m || pathname.startsWith(m + '/'))
+
   return (
-    <aside className="hidden lg:flex flex-col fixed top-0 left-0 h-screen w-64 border-r border-stroke bg-surface z-30 overflow-y-auto">
-      <div className="flex flex-col h-full px-3 py-4">
+    <aside
+      className="hidden lg:flex flex-col fixed top-0 left-0 h-screen w-64 border-r border-stroke z-30 overflow-y-auto"
+      style={{ background: 'var(--surface)' }}
+    >
+      <div className="flex flex-col h-full px-3.5 py-4 gap-1">
 
         {/* Logo */}
-        <Link href="/oyun" className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl hover:bg-surface-2 transition-colors mb-3 group">
-          <Image src="/logo.png" alt="Kapisio" width={30} height={30} className="w-7 h-7 object-contain" />
-          <span className="font-black text-[19px] text-gradient tracking-tight">Kapisio</span>
+        <Link href="/oyun" className="flex items-center gap-2 px-2 py-1.5 mb-3 hover:opacity-80 transition-opacity">
+          <Image src="/logo.png" alt="Kapisio" width={32} height={32} className="w-8 h-8 object-contain" />
+          <span className="text-xl font-bold tracking-tight" style={{ letterSpacing: '-0.02em' }}>Kapisio</span>
         </Link>
 
         {/* Nav items */}
-        <nav className="flex flex-col gap-0.5">
-          {NAV.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href || pathname.startsWith(href + '/')
+        <nav className="flex flex-col gap-1">
+          {NAV.map(({ href, label, icon: Icon, match }) => {
+            const active = isActive(match)
             return (
               <Link
                 key={href}
                 href={href}
                 className={cn(
-                  'flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-[14.5px] font-medium transition-all',
+                  'flex items-center gap-3 px-3.5 py-2.5 rounded-[10px] text-[14.5px] transition-colors',
                   active
-                    ? 'bg-primary/8 text-[#1442a8] font-semibold'
-                    : 'text-fg-muted hover:text-fg hover:bg-surface-2'
+                    ? 'font-semibold'
+                    : 'font-medium text-fg hover:bg-surface-2'
                 )}
+                style={active ? {
+                  background: 'var(--k-blue-50)',
+                  color: 'var(--k-blue-700)',
+                } : undefined}
               >
-                <Icon
-                  size={20}
-                  strokeWidth={active ? 2.3 : 1.8}
-                  className={active ? 'text-primary' : ''}
-                />
-                <span>{label}</span>
+                <Icon size={20} strokeWidth={active ? 2 : 1.75} style={{
+                  color: active ? 'var(--k-blue-600)' : 'var(--fg-muted)',
+                }} />
+                <span className="flex-1">{label}</span>
               </Link>
             )
           })}
-
-          <Link
-            href={`/profil/${profile.username}`}
-            className={cn(
-              'flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-[14.5px] font-medium transition-all',
-              pathname.startsWith('/profil') && !pathname.startsWith('/profil/ayarlar')
-                ? 'bg-primary/8 text-[#1442a8] font-semibold'
-                : 'text-fg-muted hover:text-fg hover:bg-surface-2'
-            )}
-          >
-            <User
-              size={20}
-              strokeWidth={pathname.startsWith('/profil') && !pathname.startsWith('/profil/ayarlar') ? 2.3 : 1.8}
-              className={pathname.startsWith('/profil') && !pathname.startsWith('/profil/ayarlar') ? 'text-primary' : ''}
-            />
-            <span>Profil</span>
-          </Link>
-
-          <Link
-            href="/profil/ayarlar"
-            className={cn(
-              'flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-[14.5px] font-medium transition-all',
-              pathname.startsWith('/profil/ayarlar')
-                ? 'bg-primary/8 text-[#1442a8] font-semibold'
-                : 'text-fg-muted hover:text-fg hover:bg-surface-2'
-            )}
-          >
-            <Settings size={20} strokeWidth={pathname.startsWith('/profil/ayarlar') ? 2.3 : 1.8}
-              className={pathname.startsWith('/profil/ayarlar') ? 'text-primary' : ''} />
-            <span>Ayarlar</span>
-          </Link>
         </nav>
 
-        {/* Create button */}
+        {/* Senaryo Oluştur — primary button */}
         <Link
           href="/senaryo-olustur"
-          className="mt-4 mx-1 flex items-center justify-center gap-2 btn-gradient rounded-full py-3 text-[14.5px] font-semibold text-white transition-all"
+          className="mt-3 flex items-center justify-center gap-2 h-11 px-4 rounded-full text-white font-semibold text-[14.5px] transition-opacity hover:opacity-90"
+          style={{ background: 'var(--k-blue-500)' }}
         >
-          <Plus size={17} strokeWidth={2.5} />
+          <Plus size={18} strokeWidth={2.2} />
           Senaryo Oluştur
         </Link>
 
+        {/* Spacer pushes streak + user chip to bottom */}
         <div className="flex-1" />
 
         {/* Streak card */}
-        {profile.streak_count > 0 && (
-          <div className="mx-1 mb-3 px-3 py-3 rounded-xl"
-            style={{ background: 'linear-gradient(135deg, #1c2f6e 0%, #2a6cf0 100%)' }}>
+        {(profile.streak_count ?? 0) > 0 && (
+          <div
+            className="p-3 rounded-[10px] text-white mb-2"
+            style={{
+              background: 'linear-gradient(135deg, var(--k-blue-700), var(--k-navy-500))',
+            }}
+          >
             <div className="flex items-center gap-2 mb-1">
-              <Flame size={16} className="text-orange-300" />
-              <span className="text-sm font-bold text-white">{profile.streak_count} günlük seri</span>
+              <Flame size={18} />
+              <span className="font-bold text-[14px]">{profile.streak_count} günlük seri</span>
             </div>
-            <p className="text-[11.5px] text-white/80 leading-tight">
-              Bugünkü senaryoyu cevapla, serin korunsun.
-            </p>
+            <div className="text-xs opacity-90 leading-snug">
+              Bugünkü senaryoyu cevapla, seri korunsun.
+            </div>
           </div>
         )}
 
-        {/* User profile card at bottom */}
-        <div className="mx-1">
-          <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-surface-2 transition-colors group border border-stroke">
-            <div className={`p-0.5 rounded-full ring-2 ${tier.ringColor} shrink-0`}>
-              <Avatar src={profile.avatar_url} username={profile.username} size="sm" />
-            </div>
+        {/* User chip — opens mini menu */}
+        <div className="relative">
+          <button
+            onClick={() => setMenuOpen(o => !o)}
+            className="w-full flex items-center gap-2.5 p-2.5 rounded-[10px] border border-stroke hover:bg-surface-2 transition-colors text-left"
+          >
+            <Avatar src={profile.avatar_url} username={profile.username} size="sm" />
             <div className="flex-1 min-w-0">
-              <p className="text-[13.5px] font-semibold text-fg truncate leading-tight">
-                {profile.display_name || profile.username}
-              </p>
-              <p className="text-[11.5px] text-fg-subtle truncate">@{profile.username}</p>
+              <div className="text-[13.5px] font-semibold truncate">{profile.display_name || profile.username}</div>
+              <div className="text-[11.5px] text-fg-subtle truncate" style={{ fontFamily: 'var(--k-font-mono, monospace)' }}>@{profile.username}</div>
             </div>
-            <button
-              onClick={handleSignOut}
-              disabled={signingOut}
-              className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-fg-subtle hover:text-red-400 transition-all"
-              title="Çıkış Yap"
-            >
-              <LogOut size={14} />
-            </button>
-          </div>
+            <MoreHorizontal size={16} className="text-fg-subtle shrink-0" />
+          </button>
+          {menuOpen && (
+            <>
+              <div className="fixed inset-0 z-10" onClick={() => setMenuOpen(false)} />
+              <div className="absolute bottom-full left-0 right-0 mb-2 bg-surface border border-stroke rounded-xl shadow-lg overflow-hidden z-20">
+                <Link
+                  href={`/profil/${profile.username}`}
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-surface-2 transition-colors"
+                >
+                  <User size={15} /> Profil
+                </Link>
+                <Link
+                  href="/profil/ayarlar"
+                  onClick={() => setMenuOpen(false)}
+                  className="flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-surface-2 transition-colors"
+                >
+                  <Settings size={15} /> Ayarlar
+                </Link>
+                <button
+                  onClick={handleSignOut}
+                  disabled={signingOut}
+                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-sm text-red-500 hover:bg-red-500/5 transition-colors border-t border-stroke"
+                >
+                  <LogOut size={15} /> Çıkış Yap
+                </button>
+              </div>
+            </>
+          )}
         </div>
 
       </div>

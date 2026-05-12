@@ -121,61 +121,66 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
     if (!userId || !isParticipant) return
     setRematchLoading(true)
 
-    // Find today's scenario to build a fresh duel
-    const today = new Date().toISOString().split('T')[0]
-    const supabaseClient = createClient()
+    try {
+      // Find today's scenario to build a fresh duel
+      const today = new Date().toISOString().split('T')[0]
+      const supabaseClient = createClient()
 
-    // Get today's scenario
-    const { data: todayScenario } = await supabaseClient
-      .from('scenarios')
-      .select('id')
-      .eq('active_date', today)
-      .single()
+      // Get today's scenario
+      const { data: todayScenario } = await supabaseClient
+        .from('scenarios')
+        .select('id')
+        .eq('active_date', today)
+        .single()
 
-    if (!todayScenario) {
-      toast('Rövanş için bugünkü senaryoya cevap vermelisin.', 'error')
+      if (!todayScenario) {
+        toast('Rövanş için bugünkü senaryoya cevap vermelisin.', 'error')
+        setRematchLoading(false)
+        return
+      }
+
+      // Get current user's answer for today
+      const { data: myAnswer } = await supabaseClient
+        .from('answers')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('scenario_id', todayScenario.id)
+        .single()
+
+      if (!myAnswer) {
+        toast('Rövanş için önce bugünkü senaryoya cevap ver!', 'error')
+        setRematchLoading(false)
+        return
+      }
+
+      const opponentId = userId === currentDuel.challenger_id
+        ? currentDuel.challenged_id
+        : currentDuel.challenger_id
+
+      const res = await fetch('/api/duel/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          challenged_id: opponentId,
+          scenario_id: todayScenario.id,
+          challenger_answer_id: myAnswer.id,
+        }),
+      })
+
+      const json = await res.json()
       setRematchLoading(false)
-      return
-    }
 
-    // Get current user's answer for today
-    const { data: myAnswer } = await supabaseClient
-      .from('answers')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('scenario_id', todayScenario.id)
-      .single()
+      if (!res.ok) {
+        toast(json.error || 'Rövanş oluşturulamadı.', 'error')
+        return
+      }
 
-    if (!myAnswer) {
-      toast('Rövanş için önce bugünkü senaryoya cevap ver!', 'error')
+      toast('Rövanş daveti gönderildi! ⚔️', 'success')
+      window.location.href = `/duel/${json.duel.share_token}`
+    } catch {
+      toast('Bağlantı hatası. Tekrar dene.', 'error')
       setRematchLoading(false)
-      return
     }
-
-    const opponentId = userId === currentDuel.challenger_id
-      ? currentDuel.challenged_id
-      : currentDuel.challenger_id
-
-    const res = await fetch('/api/duel/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        challenged_id: opponentId,
-        scenario_id: todayScenario.id,
-        challenger_answer_id: myAnswer.id,
-      }),
-    })
-
-    const json = await res.json()
-    setRematchLoading(false)
-
-    if (!res.ok) {
-      toast(json.error || 'Rövanş oluşturulamadı.', 'error')
-      return
-    }
-
-    toast('Rövanş daveti gönderildi! ⚔️', 'success')
-    window.location.href = `/duel/${json.duel.share_token}`
   }
 
   const sides = [
