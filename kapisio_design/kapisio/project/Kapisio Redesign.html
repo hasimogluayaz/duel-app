@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kapisio — Yeniden Tasarım</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #f0eee9; font-family: 'Geist', system-ui, sans-serif; }
+  body { overflow: hidden; }
+  @keyframes kFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  /* Inside DCArtboard, our roots set their own background */
+  .k-frame {
+    width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: var(--k-bg);
+  }
+  .k-frame-mobile {
+    width: 100%; height: 100%; overflow: hidden;
+    border-radius: 32px;
+    background: var(--k-bg);
+    position: relative;
+  }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="data.jsx"></script>
+  <script type="text/babel" src="components.jsx"></script>
+  <script type="text/babel" src="screens.jsx"></script>
+  <script type="text/babel" src="screens-extra.jsx"></script>
+  <script type="text/babel" src="shell-desktop.jsx"></script>
+  <script type="text/babel" src="shell-mobile.jsx"></script>
+
+  <script type="text/babel">
+    const { useState, useCallback, useMemo } = React;
+
+    // Shared app state — single source of truth for BOTH artboards.
+    // Each artboard renders a synced view; clicking nav on desktop also moves mobile.
+    const useAppState = () => {
+      const [screen, setScreen] = useState('home');
+      const [creating, setCreating] = useState(false);
+
+      const openCreate = useCallback(() => setCreating(true), []);
+      const closeCreate = useCallback(() => setCreating(false), []);
+      const openScenario = useCallback((s) => setScreen('detail'), []);
+
+      return { screen, setScreen, creating, openCreate, closeCreate, openScenario };
+    };
+
+    const ScreenBody = ({ state, vp }) => {
+      const data = window.KAPISIO_DATA;
+      const { screen, openScenario } = state;
+      if (screen === 'home')     return <HomeScreen vp={vp} data={data} onOpenScenario={openScenario}/>;
+      if (screen === 'detail')   return <DetailScreen vp={vp} data={data} onBack={() => state.setScreen('home')}/>;
+      if (screen === 'discover') return <DiscoverScreen vp={vp} data={data} onOpenScenario={openScenario}/>;
+      if (screen === 'leader')   return <LeaderboardScreen vp={vp} data={data}/>;
+      if (screen === 'notif')    return <NotificationsScreen vp={vp} data={data}/>;
+      if (screen === 'profile')  return <ProfileScreen vp={vp} data={data}/>;
+      if (screen === 'messages') return <MessagesScreen vp={vp} data={data}/>;
+      if (screen === 'archive')  return <ArchiveScreen vp={vp} data={data}/>;
+      if (screen === 'saved')    return <SavedScreen vp={vp} data={data}/>;
+      if (screen === 'settings') return <SettingsScreen vp={vp} data={data}/>;
+      return null;
+    };
+
+    const DesktopProto = ({ state }) => {
+      const data = window.KAPISIO_DATA;
+      return (
+        <div className="k-root k-frame" data-screen-label="Desktop · Kapisio">
+          <DesktopShell screen={state.screen} setScreen={state.setScreen}
+                        openCreate={state.openCreate} data={data}>
+            <ScreenBody state={state} vp="desktop"/>
+          </DesktopShell>
+          {state.creating && <CreateModal vp="desktop" onClose={state.closeCreate}/>}
+        </div>
+      );
+    };
+
+    const MobileProto = ({ state }) => {
+      const data = window.KAPISIO_DATA;
+      return (
+        <div className="k-root k-frame-mobile" data-screen-label="Mobile · Kapisio">
+          <MobileShell screen={state.screen} setScreen={state.setScreen}
+                       openCreate={state.openCreate} data={data}>
+            <ScreenBody state={state} vp="mobile"/>
+          </MobileShell>
+          {state.creating && <CreateModal vp="mobile" onClose={state.closeCreate}/>}
+        </div>
+      );
+    };
+
+    const App = () => {
+      const state = useAppState();
+      return (
+        <DesignCanvas>
+          <DCSection id="proto" title="Kapisio — Yeniden Tasarım" subtitle="Modern, rafine, mobil-öncelikli. Mavi korunur, sıcak ten eklendi. Bottom-tab + FAB.">
+            <DCArtboard id="desktop" label="Desktop · 1280" width={1280} height={900}>
+              <DesktopProto state={state}/>
+            </DCArtboard>
+            <DCArtboard id="mobile" label="Mobile · 390" width={390} height={844}>
+              <MobileProto state={state}/>
+            </DCArtboard>
+          </DCSection>
+          <DCSection id="notes" title="Tasarım notları" subtitle="Önceki tasarıma kıyasla ne değişti">
+            <DCArtboard id="notes-content" label="Notlar" width={1100} height={520}>
+              <div style={{
+                padding: 36, fontFamily: 'Geist, system-ui, sans-serif', color:'#0f1320',
+                background:'#fff', height:'100%', overflow:'auto', fontSize: 14, lineHeight: 1.55,
+              }}>
+                <h2 style={{ margin:'0 0 6px', fontSize: 22, letterSpacing:'-0.02em' }}>Ne değişti</h2>
+                <p style={{ margin:'0 0 22px', color:'#646c7e' }}>Mevcut Kapisio'nun mavi tonunu ve K logosunu koruduk; bilgi mimarisini, mobili ve mikro-etkileşimleri rafine ettik.</p>
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap: 22 }}>
+                  {[
+                    { t:`Tipografi: Geist`,
+                      d:`Inter yerine Geist + Geist Mono. Daha modern, sayılar tabular. Başlıklar -0.02em letter-spacing.` },
+                    { t:`Sıcak ten aksanı`,
+                      d:`Coral (#1c2f6e) seri/ateş için sistematik aksan. Mavi'nin tamamlayıcısı, çok uzak değil.` },
+                    { t:`Feed öne çıktı`,
+                      d:`Sadece "günün senaryosu" değil — topluluk feed'i: aktif düellolar, farklı modlar, kayan oylar.` },
+                    { t:`Senaryo detayı = okuma+oy`,
+                      d:`Reddit tarzı upvote/downvote, taraf rozeti (Sıcak/Soğuk), Top/Yeni/Düello sıralaması.` },
+                    { t:`Mobil bottom-tab`,
+                      d:`Anasayfa / Keşfet / [+ FAB] / Liderlik / Profil. Üstte küçük arama+bildirim+avatar.` },
+                    { t:`Hero özet kart`,
+                      d:`Günün senaryosu mavi gradyanlı hero. Cevap verildiyse durum + iki düello CTA bir arada.` },
+                    { t:`Mode chip sistemi`,
+                      d:`Senaryo / Emoji / Karakter / Tartışma — 4 farklı renk, her yerde tutarlı.` },
+                    { t:`Sağ rail — desktop`,
+                      d:`Trend etiketler, mini liderlik, tanıyor olabilirsin. Eski boş alanın yerine canlı bilgi.` },
+                    { t:`Oyunlaştırma orta dozda`,
+                      d:`Rütbe ilerleme barı, seri kartı, rozet emojileri — agresif değil, sıcacık.` },
+                  ].map((c, i) => (
+                    <div key={i} style={{ padding: 14, border:'1px solid #e4e7ed', borderRadius: 12 }}>
+                      <div style={{
+                        width: 24, height: 24, borderRadius: 8, background:'#eef4ff',
+                        color:'#1442a8', font:'700 12px Geist Mono', display:'flex', alignItems:'center', justifyContent:'center',
+                        marginBottom: 10,
+                      }}>{String(i+1).padStart(2,'0')}</div>
+                      <div style={{ fontWeight: 600, marginBottom: 4 }}>{c.t}</div>
+                      <div style={{ color:'#646c7e', fontSize: 13 }}>{c.d}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginTop: 22, padding: 14, background:'#eef4ff', borderRadius: 12, color:'#1442a8', fontSize: 13 }}>
+                  <strong>İpucu:</strong> Bir artboard'u tam ekran açmak için sağ üstteki genişletme ikonuna bas. Desktop ↔ Mobile state'i senkron — bir tarafta nav'a tıklayınca diğeri de değişir.
+                </div>
+              </div>
+            </DCArtboard>
+          </DCSection>
+        </DesignCanvas>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>

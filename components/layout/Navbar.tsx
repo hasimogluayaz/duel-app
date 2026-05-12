@@ -59,7 +59,7 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
           className="lg:hidden sticky top-0 z-40 border-b border-stroke"
           style={{
             height: 54,
-            background: 'rgba(247,248,250,0.92)',
+            background: 'rgba(244,246,250,0.94)',
             backdropFilter: 'blur(10px)',
             WebkitBackdropFilter: 'blur(10px)',
           }}

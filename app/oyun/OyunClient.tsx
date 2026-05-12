@@ -14,8 +14,9 @@ import type { Profile, Scenario, Answer } from '@/types'
 import {
   Swords, Clock, CheckCircle, Search,
   Star, Sparkles, Users, Lock,
-  Zap, Target, LogIn, ExternalLink, Flame, Trophy, Link2,
+  Zap, Target, LogIn, ExternalLink, Flame, Trophy,
 } from 'lucide-react'
+import { TugBar } from '@/components/ui/TugBar'
 import { ContentMenu } from '@/components/ui/ContentMenu'
 import BookmarkButton from '@/components/bookmarks/BookmarkButton'
 import { ModeChip } from '@/components/ui/ModeChip'
@@ -206,103 +207,137 @@ export function OyunClient({
           )}
         </div>
       ) : (
-        /* ── Today's Hero — gradient card ── */
+        /* ── Today's Hero — v3 arena card ── */
         <div className="mx-3 my-3">
           <section
             className="relative overflow-hidden text-white"
             style={{
-              borderRadius: 20,
-              background: 'linear-gradient(135deg, #1442a8 0%, #2a6cf0 55%, #5188fa 100%)',
-              boxShadow: '0 4px 12px rgba(15,19,32,0.06), 0 2px 4px rgba(15,19,32,0.04)',
-              padding: 18,
+              borderRadius: 22,
+              background: 'linear-gradient(160deg, #0a1f55 0%, #1442a8 38%, #2a6cf0 100%)',
+              boxShadow: 'var(--k-shadow-hero)',
+              padding: 20,
             }}
           >
-            {/* Decorative circles */}
-            <div
-              aria-hidden
-              className="absolute pointer-events-none"
-              style={{ right: -40, top: -40, width: 200, height: 200, borderRadius: '50%', background: 'rgba(255,255,255,0.08)' }}
-            />
-            <div
-              aria-hidden
-              className="absolute pointer-events-none"
-              style={{ right: 40, bottom: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(255,255,255,0.05)' }}
-            />
+            {/* "?" watermark */}
+            <div aria-hidden style={{
+              position: 'absolute', right: -30, top: -50,
+              font: '900 320px/1 Geist, sans-serif',
+              color: 'rgba(255,255,255,0.04)',
+              letterSpacing: '-0.05em', userSelect: 'none', pointerEvents: 'none',
+            }}>?</div>
 
-            {/* Top row */}
-            <div className="relative flex items-center justify-between gap-2 mb-3.5">
-              <div
-                className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider"
-                style={{
-                  background: 'rgba(255,255,255,0.16)',
-                  padding: '4px 10px',
-                  borderRadius: 999,
-                }}
-              >
-                <Zap size={12} /> Günün Senaryosu · {new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })}
+            {/* Top status row */}
+            <div className="relative flex items-center justify-between gap-2 mb-4 flex-wrap">
+              <div className="inline-flex items-center gap-2">
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 7,
+                  padding: '5px 12px', borderRadius: 99,
+                  background: 'rgba(255,255,255,0.15)', backdropFilter: 'blur(4px)',
+                  font: '700 11px Geist, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase',
+                }}>
+                  <span className="live-dot" style={{ background: '#bff5d5' }} />
+                  Günün Senaryosu
+                </span>
+                <span className="tab-nums" style={{ font: '500 12px Geist Mono, monospace', opacity: 0.7 }}>
+                  {new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })}
+                </span>
               </div>
               {nextScenarioCountdown && (
-                <div className="inline-flex items-center gap-1 text-xs font-medium font-mono opacity-90">
-                  <Clock size={13} /> {nextScenarioCountdown}
-                </div>
+                <span className="tab-nums" style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 6,
+                  font: '600 12px Geist Mono, monospace', opacity: 0.95,
+                }}>
+                  <Clock size={13} /> Yenilenmeye {nextScenarioCountdown}
+                </span>
               )}
             </div>
 
             {/* Title */}
-            <h2 className="relative text-xl sm:text-2xl font-bold leading-tight tracking-tight mb-4 break-words" style={{ letterSpacing: '-0.02em' }}>
+            <h2 className="relative k3-h-1 text-white break-words" style={{
+              margin: '0 0 20px',
+              fontSize: 'clamp(22px, 5vw, 32px)',
+              textWrap: 'balance',
+            }}>
               {scenario.content}
             </h2>
+
+            {/* Tug bar (show when there are answers) */}
+            {communityAnswers.length > 0 && (
+              <div className="relative mb-4">
+                <TugBar
+                  warm={Math.round(communityAnswers.filter((a: any) => a.vote_count > 0).length / Math.max(communityAnswers.length, 1) * 100) || 50}
+                  cool={Math.round(communityAnswers.filter((a: any) => !a.vote_count || a.vote_count === 0).length / Math.max(communityAnswers.length, 1) * 100) || 50}
+                  compact
+                  dark
+                />
+              </div>
+            )}
 
             {/* Answered state */}
             {userAnswer ? (
               <div className="relative flex flex-col gap-3">
-                <div
-                  className="flex items-center gap-2.5 text-sm font-medium"
-                  style={{
-                    background: 'rgba(255,255,255,0.14)',
-                    borderRadius: 10,
-                    padding: '10px 14px',
-                  }}
-                >
-                  <CheckCircle size={16} style={{ color: '#bff5d5' }} className="shrink-0" />
-                  <span className="opacity-85">Cevabın:</span>
-                  <span className="font-semibold truncate">&ldquo;{userAnswer.content}&rdquo;</span>
+                <div style={{
+                  display: 'flex', flexDirection: 'column', gap: 12,
+                  padding: 14, borderRadius: 14,
+                  background: 'rgba(255,255,255,0.1)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <CheckCircle size={16} style={{ color: '#bff5d5', flexShrink: 0 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ font: '600 11px Geist, sans-serif', letterSpacing: '0.08em', textTransform: 'uppercase', opacity: 0.75, marginBottom: 3 }}>
+                        Cevabın
+                      </div>
+                      <div style={{ font: '600 15px Geist, sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        &ldquo;{userAnswer.content}&rdquo;
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={quickMatch}
+                      disabled={quickMatching}
+                      className="flex-1 flex items-center justify-center gap-1.5 font-semibold transition-all"
+                      style={{ height: 40, borderRadius: 12, background: '#fff', color: 'var(--k-blue-700)', fontSize: 14 }}
+                    >
+                      {quickMatching
+                        ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                        : <Swords size={15} />
+                      }
+                      Düello
+                    </button>
+                    <button
+                      onClick={() => setDuelModal(true)}
+                      className="flex-1 flex items-center justify-center gap-1.5 font-semibold transition-all text-white"
+                      style={{ height: 40, borderRadius: 12, background: 'rgba(255,255,255,0.16)', fontSize: 14 }}
+                    >
+                      <Target size={15} />
+                      İsimli Düello
+                    </button>
+                  </div>
                 </div>
-                <div className="flex gap-2 flex-wrap">
-                  <button
-                    onClick={quickMatch}
-                    disabled={quickMatching}
-                    className="flex-1 flex items-center justify-center gap-1.5 h-10 px-4 rounded-full font-semibold text-sm transition-all"
-                    style={{ background: '#fff', color: 'var(--k-blue-700)' }}
-                  >
-                    {quickMatching
-                      ? <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                      : <Zap size={15} />
-                    }
-                    Hızlı Düello
-                  </button>
-                  <button
-                    onClick={() => setDuelModal(true)}
-                    className="flex-1 flex items-center justify-center gap-1.5 h-10 px-4 rounded-full font-semibold text-sm transition-all text-white"
-                    style={{ background: 'rgba(255,255,255,0.16)' }}
-                  >
-                    <Target size={15} />
-                    İsimli Düello
-                  </button>
-                </div>
-                {communityAnswers.length > 0 && (
-                  <button
-                    onClick={() => { /* scrolls to feed below */ }}
-                    className="flex items-center justify-center gap-1.5 h-9 px-3 rounded-full text-sm font-medium text-white"
-                    style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.3)' }}
-                  >
-                    {communityAnswers.length} cevabı gör <Users size={14} />
-                  </button>
-                )}
               </div>
             ) : (
-              <p className="relative text-sm opacity-90">Cevabını yazıp düelloya katıl.</p>
+              <button
+                onClick={() => {}}
+                className="flex items-center justify-center gap-2 text-white font-semibold transition-all"
+                style={{ height: 48, padding: '0 24px', borderRadius: 12, background: '#fff', color: 'var(--k-blue-700)', fontSize: 15 }}
+              >
+                <Zap size={18} /> Tarafını seç, cevabını yaz
+              </button>
             )}
+
+            {/* Participation strip */}
+            <div className="relative flex items-center gap-3 mt-4 flex-wrap" style={{ font: '500 12px Geist, sans-serif', opacity: 0.85 }}>
+              <span className="tab-nums">
+                <strong>{communityAnswers.length.toLocaleString('tr-TR')}</strong> cevap
+              </span>
+              <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'currentColor', opacity: 0.4 }} />
+              <span className="tab-nums" style={{ color: '#ffd4b3' }}>
+                <strong>{recentDuels.filter((d: any) => d.status === 'active').length}</strong> aktif düello
+              </span>
+            </div>
           </section>
         </div>
       )}
@@ -613,18 +648,11 @@ export function OyunClient({
                       {duel.scenario?.content && (
                         <p className="text-xs text-fg-subtle mb-2 line-clamp-1">{duel.scenario.content}</p>
                       )}
-                      {/* Vote split bar */}
+                      {/* Vote split bar — v3 TugBar */}
                       {totalVotes > 0 && (
-                        <div>
-                          <div className="flex justify-between text-[10px] font-mono text-fg-subtle mb-1">
-                            <span style={{ color: 'var(--k-blue-500)' }}>{duel.challenger?.username} {pctA}%</span>
-                            <span style={{ color: 'var(--k-navy-500)' }}>{duel.challenged?.username} {pctB}%</span>
-                          </div>
-                          <div className="flex h-1.5 rounded-full overflow-hidden bg-surface-2">
-                            <div style={{ width: pctA + '%', background: 'var(--k-blue-500)' }} />
-                            <div style={{ width: pctB + '%', background: 'var(--k-navy-500)' }} />
-                          </div>
-                          <p className="text-[10px] text-fg-subtle mt-1">{totalVotes} oy</p>
+                        <div className="mt-2">
+                          <TugBar warm={pctA} cool={pctB} compact />
+                          <p className="tab-nums text-[10px] text-fg-subtle mt-1">{totalVotes} oy</p>
                         </div>
                       )}
                     </div>

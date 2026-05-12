@@ -1,0 +1,125 @@
+/* Kapisio v2 — editorial overlay tokens (depends on tokens.css) */
+
+:root {
+  /* Restore TRUE warm vs cool semantic — Sıcak/Soğuk should look different */
+  --k2-warm-50:  #fdf3ec;
+  --k2-warm-100: #fbe2cf;
+  --k2-warm-200: #f6c599;
+  --k2-warm-400: #e88240;
+  --k2-warm-500: #d96a1c;  /* sıcak — warm amber */
+  --k2-warm-600: #b8520e;
+  --k2-warm-700: #8e3d08;
+
+  --k2-cool-500: var(--k-blue-500);  /* soğuk — kapisio blue */
+  --k2-cool-600: var(--k-blue-600);
+  --k2-cool-700: var(--k-blue-700);
+  --k2-cool-50:  var(--k-blue-50);
+  --k2-cool-100: var(--k-blue-100);
+
+  /* Cream surface — warmer than slate */
+  --k2-paper:    #faf7f2;
+  --k2-paper-2:  #f3eee5;
+  --k2-paper-3:  #e8e1d3;
+  --k2-ink:      #0c1018;
+  --k2-ink-2:    #2a2f3d;
+  --k2-ink-3:    #6b7184;
+  --k2-rule:     #d8d2c5;
+  --k2-rule-soft:#e8e1d3;
+
+  /* Editorial type */
+  --k2-display: 'Newsreader', 'Source Serif Pro', Georgia, serif;
+  --k2-sans:    var(--k-font-sans);
+  --k2-mono:    var(--k-font-mono);
+}
+
+/* v2-scoped root — applied to artboards via .k2-root */
+.k2-root {
+  font-family: var(--k2-sans);
+  color: var(--k2-ink);
+  background: var(--k2-paper);
+  font-size: 14px;
+  line-height: 1.45;
+  font-feature-settings: 'cv11','ss01','ss03';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.k2-root *, .k2-root *::before, .k2-root *::after { box-sizing: border-box; }
+.k2-root button { font-family: inherit; cursor: pointer; }
+.k2-root *::-webkit-scrollbar { display: none; }
+.k2-root * { scrollbar-width: none; }
+
+/* Display headline class */
+.k2-display {
+  font-family: var(--k2-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  font-feature-settings: 'ss01';
+}
+.k2-display em { font-style: italic; font-weight: 500; }
+
+/* Tabular numbers utility */
+.k2-tab { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; }
+
+/* Editorial mark / hairline rule */
+.k2-rule {
+  height: 1px; background: var(--k2-rule); border: none; margin: 0;
+}
+.k2-rule-thick {
+  height: 2px; background: var(--k2-ink); border: none; margin: 0;
+}
+
+/* Card variant — paper with subtle warm border */
+.k2-card {
+  background: #fff;
+  border: 1px solid var(--k2-rule);
+  border-radius: 16px;
+}
+
+/* Eyebrow — small caps editorial label */
+.k2-eyebrow {
+  font: 600 11px/1 var(--k2-sans);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--k2-ink-3);
+}
+
+/* Side chips */
+.k2-side-warm {
+  color: var(--k2-warm-700);
+  background: var(--k2-warm-50);
+  border: 1px solid var(--k2-warm-100);
+}
+.k2-side-cool {
+  color: var(--k2-cool-700);
+  background: var(--k2-cool-50);
+  border: 1px solid var(--k2-cool-100);
+}
+
+/* Button variants tuned to cream */
+.k2-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  font: 500 14px/1 var(--k2-sans);
+  height: 40px; padding: 0 18px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  transition: transform .06s, background .12s, color .12s, border-color .12s;
+  white-space: nowrap; user-select: none;
+}
+.k2-btn:active { transform: scale(.97); }
+.k2-btn-ink     { background: var(--k2-ink); color: #fff; }
+.k2-btn-ink:hover { background: #1a1f30; }
+.k2-btn-paper   { background: #fff; color: var(--k2-ink); border-color: var(--k2-rule); }
+.k2-btn-paper:hover { background: var(--k2-paper-2); }
+.k2-btn-warm    { background: var(--k2-warm-500); color: #fff; }
+.k2-btn-warm:hover { background: var(--k2-warm-600); }
+.k2-btn-cool    { background: var(--k-blue-500); color: #fff; }
+.k2-btn-cool:hover { background: var(--k-blue-600); }
+.k2-btn-ghost   { background: transparent; color: var(--k2-ink); }
+.k2-btn-ghost:hover { background: var(--k2-paper-2); }
+
+/* Focus */
+.k2-root :focus-visible { outline: 2px solid var(--k-blue-400); outline-offset: 2px; border-radius: 6px; }
+
+/* Animated tug bar */
+@keyframes k2-pulse-warm { 0%,100% { box-shadow: 0 0 0 0 var(--k2-warm-200); } 50% { box-shadow: 0 0 0 4px rgba(217,106,28,0); } }
+@keyframes k2-shimmer    { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }

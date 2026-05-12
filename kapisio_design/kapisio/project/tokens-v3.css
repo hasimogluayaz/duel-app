@@ -1,0 +1,146 @@
+/* Kapisio v3 — tightening on top of v1 (Geist + blue) */
+/* Loaded AFTER tokens.css to override */
+
+:root {
+  /* Restore TRUE warm vs cool side semantics — Sıcak should look warm */
+  --k3-warm-50:  #fff1e6;
+  --k3-warm-100: #ffdcbf;
+  --k3-warm-200: #ffbe83;
+  --k3-warm-400: #f58a3c;
+  --k3-warm-500: #ed6f1c;
+  --k3-warm-600: #c8540e;
+  --k3-warm-700: #93390a;
+
+  /* Cool = Kapisio blue (alias) */
+  --k3-cool-50:  var(--k-blue-50);
+  --k3-cool-100: var(--k-blue-100);
+  --k3-cool-500: var(--k-blue-500);
+  --k3-cool-600: var(--k-blue-600);
+  --k3-cool-700: var(--k-blue-700);
+
+  /* Refined surface — cooler, slightly denser */
+  --k3-bg:       #f4f6fa;
+  --k3-surface:  #ffffff;
+  --k3-surface-2:#eef1f6;
+  --k3-rule:     #e1e6ee;
+  --k3-rule-2:   #cfd6e2;
+  --k3-ink:      #0a0f1e;
+  --k3-ink-2:    #3a4256;
+  --k3-ink-3:    #6e7892;
+
+  /* Glow + ink shadows */
+  --k3-shadow-card: 0 1px 2px rgba(10,15,30,.04), 0 4px 16px rgba(10,15,30,.04);
+  --k3-shadow-hero: 0 24px 60px -20px rgba(20,66,168,.45), 0 8px 20px -10px rgba(10,15,30,.2);
+}
+
+.k3-root {
+  font-family: 'Geist', system-ui, sans-serif;
+  color: var(--k3-ink);
+  background: var(--k3-bg);
+  font-size: 14px;
+  line-height: 1.45;
+  font-feature-settings: 'cv11','ss01','ss03';
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.k3-root *, .k3-root *::before, .k3-root *::after { box-sizing: border-box; }
+.k3-root button { font-family: inherit; cursor: pointer; }
+.k3-root *::-webkit-scrollbar { display: none; }
+.k3-root * { scrollbar-width: none; }
+
+.k3-tab { font-variant-numeric: tabular-nums; font-feature-settings: 'tnum'; }
+
+.k3-card {
+  background: var(--k3-surface);
+  border: 1px solid var(--k3-rule);
+  border-radius: 18px;
+  box-shadow: var(--k3-shadow-card);
+}
+
+/* Display headline — Geist 800, tight */
+.k3-h-1 {
+  font-family: 'Geist', system-ui, sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.02;
+}
+.k3-h-2 {
+  font-family: 'Geist', system-ui, sans-serif;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
+}
+
+/* Eyebrow — small caps */
+.k3-eyebrow {
+  font: 700 11px/1 'Geist', system-ui, sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--k3-ink-3);
+}
+
+/* Side chips */
+.k3-side-warm {
+  color: var(--k3-warm-700);
+  background: var(--k3-warm-50);
+  border: 1px solid var(--k3-warm-100);
+}
+.k3-side-cool {
+  color: var(--k3-cool-700);
+  background: var(--k3-cool-50);
+  border: 1px solid var(--k3-cool-100);
+}
+
+/* Buttons */
+.k3-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  font: 600 14px/1 'Geist', system-ui, sans-serif;
+  height: 40px; padding: 0 18px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  transition: transform .06s, background .12s, color .12s, border-color .12s, box-shadow .12s;
+  white-space: nowrap; user-select: none;
+}
+.k3-btn:active { transform: scale(.97); }
+.k3-btn-primary { background: var(--k-blue-500); color: #fff;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.3) inset, 0 6px 16px -4px rgba(42,108,240,0.45); }
+.k3-btn-primary:hover { background: var(--k-blue-600); }
+.k3-btn-ink     { background: var(--k3-ink); color: #fff; }
+.k3-btn-ink:hover { background: #16203a; }
+.k3-btn-outline { background: var(--k3-surface); color: var(--k3-ink); border-color: var(--k3-rule); }
+.k3-btn-outline:hover { border-color: var(--k3-rule-2); }
+.k3-btn-ghost   { background: transparent; color: var(--k3-ink); }
+.k3-btn-ghost:hover { background: var(--k3-surface-2); }
+.k3-btn-warm    { background: var(--k3-warm-500); color: #fff;
+  box-shadow: 0 6px 16px -4px rgba(237,111,28,0.5); }
+.k3-btn-warm:hover { background: var(--k3-warm-600); }
+
+/* Pill chips */
+.k3-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 24px; padding: 0 10px;
+  border-radius: 999px;
+  font: 600 11.5px/1 'Geist', system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+
+/* Focus */
+.k3-root :focus-visible { outline: 2px solid var(--k-blue-400); outline-offset: 2px; border-radius: 8px; }
+
+/* Pulse anim — for live indicators */
+@keyframes k3-live { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.4); opacity: .4; } }
+.k3-live-dot {
+  position: relative; width: 8px; height: 8px; border-radius: 50%;
+  background: #16a34a;
+}
+.k3-live-dot::after {
+  content: ''; position: absolute; inset: 0; border-radius: 50%;
+  background: #16a34a; animation: k3-live 1.6s ease-out infinite;
+}
+
+/* Grain overlay class — adds subtle paper grain */
+.k3-grain::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 3px 3px; opacity: .4; mix-blend-mode: overlay;
+}

@@ -1,0 +1,158 @@
+/* Kapisio design tokens — refined palette + type scale */
+:root {
+  /* Brand blue — logo blue is the whole palette */
+  --k-blue-50:  #eef4ff;
+  --k-blue-100: #dbe7ff;
+  --k-blue-200: #b8cfff;
+  --k-blue-300: #88aeff;
+  --k-blue-400: #5188fa;
+  --k-blue-500: #2a6cf0;  /* primary — logo */
+  --k-blue-600: #1a56d6;
+  --k-blue-700: #1442a8;
+  --k-blue-900: #0a1f55;
+
+  /* Sky — lighter blue accent (cooler than primary) */
+  --k-sky-50:  #ecf6ff;
+  --k-sky-100: #d3eaff;
+  --k-sky-400: #4aa8ff;
+  --k-sky-500: #1f8df0;
+  --k-sky-600: #1572c4;
+
+  /* Navy — deep blue accent (for streaks, fire, emphasis) */
+  --k-navy-50:  #e7ecf7;
+  --k-navy-100: #ccd5ea;
+  --k-navy-400: #2c4288;
+  --k-navy-500: #1c2f6e;
+  --k-navy-600: #122351;
+
+  /* Legacy coral aliases now map to navy so existing markup stays consistent */
+  --k-coral-50:  var(--k-navy-50);
+  --k-coral-100: var(--k-navy-100);
+  --k-coral-200: var(--k-navy-100);
+  --k-coral-400: var(--k-navy-400);
+  --k-coral-500: var(--k-navy-500);
+  --k-coral-600: var(--k-navy-600);
+
+  /* Cool slate for chrome */
+  --k-slate-50:  #f7f8fa;
+  --k-slate-100: #eef0f4;
+  --k-slate-150: #e4e7ed;
+  --k-slate-200: #d6dae3;
+  --k-slate-300: #b8bfcc;
+  --k-slate-400: #8e96a6;
+  --k-slate-500: #646c7e;
+  --k-slate-600: #464d5c;
+  --k-slate-700: #2f3441;
+  --k-slate-800: #1c2030;
+  --k-slate-900: #0f1320;
+
+  /* Semantic */
+  --k-success: #16a34a;
+  --k-success-50: #ecfdf3;
+  --k-warning: #1f8df0;
+  --k-danger: #dc2626;
+
+  /* Mode badge colors — all in blue family, just different tonal weight */
+  --k-mode-senaryo: #2a6cf0;  /* primary blue   */
+  --k-mode-emoji:   #4aa8ff;  /* sky blue       */
+  --k-mode-karakter:#1442a8;  /* deep navy      */
+  --k-mode-tartisma:#1c2f6e;  /* darkest navy   */
+
+  /* Surfaces — light */
+  --k-bg:        #f7f8fa;
+  --k-bg-elev:   #ffffff;
+  --k-bg-soft:   #eef0f4;
+  --k-border:    #e4e7ed;
+  --k-border-strong: #d6dae3;
+  --k-text:      #0f1320;
+  --k-text-2:    #464d5c;
+  --k-text-3:    #8e96a6;
+  --k-text-on-blue: #ffffff;
+
+  /* Radii */
+  --k-r-sm: 6px;
+  --k-r-md: 10px;
+  --k-r-lg: 14px;
+  --k-r-xl: 20px;
+  --k-r-pill: 999px;
+
+  /* Shadows */
+  --k-shadow-sm: 0 1px 2px rgba(15,19,32,.04), 0 1px 1px rgba(15,19,32,.03);
+  --k-shadow-md: 0 4px 12px rgba(15,19,32,.06), 0 2px 4px rgba(15,19,32,.04);
+  --k-shadow-lg: 0 12px 32px rgba(15,19,32,.10), 0 4px 8px rgba(15,19,32,.05);
+  --k-shadow-pop: 0 18px 50px rgba(15,19,32,.18);
+
+  /* Type */
+  --k-font-sans: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --k-font-mono: 'Geist Mono', ui-monospace, 'JetBrains Mono', Menlo, monospace;
+}
+
+/* Apply to artboard roots (each artboard gets `.k-root`) */
+.k-root {
+  font-family: var(--k-font-sans);
+  color: var(--k-text);
+  background: var(--k-bg);
+  line-height: 1.4;
+  font-feature-settings: 'cv11','ss01','ss03';
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+  text-rendering: optimizeLegibility;
+}
+.k-root *, .k-root *::before, .k-root *::after { box-sizing: border-box; }
+.k-root button { font-family: inherit; cursor: pointer; }
+
+/* Hide native scrollbars inside the prototype */
+.k-root *::-webkit-scrollbar { display: none; }
+.k-root * { scrollbar-width: none; }
+
+/* Buttons */
+.k-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  font: 500 14px/1 var(--k-font-sans);
+  height: 36px; padding: 0 14px;
+  border-radius: var(--k-r-pill);
+  border: 1px solid transparent;
+  transition: transform .06s ease, background .12s, color .12s, border-color .12s, box-shadow .12s;
+  white-space: nowrap;
+  user-select: none;
+}
+.k-btn:active { transform: scale(.97); }
+.k-btn-primary { background: var(--k-blue-500); color: #fff; }
+.k-btn-primary:hover { background: var(--k-blue-600); }
+.k-btn-ghost { background: transparent; color: var(--k-text); }
+.k-btn-ghost:hover { background: var(--k-bg-soft); }
+.k-btn-outline { background: #fff; color: var(--k-text); border-color: var(--k-border); }
+.k-btn-outline:hover { border-color: var(--k-border-strong); background: #fff; }
+.k-btn-coral { background: var(--k-coral-500); color: #fff; }
+.k-btn-coral:hover { background: var(--k-coral-600); }
+
+/* Cards */
+.k-card {
+  background: var(--k-bg-elev);
+  border: 1px solid var(--k-border);
+  border-radius: var(--k-r-lg);
+}
+
+/* Mode chip */
+.k-mode {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 22px; padding: 0 8px;
+  font: 600 11px/1 var(--k-font-sans);
+  letter-spacing: .02em;
+  border-radius: var(--k-r-pill);
+}
+.k-mode-dot { width:6px; height:6px; border-radius:50%; }
+
+/* Avatars */
+.k-avatar {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%; font: 600 13px/1 var(--k-font-sans);
+  color: #fff; flex: none;
+}
+
+/* Focus rings */
+.k-root :focus-visible {
+  outline: 2px solid var(--k-blue-400);
+  outline-offset: 2px;
+  border-radius: var(--k-r-sm);
+}

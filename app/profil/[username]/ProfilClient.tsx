@@ -93,25 +93,28 @@ export default function ProfilClient({
       {/* ── Banner ── */}
       <div className="relative">
         <div
-          className="h-40 sm:h-48 relative overflow-hidden"
-          style={{ background: 'linear-gradient(135deg, #1442a8 0%, #2a6cf0 55%, #5188fa 100%)' }}
+          className="relative overflow-hidden"
+          style={{
+            height: 128,
+            background: 'linear-gradient(135deg, #0a1f55 0%, #1442a8 50%, #2a6cf0 100%)',
+          }}
         >
-          {/* Decorative rings */}
-          <div className="absolute -top-20 -right-20 w-80 h-80 border-2 border-white/10 rounded-full" />
-          <div className="absolute -top-8 -right-8 w-52 h-52 border border-white/10 rounded-full" />
-          <div className="absolute -bottom-24 left-6 w-64 h-64 border border-white/[0.07] rounded-full" />
-          <div className="absolute top-6 left-1/3 w-32 h-32 border border-white/[0.06] rounded-full" />
-          {/* Bottom fade for avatar overlap */}
-          <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/30 to-transparent" />
+          {/* Overlay for warm depth */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'radial-gradient(at 25% 60%, rgba(237,111,28,0.18), transparent 40%), radial-gradient(at 80% 30%, rgba(255,255,255,0.10), transparent 50%)',
+          }} />
           {/* Tier badge */}
           <div className="absolute bottom-3 left-4">
-            <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-black/30 backdrop-blur-sm border border-white/10 text-white">
+            <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full text-white"
+              style={{ background: 'rgba(0,0,0,0.28)', backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.12)' }}>
               {tier.emoji} {tier.label}
             </span>
           </div>
           {isOwnProfile && (
             <Link href="/profil/ayarlar" className="absolute top-3 right-3">
-              <div className="flex items-center gap-1.5 text-xs text-white/90 bg-black/40 backdrop-blur-sm border border-white/15 rounded-lg px-3 py-1.5 hover:bg-black/60 transition-all font-medium">
+              <div className="flex items-center gap-1.5 text-xs text-white/90 rounded-lg px-3 py-1.5 transition-all font-medium hover:opacity-90"
+                style={{ background: 'rgba(0,0,0,0.35)', backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.15)' }}>
                 <Settings size={12} />
                 Düzenle
               </div>
@@ -184,8 +187,46 @@ export default function ProfilClient({
             </p>
           )}
 
-          {/* ── Stats strip ── */}
-          <div className="flex items-center gap-4 mb-3 text-sm">
+          {/* ── Stats grid — v3: 4-column with eyebrow labels ── */}
+          <div className="grid grid-cols-4 border border-stroke rounded-2xl overflow-hidden mb-4" style={{ borderTop: '1px solid var(--stroke)' }}>
+            {[
+              { label: 'Puan', value: formatPoints(profile.total_points), color: 'var(--fg)' },
+              { label: 'Düello', value: duelCount, color: 'var(--fg)' },
+              { label: 'Galibiyet', value: winCount, color: 'var(--k-success, #16a34a)' },
+              { label: 'Seri', value: `${profile.streak_count ?? 0}🔥`, color: 'var(--k3-warm-500, #ed6f1c)' },
+            ].map((s, i) => (
+              <div key={i} className="flex flex-col items-center py-3 px-2"
+                style={{ borderRight: i < 3 ? '1px solid var(--stroke)' : 'none', borderTop: '1px solid var(--stroke)' }}>
+                <div className="k3-eyebrow mb-1">{s.label}</div>
+                <div className="tab-nums k3-h-2" style={{ fontSize: 22, color: s.color }}>{s.value}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Rank progress bar */}
+          <div className="mb-3">
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="k3-eyebrow">
+                {tier.emoji} {tier.label}{tierProgress.next ? ` → ${tierProgress.next.label}` : ''}
+              </span>
+              {tierProgress.next && (
+                <span className="tab-nums text-[11px] text-fg-subtle" style={{ fontFamily: 'Geist Mono, monospace' }}>
+                  {formatPoints(profile.total_points)} / {formatPoints(tierProgress.next.minPoints)}
+                </span>
+              )}
+            </div>
+            <div style={{ height: 8, background: 'var(--surface-2)', borderRadius: 99, overflow: 'hidden' }}>
+              <div style={{
+                height: '100%', borderRadius: 99,
+                width: `${tierProgress.progress}%`,
+                background: 'linear-gradient(90deg, var(--k3-warm-400, #f58a3c), var(--k3-warm-500, #ed6f1c))',
+                transition: 'width .5s ease',
+              }} />
+            </div>
+          </div>
+
+          {/* Follow stats strip */}
+          <div className="flex items-center gap-4 mb-2 text-sm">
             <Link href={`/profil/${profile.username}/takip`} className="hover:underline">
               <span className="font-bold text-fg">{profile.following_count ?? 0}</span>
               <span className="text-fg-subtle ml-1 text-xs">Takip</span>
@@ -194,14 +235,6 @@ export default function ProfilClient({
               <span className="font-bold text-fg">{profile.follower_count ?? 0}</span>
               <span className="text-fg-subtle ml-1 text-xs">Takipçi</span>
             </Link>
-            <span>
-              <span className="font-bold text-fg">{duelCount}</span>
-              <span className="text-fg-subtle ml-1 text-xs">Düello</span>
-            </span>
-            <span>
-              <span className="font-bold text-fg">{formatPoints(profile.total_points)}</span>
-              <span className="text-fg-subtle ml-1 text-xs">puan</span>
-            </span>
           </div>
 
           {/* Recent form */}

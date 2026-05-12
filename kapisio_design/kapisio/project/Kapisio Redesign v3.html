@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kapisio — Yeniden Tasarım v3</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="tokens-v3.css">
+
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #e6eaf2; font-family: 'Geist', system-ui, sans-serif; }
+  body { overflow: hidden; }
+  .k3-frame {
+    width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: var(--k3-bg);
+  }
+  .k3-frame-mobile {
+    width: 100%; height: 100%; overflow: hidden;
+    border-radius: 32px;
+    background: var(--k3-bg);
+    position: relative;
+  }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="data.jsx"></script>
+  <script type="text/babel" src="components.jsx"></script>
+  <script type="text/babel" src="screens.jsx"></script>
+  <script type="text/babel" src="screens-extra.jsx"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="screens-v3.jsx"></script>
+  <script type="text/babel" src="shells-v3.jsx"></script>
+
+  <script type="text/babel">
+    const { useState, useCallback, useMemo, useEffect } = React;
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Tweaks
+    // ─────────────────────────────────────────────────────────────────────
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "warmTone": "orange",
+      "primaryShade": "kapisio",
+      "density": "cozy"
+    }/*EDITMODE-END*/;
+
+    const WARM_TONES = {
+      orange:  { c500:'#ed6f1c', c600:'#c8540e', c700:'#93390a',
+                 c50:'#fff1e6', c100:'#ffdcbf', c200:'#ffbe83', c400:'#f58a3c' },
+      coral:   { c500:'#e7434a', c600:'#bd2c33', c700:'#8a1d23',
+                 c50:'#fdecec', c100:'#fbcdcf', c200:'#f6989b', c400:'#ef6a70' },
+      amber:   { c500:'#d97706', c600:'#b45309', c700:'#78350f',
+                 c50:'#fef6e6', c100:'#fde4b3', c200:'#fbcb6b', c400:'#f3a23b' },
+    };
+    const PRIMARY_SHADES = {
+      kapisio: { p500:'#2a6cf0', p600:'#1a56d6', p700:'#1442a8', p400:'#5188fa', p50:'#eef4ff' },
+      indigo:  { p500:'#4f46e5', p600:'#3f37c9', p700:'#312a96', p400:'#7a72ee', p50:'#eef0fe' },
+      teal:    { p500:'#0d9488', p600:'#0b766c', p700:'#0a5851', p400:'#36b4a9', p50:'#e6f6f4' },
+    };
+
+    const applyTweaks = (t) => {
+      const root = document.documentElement;
+      const w = WARM_TONES[t.warmTone] || WARM_TONES.orange;
+      root.style.setProperty('--k3-warm-500', w.c500);
+      root.style.setProperty('--k3-warm-600', w.c600);
+      root.style.setProperty('--k3-warm-700', w.c700);
+      root.style.setProperty('--k3-warm-50',  w.c50);
+      root.style.setProperty('--k3-warm-100', w.c100);
+      root.style.setProperty('--k3-warm-200', w.c200);
+      root.style.setProperty('--k3-warm-400', w.c400);
+      const p = PRIMARY_SHADES[t.primaryShade] || PRIMARY_SHADES.kapisio;
+      root.style.setProperty('--k-blue-500', p.p500);
+      root.style.setProperty('--k-blue-600', p.p600);
+      root.style.setProperty('--k-blue-700', p.p700);
+      root.style.setProperty('--k-blue-400', p.p400);
+      root.style.setProperty('--k-blue-50',  p.p50);
+    };
+
+    // ─────────────────────────────────────────────────────────────────────
+    // App state — synced between artboards
+    // ─────────────────────────────────────────────────────────────────────
+    const useAppState = () => {
+      const [screen, setScreen] = useState('home');
+      const [creating, setCreating] = useState(false);
+      return {
+        screen, setScreen, creating,
+        openCreate: () => setCreating(true),
+        closeCreate: () => setCreating(false),
+        openScenario: () => setScreen('detail'),
+      };
+    };
+
+    const V3ScreenBody = ({ state, vp }) => {
+      const data = window.KAPISIO_DATA;
+      const { screen, openScenario, setScreen } = state;
+      if (screen === 'home')     return <HomeScreenV3 vp={vp} data={data} onOpenScenario={openScenario}/>;
+      if (screen === 'detail')   return <DetailScreenV3 vp={vp} data={data} onBack={() => setScreen('home')}/>;
+      if (screen === 'discover') return <DiscoverScreenV3 vp={vp} data={data} onOpenScenario={openScenario}/>;
+      if (screen === 'leader')   return <LeaderboardScreenV3 vp={vp} data={data}/>;
+      if (screen === 'profile')  return <ProfileScreenV3 vp={vp} data={data}/>;
+      // Re-use v1 fallback screens (they're solid)
+      if (screen === 'notif')    return <NotificationsScreen vp={vp} data={data}/>;
+      if (screen === 'messages') return <MessagesScreen vp={vp} data={data}/>;
+      if (screen === 'archive')  return <ArchiveScreen vp={vp} data={data}/>;
+      if (screen === 'saved')    return <SavedScreen vp={vp} data={data}/>;
+      if (screen === 'settings') return <SettingsScreen vp={vp} data={data}/>;
+      return null;
+    };
+
+    const DesktopProto = ({ state }) => (
+      <div className="k3-root k-root k3-frame" data-screen-label="Desktop · Kapisio v3">
+        <DesktopShellV3 screen={state.screen} setScreen={state.setScreen}
+                        openCreate={state.openCreate} data={window.KAPISIO_DATA}>
+          <V3ScreenBody state={state} vp="desktop"/>
+        </DesktopShellV3>
+        {state.creating && <CreateModal vp="desktop" onClose={state.closeCreate}/>}
+      </div>
+    );
+    const MobileProto = ({ state }) => (
+      <div className="k3-root k-root k3-frame-mobile" data-screen-label="Mobile · Kapisio v3">
+        <MobileShellV3 screen={state.screen} setScreen={state.setScreen}
+                       openCreate={state.openCreate} data={window.KAPISIO_DATA}>
+          <V3ScreenBody state={state} vp="mobile"/>
+        </MobileShellV3>
+        {state.creating && <CreateModal vp="mobile" onClose={state.closeCreate}/>}
+      </div>
+    );
+
+    const App = () => {
+      const state = useAppState();
+      const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+      useEffect(() => { applyTweaks(t); }, [t.warmTone, t.primaryShade]);
+
+      return (
+        <>
+          <DesignCanvas>
+            <DCSection id="proto"
+                       title="Kapisio — Yeniden Tasarım v3"
+                       subtitle="v1'in DNA'sı (Geist + Kapisio mavisi + bottom-tab). Üzerine: Sıcak/Soğuk gerçek semantik, daha keskin tipografi, iki kolonlu Arena, gerçek podyum. Tek font ailesi: Geist.">
+              <DCArtboard id="desktop-v3" label="Desktop · 1280" width={1280} height={920}>
+                <DesktopProto state={state}/>
+              </DCArtboard>
+              <DCArtboard id="mobile-v3" label="Mobile · 390" width={390} height={844}>
+                <MobileProto state={state}/>
+              </DCArtboard>
+            </DCSection>
+
+            <DCSection id="notes" title="v1 → v3 ne değişti" subtitle="v1'in iskeleti aynen, sadece sıkıldı ve keskinleşti">
+              <DCArtboard id="notes-v3" label="Notlar" width={1200} height={560}>
+                <div style={{
+                  padding: 40, fontFamily: 'Geist, system-ui, sans-serif', color:'#0a0f1e',
+                  background:'#f4f6fa', height:'100%', overflow:'auto', fontSize: 14, lineHeight: 1.5,
+                }}>
+                  <h2 style={{ margin:0, fontWeight: 800, fontSize: 32, letterSpacing:'-0.025em' }}>
+                    v1 üstüne koyduklarımız
+                  </h2>
+                  <p style={{ margin:'10px 0 28px', color:'#3a4256', fontSize: 15, maxWidth: 720 }}>
+                    Newsreader + krem hatasıydı, geri aldım. v1'in Geist + mavi DNA'sı kalıyor. v3 = aynı iskeletin daha keskin, daha kapisiomsu versiyonu.
+                  </p>
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap: 16 }}>
+                    {[
+                      { n:'01', t:'Sıcak vs Soğuk — gerçek semantik',
+                        d:'Sıcak = sıcak turuncu, Soğuk = Kapisio mavi. v1\'de ikisi de laciverteydi (görsel olarak ayrışmıyordu).' },
+                      { n:'02', t:'Tug-of-war çubuğu',
+                        d:'Sadece yüzde değil; ortada ip işareti, iki tarafın gradient renkleri çekişiyor. Hero\'da, detayda, feed duello kartında.' },
+                      { n:'03', t:'İki kolonlu Arena (detay)',
+                        d:'Sıcak cevaplar solda, Soğuk\'unkiler sağda — duruşma metaforu. Mobilde 🔥 / Tümü / ❄️ pill toggle.' },
+                      { n:'04', t:'Hero daha az SaaS, daha çok arena',
+                        d:'Devasa "?" filigran, canlı puls dot, katılımcı avatar stack +243, glassmorphism cevap panel. Generic mavi gradient değil.' },
+                      { n:'05', t:'Tipografi keskinleşti',
+                        d:'Manşetler Geist 800, -0.035em tracking. Eyebrow uppercase. Tabular nums (.k3-tab) tüm sayılarda — hizalı tablo hissi.' },
+                      { n:'06', t:'Podyum gerçek altın/gümüş/bronz',
+                        d:'v1\'de düz mavi bar vardı. v3\'te madalya emojisi + gradient pedestal + 800-weight rakam.' },
+                      { n:'07', t:'Profil başarım stripi',
+                        d:'4 mini başarım kartı: seri, ilk düello, tartışmacı, topluluk oyu. Stats grid 30px büyük rakamlar.' },
+                      { n:'08', t:'Mobil bottom-nav pill highlight',
+                        d:'Aktif sekme mavi pill içine alınıyor (sadece renk değil — kabaca dokunma alanı). FAB gradient mavi.' },
+                      { n:'09', t:'Tweakable',
+                        d:'Sıcak ton: turuncu / coral / amber. Birincil: Kapisio / indigo / teal (dene-gör). Hep canlı, kaydedilir.' },
+                    ].map(c => (
+                      <div key={c.n} style={{ padding: 18, background:'#fff', border:'1px solid #e1e6ee', borderRadius: 14 }}>
+                        <div style={{
+                          font:'800 11px "Geist Mono", monospace', color:'var(--k3-warm-500)',
+                          letterSpacing:'0.04em', marginBottom: 10,
+                        }}>{c.n}</div>
+                        <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4, letterSpacing:'-0.015em' }}>{c.t}</div>
+                        <div style={{ color:'#3a4256', fontSize: 13, lineHeight: 1.55 }}>{c.d}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </DCArtboard>
+            </DCSection>
+          </DesignCanvas>
+
+          <TweaksPanel title="Tweaks">
+            <TweakSection label="Sıcak ton (Sıcak tarafı)">
+              <TweakRadio label="Renk" value={t.warmTone}
+                options={[
+                  { value:'orange', label:'Turuncu' },
+                  { value:'coral',  label:'Coral' },
+                  { value:'amber',  label:'Amber' },
+                ]}
+                onChange={(v) => setTweak('warmTone', v)}/>
+            </TweakSection>
+            <TweakSection label="Birincil renk (Soğuk + UI)">
+              <TweakRadio label="Renk" value={t.primaryShade}
+                options={[
+                  { value:'kapisio', label:'Kapisio' },
+                  { value:'indigo',  label:'Indigo' },
+                  { value:'teal',    label:'Teal' },
+                ]}
+                onChange={(v) => setTweak('primaryShade', v)}/>
+            </TweakSection>
+          </TweaksPanel>
+        </>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>

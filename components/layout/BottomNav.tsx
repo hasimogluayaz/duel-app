@@ -83,66 +83,82 @@ export function BottomNav({ userId, username }: Props) {
   return (
     <>
       <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface border-t border-stroke max-w-full"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-stroke max-w-full"
         style={{
+          height: 68,
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-          boxShadow: '0 -2px 12px rgba(15,19,32,0.04)',
+          background: 'rgba(255,255,255,0.96)',
+          backdropFilter: 'blur(10px)',
+          WebkitBackdropFilter: 'blur(10px)',
         }}
       >
-        <div className="flex items-center justify-around h-16 px-1">
+        <div className="flex items-center justify-around h-full px-1">
           <TabItem
-            icon={<Home size={22} />}
+            icon={<Home size={20} />}
             label="Anasayfa"
             active={isActive(['/oyun', '/duel', '/emoji', '/karakter', '/tartisma'])}
             href="/oyun"
           />
           <TabItem
-            icon={<Compass size={22} />}
+            icon={<Compass size={20} />}
             label="Keşfet"
             active={isActive(['/kesfet'])}
             href="/kesfet"
           />
 
-          {/* Center FAB */}
+          {/* Center FAB — v3: 54x54, radius 18, -14px lift */}
           <Link
             href="/senaryo-olustur"
             aria-label="Senaryo oluştur"
-            className="flex items-center justify-center text-white -translate-y-3"
+            className="flex items-center justify-center text-white"
             style={{
-              width: 52, height: 52, borderRadius: 16,
-              background: 'linear-gradient(135deg, var(--k-blue-400), var(--k-blue-600))',
-              boxShadow: '0 6px 16px rgba(42,108,240,0.35)',
+              width: 54, height: 54, borderRadius: 18,
+              background: 'linear-gradient(140deg, #4aa8ff, #1442a8)',
+              boxShadow: '0 8px 22px -4px rgba(42,108,240,0.5)',
+              transform: 'translateY(-14px)',
+              flexShrink: 0,
             }}
           >
             <Plus size={24} strokeWidth={2.5} />
           </Link>
 
           <TabItem
-            icon={<User size={22} />}
-            label="Profil"
-            active={isActive(['/profil', '/basarimlar', '/kayitlarim'])}
-            href={username ? `/profil/${username}` : '/giris'}
+            icon={<Trophy size={20} />}
+            label="Liderlik"
+            active={isActive(['/liderlik'])}
+            href="/liderlik"
           />
 
           {/* More — opens bottom sheet */}
           <button
             onClick={() => setMoreOpen(true)}
-            className={cn(
-              'flex-1 flex flex-col items-center justify-center gap-0.5 relative',
-              isActive(['/mesajlar', '/arsiv', '/liderlik', '/bildirimler', '/profil/ayarlar'])
-                ? 'text-primary'
-                : 'text-fg-subtle'
-            )}
+            className="flex-1 flex flex-col items-center justify-center gap-0.5 relative h-full"
+            style={{
+              color: isActive(['/profil', '/basarimlar', '/kayitlarim', '/mesajlar', '/arsiv', '/bildirimler', '/profil/ayarlar'])
+                ? 'var(--k-blue-600)'
+                : 'var(--fg-subtle)',
+            }}
           >
-            <span className="relative">
-              <MoreHorizontal size={22} />
+            <span style={{
+              position: 'relative',
+              padding: isActive(['/profil', '/basarimlar', '/kayitlarim', '/mesajlar', '/arsiv', '/bildirimler', '/profil/ayarlar'])
+                ? '4px 14px' : '4px 8px',
+              background: isActive(['/profil', '/basarimlar', '/kayitlarim', '/mesajlar', '/arsiv', '/bildirimler', '/profil/ayarlar'])
+                ? 'var(--k-blue-50)' : 'transparent',
+              borderRadius: 999,
+              transition: 'background .12s, padding .12s',
+            }}>
+              <User size={20} />
               {(unreadMsg + unreadNotif) > 0 && (
-                <span className="absolute -top-1 -right-2 min-w-4 h-4 px-1 bg-primary text-white text-[9px] font-bold rounded-full flex items-center justify-center border-[1.5px] border-surface">
+                <span className="absolute -top-0.5 -right-1 min-w-[14px] h-[14px] px-[3px] text-white text-[9px] font-bold rounded-full flex items-center justify-center border-[1.5px] border-surface"
+                  style={{ background: 'var(--k3-warm-500, #ed6f1c)' }}>
                   {unreadMsg + unreadNotif > 9 ? '9+' : unreadMsg + unreadNotif}
                 </span>
               )}
             </span>
-            <span className="text-[10px] font-semibold">Daha</span>
+            <span className="text-[10px]" style={{
+              fontWeight: isActive(['/profil', '/basarimlar', '/kayitlarim', '/mesajlar', '/arsiv', '/bildirimler', '/profil/ayarlar']) ? 700 : 500,
+            }}>Profil</span>
           </button>
         </div>
       </nav>
@@ -152,25 +168,26 @@ export function BottomNav({ userId, username }: Props) {
         <>
           {/* Backdrop */}
           <div
-            className="md:hidden fixed inset-0 z-50 bg-black/45"
+            className="md:hidden fixed inset-0 z-50"
+            style={{ background: 'rgba(10,15,30,0.5)' }}
             onClick={() => setMoreOpen(false)}
           />
           {/* Sheet */}
           <div
-            className="md:hidden fixed left-0 right-0 bottom-0 z-50 bg-surface border-t border-stroke pb-4"
+            className="md:hidden fixed left-0 right-0 bottom-0 z-50 bg-surface"
             style={{
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
-              paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 16px)',
-              animation: 'slideUp .22s ease-out',
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 22px)',
+              animation: 'slideUp .25s ease-out',
             }}
           >
             {/* Drag handle */}
             <div
-              className="mx-auto my-2 bg-stroke rounded-full"
-              style={{ width: 38, height: 4 }}
+              className="mx-auto rounded-full"
+              style={{ width: 40, height: 4, background: 'var(--stroke-strong)', margin: '10px auto 14px' }}
             />
-            <div className="px-5 pb-1.5 pt-1 text-[11px] font-bold uppercase tracking-wider text-fg-subtle">
+            <div className="px-5 pb-3" style={{ font: '700 20px Geist, sans-serif', letterSpacing: '-0.02em' }}>
               Menü
             </div>
 
@@ -244,20 +261,29 @@ function TabItem({
   return (
     <Link
       href={href}
-      className={cn(
-        'flex-1 flex flex-col items-center justify-center gap-0.5 relative h-full',
-        active ? 'text-primary' : 'text-fg-subtle'
-      )}
+      className="flex-1 flex flex-col items-center justify-center gap-[3px] relative h-full"
+      style={{ color: active ? 'var(--k-blue-600)' : 'var(--fg-subtle)' }}
     >
-      <span className="relative">
+      <span style={{
+        position: 'relative',
+        padding: active ? '4px 14px' : '4px 8px',
+        background: active ? 'var(--k-blue-50)' : 'transparent',
+        borderRadius: 999,
+        transition: 'background .12s, padding .12s',
+      }}>
         {icon}
         {badge && badge > 0 ? (
-          <span className="absolute -top-1 -right-2 min-w-4 h-4 px-1 bg-primary text-white text-[9px] font-bold rounded-full flex items-center justify-center border-[1.5px] border-surface">
+          <span
+            className="absolute -top-0.5 -right-1 min-w-[14px] h-[14px] px-[3px] text-white text-[9px] font-bold rounded-full flex items-center justify-center border-[1.5px] border-surface"
+            style={{ background: 'var(--k3-warm-500, #ed6f1c)' }}
+          >
             {badge > 9 ? '9+' : badge}
           </span>
         ) : null}
       </span>
-      <span className={cn('text-[10px]', active ? 'font-semibold' : 'font-medium')}>{label}</span>
+      <span style={{ fontSize: 10, fontWeight: active ? 700 : 500, letterSpacing: active ? '-0.005em' : 0 }}>
+        {label}
+      </span>
     </Link>
   )
 }
@@ -291,7 +317,8 @@ function MoreItem({
         <span className="block text-xs text-fg-subtle mt-0.5 truncate">{hint}</span>
       </span>
       {badge ? (
-        <span className="bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+        <span className="text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+          style={{ background: 'var(--k3-warm-500, #ed6f1c)' }}>
           {badge > 9 ? '9+' : badge}
         </span>
       ) : null}

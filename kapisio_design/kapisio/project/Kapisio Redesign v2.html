@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kapisio — Yeniden Tasarım v2</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<link rel="stylesheet" href="tokens-v2.css">
+
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #ece6d8; font-family: 'Geist', system-ui, sans-serif; }
+  body { overflow: hidden; }
+  @keyframes kFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .k2-frame {
+    width: 100%; height: 100%; overflow-y: auto; overflow-x: hidden;
+    background: var(--k2-paper);
+  }
+  .k2-frame-mobile {
+    width: 100%; height: 100%; overflow: hidden;
+    border-radius: 32px;
+    background: var(--k2-paper);
+    position: relative;
+  }
+</style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="data.jsx"></script>
+  <script type="text/babel" src="components.jsx"></script>
+  <script type="text/babel" src="screens.jsx"></script>
+  <script type="text/babel" src="screens-extra.jsx"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="screens-v2.jsx"></script>
+  <script type="text/babel" src="shells-v2.jsx"></script>
+
+  <script type="text/babel">
+    const { useState, useCallback, useMemo, useEffect } = React;
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Tweaks defaults
+    // ─────────────────────────────────────────────────────────────────────
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "edition": 248,
+      "accent": "warm",
+      "titleFont": "newsreader",
+      "density": "cozy",
+      "creamPaper": true
+    }/*EDITMODE-END*/;
+
+    const ACCENTS = {
+      warm:  { warm500:'#d96a1c', warm600:'#b8520e', warm700:'#8e3d08',
+               warm50:'#fdf3ec', warm100:'#fbe2cf', warm200:'#f6c599', warm400:'#e88240' },
+      mint:  { warm500:'#1f8a5b', warm600:'#176b46', warm700:'#0e4d31',
+               warm50:'#ecfaf2', warm100:'#cdedd9', warm200:'#9fdbb7', warm400:'#4eb586' },
+      magenta:{ warm500:'#c41e6d', warm600:'#9c1755', warm700:'#6e1039',
+               warm50:'#fdebf3', warm100:'#f8c5dc', warm200:'#f08fbd', warm400:'#e25599' },
+    };
+    const PAPER_CREAM = { paper:'#faf7f2', paper2:'#f3eee5', paper3:'#e8e1d3', rule:'#d8d2c5', ruleSoft:'#e8e1d3' };
+    const PAPER_COOL  = { paper:'#f7f8fa', paper2:'#eef0f4', paper3:'#d6dae3', rule:'#e4e7ed', ruleSoft:'#eef0f4' };
+
+    // Apply tweaks live to CSS vars
+    const applyTweaks = (t) => {
+      const root = document.documentElement;
+      const a = ACCENTS[t.accent] || ACCENTS.warm;
+      root.style.setProperty('--k2-warm-500', a.warm500);
+      root.style.setProperty('--k2-warm-600', a.warm600);
+      root.style.setProperty('--k2-warm-700', a.warm700);
+      root.style.setProperty('--k2-warm-50',  a.warm50);
+      root.style.setProperty('--k2-warm-100', a.warm100);
+      root.style.setProperty('--k2-warm-200', a.warm200);
+      root.style.setProperty('--k2-warm-400', a.warm400);
+      const p = t.creamPaper ? PAPER_CREAM : PAPER_COOL;
+      root.style.setProperty('--k2-paper',     p.paper);
+      root.style.setProperty('--k2-paper-2',   p.paper2);
+      root.style.setProperty('--k2-paper-3',   p.paper3);
+      root.style.setProperty('--k2-rule',      p.rule);
+      root.style.setProperty('--k2-rule-soft', p.ruleSoft);
+      const fonts = {
+        newsreader: `'Newsreader', 'Source Serif Pro', Georgia, serif`,
+        geist:      `'Geist', system-ui, sans-serif`,
+      };
+      root.style.setProperty('--k2-display', fonts[t.titleFont] || fonts.newsreader);
+    };
+
+    // ─────────────────────────────────────────────────────────────────────
+    // Shared app state — synced between desktop & mobile artboards
+    // ─────────────────────────────────────────────────────────────────────
+    const useAppState = () => {
+      const [screen, setScreen] = useState('home');
+      const [creating, setCreating] = useState(false);
+      return {
+        screen, setScreen,
+        creating,
+        openCreate: () => setCreating(true),
+        closeCreate: () => setCreating(false),
+        openScenario: () => setScreen('detail'),
+      };
+    };
+
+    const V2ScreenBody = ({ state, vp, edition }) => {
+      const data = window.KAPISIO_DATA;
+      const { screen, openScenario, setScreen } = state;
+      if (screen === 'home')     return <HomeScreenV2 vp={vp} data={data} onOpenScenario={openScenario} edition={edition}/>;
+      if (screen === 'detail')   return <DetailScreenV2 vp={vp} data={data} onBack={() => setScreen('home')} edition={edition}/>;
+      if (screen === 'discover') return <DiscoverScreenV2 vp={vp} data={data} onOpenScenario={openScenario}/>;
+      if (screen === 'leader')   return <LeaderboardScreenV2 vp={vp} data={data}/>;
+      if (screen === 'profile')  return <ProfileScreenV2 vp={vp} data={data}/>;
+      // Reuse v1 for non-redesigned screens
+      if (screen === 'notif')    return <NotificationsScreen vp={vp} data={data}/>;
+      if (screen === 'messages') return <MessagesScreen vp={vp} data={data}/>;
+      if (screen === 'archive')  return <ArchiveScreen vp={vp} data={data}/>;
+      if (screen === 'saved')    return <SavedScreen vp={vp} data={data}/>;
+      if (screen === 'settings') return <SettingsScreen vp={vp} data={data}/>;
+      return null;
+    };
+
+    const DesktopProto = ({ state, edition }) => (
+      <div className="k2-root k-root k2-frame" data-screen-label="Desktop · Kapisio v2">
+        <DesktopShellV2 screen={state.screen} setScreen={state.setScreen}
+                        openCreate={state.openCreate} data={window.KAPISIO_DATA} edition={edition}>
+          <V2ScreenBody state={state} vp="desktop" edition={edition}/>
+        </DesktopShellV2>
+        {state.creating && <CreateModal vp="desktop" onClose={state.closeCreate}/>}
+      </div>
+    );
+    const MobileProto = ({ state, edition }) => (
+      <div className="k2-root k-root k2-frame-mobile" data-screen-label="Mobile · Kapisio v2">
+        <MobileShellV2 screen={state.screen} setScreen={state.setScreen}
+                       openCreate={state.openCreate} data={window.KAPISIO_DATA} edition={edition}>
+          <V2ScreenBody state={state} vp="mobile" edition={edition}/>
+        </MobileShellV2>
+        {state.creating && <CreateModal vp="mobile" onClose={state.closeCreate}/>}
+      </div>
+    );
+
+    // ─────────────────────────────────────────────────────────────────────
+    // App
+    // ─────────────────────────────────────────────────────────────────────
+    const App = () => {
+      const state = useAppState();
+      const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+      useEffect(() => { applyTweaks(t); }, [t.accent, t.creamPaper, t.titleFont]);
+
+      return (
+        <>
+          <DesignCanvas>
+            <DCSection id="proto"
+                       title="Kapisio — Yeniden Tasarım v2"
+                       subtitle="Editöryel. Sıcak (amber) vs Soğuk (mavi) tarafları görsel olarak ayrıştı. Newsreader display + Geist UI. Tweaks panelden aksan + kağıt + başlık fontu değiş.">
+              <DCArtboard id="desktop-v2" label="Desktop · 1280" width={1280} height={920}>
+                <DesktopProto state={state} edition={t.edition}/>
+              </DCArtboard>
+              <DCArtboard id="mobile-v2" label="Mobile · 390" width={390} height={844}>
+                <MobileProto state={state} edition={t.edition}/>
+              </DCArtboard>
+            </DCSection>
+
+            <DCSection id="notes" title="v2 — neyi değiştirdik" subtitle="Önceki redesign'a kıyasla">
+              <DCArtboard id="notes-v2" label="Notlar" width={1200} height={620}>
+                <div style={{
+                  padding: 40, fontFamily: 'Geist, system-ui, sans-serif', color: '#0c1018',
+                  background: '#faf7f2', height: '100%', overflow: 'auto', fontSize: 14, lineHeight: 1.55,
+                }}>
+                  <div style={{
+                    paddingBottom: 18, borderBottom: '1px solid #0c1018',
+                    display:'flex', alignItems:'baseline', justifyContent:'space-between',
+                  }}>
+                    <h2 style={{ margin: 0, fontFamily: 'Newsreader, serif', fontSize: 38, fontWeight: 500, letterSpacing:'-0.02em' }}>
+                      v1 → v2: Editöryel dönüş
+                    </h2>
+                    <span style={{ fontSize: 11, letterSpacing:'0.14em', textTransform:'uppercase', color:'#6b7184' }}>
+                      Tasarım notları
+                    </span>
+                  </div>
+                  <p style={{ margin:'18px 0 28px', color:'#2a2f3d', fontSize: 15, lineHeight: 1.6, maxWidth: 720, textWrap:'pretty' }}>
+                    Kapisio bir günlük tartışma platformu — gazete metaforu en doğru çerçeve. v1 SaaS dashboard'una yakındı; v2 bir günlük yayın gibi hissetiriyor.
+                  </p>
+                  <div style={{ display:'grid', gridTemplateColumns:'repeat(3, 1fr)', gap: 18 }}>
+                    {[
+                      { n:'01', t:'Sıcak vs Soğuk — gerçek anlamı geri',
+                        d:'v1\'de iki taraf da laciverte sabitlenmişti. v2\'de Sıcak = amber, Soğuk = mavi. Tug-of-war çubuğunda görsel olarak çekişiyor.' },
+                      { n:'02', t:'Günün davası = gazete manşeti',
+                        d:'Sayı numarası, tarih, "Günün Davası" eyebrow. Newsreader display fontu — Inter/Geist gövdeyle kontrast.' },
+                      { n:'03', t:'Detayda iki kolonlu Arena',
+                        d:'Sıcak tarafının cevapları solda, Soğuk\'unkiler sağda (desktop). Mobile\'de pill toggle. Cevaplar gerçek bir duruşma gibi görünüyor.' },
+                      { n:'04', t:'Krem yüzey + Geist Mono sayılar',
+                        d:'#faf7f2 sıcak off-white, kurumsal #f7f8fa\'dan çıkış. Tüm istatistik tabular nums — tab-set tablo gibi hizalanıyor.' },
+                      { n:'05', t:'Liderlik = gerçek podyum + tablo',
+                        d:'Olimpik düz bar yerine altın/gümüş/bronz gradient. Tabular puanlar, "SEN" rozeti, hafta delta\'sı.' },
+                      { n:'06', t:'Mobil bottom nav — pill highlight',
+                        d:'Aktif sekme pill içine alınıyor, ikon büyümeden netlik. + butonu siyah ink, FAB değil — sabit ritim.' },
+                      { n:'07', t:'Profil = letterhead',
+                        d:'Sicil numarası, edisyon başı, büyük serif display isim. Stats grid pipe-separated — gazete arka sayfa hissi.' },
+                      { n:'08', t:'Sağ rail — canlı nabız',
+                        d:'Bugünün tug-bar\'ı küçük halde tepede; trend etiketler numaralı liste (01, 02..) — editör listesi gibi.' },
+                      { n:'09', t:'Tweakable',
+                        d:'Aksan: amber / mint / magenta. Kağıt: krem / cool. Başlık fontu: Newsreader / Geist. Hepsi anlık.' },
+                    ].map((c) => (
+                      <div key={c.n} style={{ padding: 18, background:'#fff', border:'1px solid #d8d2c5', borderRadius: 12 }}>
+                        <div style={{ display:'flex', alignItems:'baseline', justifyContent:'space-between', marginBottom: 10 }}>
+                          <span style={{ font:'700 12px "Geist Mono", monospace', color:'#d96a1c', letterSpacing:'0.04em' }}>
+                            {c.n}
+                          </span>
+                          <span style={{ width: 24, height: 1, background:'#0c1018' }}/>
+                        </div>
+                        <div style={{ fontFamily:'Newsreader, serif', fontSize: 18, fontWeight: 500, marginBottom: 6, letterSpacing:'-0.01em' }}>
+                          {c.t}
+                        </div>
+                        <div style={{ color:'#2a2f3d', fontSize: 13, lineHeight: 1.55 }}>{c.d}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </DCArtboard>
+            </DCSection>
+          </DesignCanvas>
+
+          <TweaksPanel title="Tweaks">
+            <TweakSection label="Edisyon">
+              <TweakNumber label="Sayı numarası" value={t.edition} min={1} max={9999}
+                onChange={(v) => setTweak('edition', v)}/>
+            </TweakSection>
+            <TweakSection label="Aksan rengi (Sıcak tarafı)">
+              <TweakRadio label="Aksan" value={t.accent}
+                options={[
+                  { value: 'warm',    label: 'Amber' },
+                  { value: 'mint',    label: 'Mint' },
+                  { value: 'magenta', label: 'Magenta' },
+                ]}
+                onChange={(v) => setTweak('accent', v)}/>
+            </TweakSection>
+            <TweakSection label="Kağıt">
+              <TweakRadio label="Yüzey" value={t.creamPaper ? 'cream' : 'cool'}
+                options={[
+                  { value: 'cream', label: 'Krem' },
+                  { value: 'cool',  label: 'Soğuk' },
+                ]}
+                onChange={(v) => setTweak('creamPaper', v === 'cream')}/>
+            </TweakSection>
+            <TweakSection label="Başlık fontu">
+              <TweakRadio label="Display" value={t.titleFont}
+                options={[
+                  { value: 'newsreader', label: 'Newsreader' },
+                  { value: 'geist',      label: 'Geist' },
+                ]}
+                onChange={(v) => setTweak('titleFont', v)}/>
+            </TweakSection>
+          </TweaksPanel>
+        </>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>
