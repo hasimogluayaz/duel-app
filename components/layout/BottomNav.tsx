@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
-  Home, Compass, User, MoreHorizontal, Plus,
+  Home, Compass, User,
   MessageCircle, Bookmark, Trophy, BookOpen, Settings, ChevronRight, Bell, Medal,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
@@ -94,45 +94,28 @@ export function BottomNav({ userId, username }: Props) {
       >
         <div className="flex items-center justify-around h-full px-1">
           <TabItem
-            icon={<Home size={20} />}
+            icon={<Home size={21} />}
             label="Anasayfa"
             active={isActive(['/oyun', '/duel', '/emoji', '/karakter', '/tartisma'])}
             href="/oyun"
           />
           <TabItem
-            icon={<Compass size={20} />}
+            icon={<Compass size={21} />}
             label="Keşfet"
             active={isActive(['/kesfet'])}
             href="/kesfet"
           />
-
-          {/* Center FAB — v3: 54x54, radius 18, -14px lift */}
-          <Link
-            href="/senaryo-olustur"
-            aria-label="Senaryo oluştur"
-            className="flex items-center justify-center text-white"
-            style={{
-              width: 54, height: 54, borderRadius: 18,
-              background: 'linear-gradient(140deg, #4aa8ff, #1442a8)',
-              boxShadow: '0 8px 22px -4px rgba(42,108,240,0.5)',
-              transform: 'translateY(-14px)',
-              flexShrink: 0,
-            }}
-          >
-            <Plus size={24} strokeWidth={2.5} />
-          </Link>
-
           <TabItem
-            icon={<Trophy size={20} />}
+            icon={<Trophy size={21} />}
             label="Liderlik"
             active={isActive(['/liderlik'])}
             href="/liderlik"
           />
 
-          {/* More — opens bottom sheet */}
+          {/* Profil — opens bottom sheet */}
           <button
             onClick={() => setMoreOpen(true)}
-            className="flex-1 flex flex-col items-center justify-center gap-0.5 relative h-full"
+            className="flex-1 flex flex-col items-center justify-center gap-[3px] relative h-full"
             style={{
               color: isActive(['/profil', '/basarimlar', '/kayitlarim', '/mesajlar', '/arsiv', '/bildirimler', '/profil/ayarlar'])
                 ? 'var(--k-blue-600)'
@@ -148,7 +131,7 @@ export function BottomNav({ userId, username }: Props) {
               borderRadius: 999,
               transition: 'background .12s, padding .12s',
             }}>
-              <User size={20} />
+              <User size={21} />
               {(unreadMsg + unreadNotif) > 0 && (
                 <span className="absolute -top-0.5 -right-1 min-w-[14px] h-[14px] px-[3px] text-white text-[9px] font-bold rounded-full flex items-center justify-center border-[1.5px] border-surface"
                   style={{ background: 'var(--k3-warm-500, #ed6f1c)' }}>
@@ -156,9 +139,9 @@ export function BottomNav({ userId, username }: Props) {
                 </span>
               )}
             </span>
-            <span className="text-[10px]" style={{
-              fontWeight: isActive(['/profil', '/basarimlar', '/kayitlarim', '/mesajlar', '/arsiv', '/bildirimler', '/profil/ayarlar']) ? 700 : 500,
-            }}>Profil</span>
+            <span style={{ fontSize: 10, fontWeight: isActive(['/profil', '/basarimlar', '/kayitlarim', '/mesajlar', '/arsiv', '/bildirimler', '/profil/ayarlar']) ? 700 : 500, letterSpacing: isActive(['/profil', '/basarimlar', '/kayitlarim', '/mesajlar', '/arsiv', '/bildirimler', '/profil/ayarlar']) ? '-0.005em' : 0 }}>
+              Profil
+            </span>
           </button>
         </div>
       </nav>

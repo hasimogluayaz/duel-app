@@ -65,9 +65,10 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
           }}
         >
           <div className="flex items-center gap-2.5 px-3.5 h-full">
-            {/* Logo left */}
-            <Link href="/oyun" className="shrink-0">
+            {/* Logo + wordmark left */}
+            <Link href="/oyun" className="shrink-0 flex items-center gap-2">
               <Image src="/logo.png" alt="Kapisio" width={26} height={26} className="w-[26px] h-[26px] object-contain" />
+              <span className="font-black text-[17px] text-gradient" style={{ letterSpacing: '-0.03em' }}>Kapisio</span>
             </Link>
 
             {/* Right: theme + search + msg + bell */}
