@@ -10,6 +10,7 @@ import { ContentMenu } from '@/components/ui/ContentMenu'
 import { useToast } from '@/components/ui/Toast'
 import { Eye, EyeOff, MessageCircle, ThumbsUp, Swords, Share2, ChevronDown } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { ChallengeModal } from '@/components/scenarios/ChallengeModal'
 
 const CATEGORY_EMOJI: Record<string, string> = {
   genel: '🌍', ask: '❤️', is: '💼', aile: '👨‍👩‍👧',
@@ -59,6 +60,9 @@ export default function ScenarioCard({ scenario, userId, mode = 'feed', initialU
   const [isAnonymous, setIsAnonymous] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [expanded, setExpanded] = useState(showAnswer)
+  const [showChallenge, setShowChallenge] = useState(false)
+  const [userAnswerId, setUserAnswerId] = useState<string | null>(null)
+  const [loadingAnswerId, setLoadingAnswerId] = useState(false)
 
   const timestamp = scenario.generated_at ?? scenario.created_at
 
@@ -246,13 +250,41 @@ export default function ScenarioCard({ scenario, userId, mode = 'feed', initialU
 
           {/* Duel invite / Answer CTA */}
           {userId && (
-            <Link
-              href={`/arsiv/${scenario.id}`}
-              className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl text-fg-subtle hover:text-primary hover:bg-primary/10 transition-colors text-xs"
-            >
-              <Swords size={14} />
-              <span className="hidden sm:inline">{answered ? 'Düello' : 'Cevapla'}</span>
-            </Link>
+            answered ? (
+              <button
+                onClick={async (e) => {
+                  e.stopPropagation()
+                  if (!userAnswerId && !loadingAnswerId) {
+                    setLoadingAnswerId(true)
+                    try {
+                      const res = await fetch(`/api/scenarios/${scenario.id}/my-answer`)
+                      if (res.ok) {
+                        const json = await res.json()
+                        setUserAnswerId(json.answerId ?? null)
+                      }
+                    } catch {}
+                    setLoadingAnswerId(false)
+                  }
+                  setShowChallenge(true)
+                }}
+                className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl transition-colors text-xs font-semibold"
+                style={{ background: 'var(--k-blue-50)', color: 'var(--k-blue-600)' }}
+              >
+                {loadingAnswerId
+                  ? <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  : <Swords size={14} />
+                }
+                <span className="hidden sm:inline">Meydan Oku</span>
+              </button>
+            ) : (
+              <Link
+                href={`/arsiv/${scenario.id}`}
+                className="flex items-center gap-1.5 px-2 py-1.5 rounded-xl text-fg-subtle hover:text-primary hover:bg-primary/10 transition-colors text-xs"
+              >
+                <Swords size={14} />
+                <span className="hidden sm:inline">Cevapla</span>
+              </Link>
+            )
           )}
 
           {/* Share */}
@@ -347,13 +379,31 @@ export default function ScenarioCard({ scenario, userId, mode = 'feed', initialU
     </div>
   )
 
+  const challengeModal = showChallenge && userId ? (
+    <ChallengeModal
+      scenarioId={scenario.id}
+      scenarioContent={scenario.content}
+      userAnswerId={userAnswerId}
+      userId={userId}
+      onClose={() => setShowChallenge(false)}
+    />
+  ) : null
+
   if (mode === 'feed') {
     return (
-      <Link href={`/arsiv/${scenario.id}`} className="block">
-        {cardContent}
-      </Link>
+      <>
+        <Link href={`/arsiv/${scenario.id}`} className="block">
+          {cardContent}
+        </Link>
+        {challengeModal}
+      </>
     )
   }
 
-  return cardContent
+  return (
+    <>
+      {cardContent}
+      {challengeModal}
+    </>
+  )
 }

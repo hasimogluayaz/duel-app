@@ -18,6 +18,7 @@ import FollowSuggestions from '@/components/social/FollowSuggestions'
 import TrendingTags from '@/components/social/TrendingTags'
 import ScenarioCard from '@/components/scenarios/ScenarioCard'
 import { DuelFeedCard } from '@/components/feed/DuelFeedCard'
+import { StoriesBar } from '@/components/feed/StoriesBar'
 
 // ─── Feed Types ───────────────────────────────────────────────────────────────
 type FeedDuel = {
@@ -395,13 +396,13 @@ function FeedTab() {
         <div className="flex justify-center py-20"><Spinner size="lg" /></div>
       ) : duels.length === 0 ? (
         <div className="text-center py-16">
-          <Swords size={28} className="text-fg-subtle opacity-25 mx-auto mb-3" />
-          <p className="text-fg-muted font-semibold mb-1">Henüz düello yok</p>
-          <p className="text-fg-subtle text-sm">
-            {period === 'today' ? 'Bugün henüz düello başlamadı.' : 'Bu hafta henüz düello yok.'}
+          <div className="text-4xl mb-3">⚔️</div>
+          <p className="text-fg font-bold mb-1">
+            {period === 'today' ? 'Bugün henüz düello yok' : 'Bu hafta henüz düello yok'}
           </p>
-          <Link href="/oyun" className="inline-flex items-center gap-1.5 mt-4 text-sm text-fg-muted hover:text-fg font-semibold transition-colors">
-            İlk düelloyu sen başlat →
+          <p className="text-fg-subtle text-sm mb-4">Bugünkü senaryoya cevap ver ve ilk düelloyu başlat.</p>
+          <Link href="/oyun" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white" style={{ background: 'linear-gradient(135deg, #1442a8, #2a6cf0)' }}>
+            <Swords size={14} /> Düello Başlat
           </Link>
         </div>
       ) : (
@@ -499,7 +500,14 @@ function FriendsTab() {
 
       {tab === 'senaryolar' && (
         scenarios.length === 0 ? (
-          <p className="text-center text-sm text-fg-subtle py-12">Takip ettiğin kimse senaryo paylaşmamış.</p>
+          <div className="text-center py-14">
+            <div className="text-4xl mb-3">👥</div>
+            <p className="text-fg font-bold mb-1">Arkadaşların henüz paylaşmadı</p>
+            <p className="text-fg-subtle text-sm mb-4">Daha fazla kişiyi takip et veya sen bir senaryo yaz.</p>
+            <Link href="/senaryo-olustur" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white" style={{ background: 'var(--k-blue-500)' }}>
+              <Plus size={15} /> Senaryo Yaz
+            </Link>
+          </div>
         ) : (
           <div className="space-y-3">
             {scenarios.map((s: any) => (
@@ -511,7 +519,14 @@ function FriendsTab() {
 
       {tab === 'cevaplar' && (
         answers.length === 0 ? (
-          <p className="text-center text-sm text-fg-subtle py-12">Takip ettiğin kimse henüz cevap vermemiş.</p>
+          <div className="text-center py-14">
+            <div className="text-4xl mb-3">💬</div>
+            <p className="text-fg font-bold mb-1">Henüz cevap yok</p>
+            <p className="text-fg-subtle text-sm mb-4">Takip ettiğin kişiler bugünkü senaryoya henüz yazmadı.</p>
+            <Link href="/oyun" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white" style={{ background: 'var(--k-blue-500)' }}>
+              Bugün oyna →
+            </Link>
+          </div>
         ) : (
           <div className="space-y-3">
             {answers.map((a: any) => (
@@ -757,9 +772,12 @@ function SenaryolarTab() {
         <div className="flex justify-center py-20"><Spinner size="lg" /></div>
       ) : scenarios.length === 0 ? (
         <div className="text-center py-16">
-          <FileText size={28} className="text-fg-subtle opacity-25 mx-auto mb-3" />
-          <p className="text-fg-muted font-semibold mb-1">Henüz senaryo yok</p>
-          <p className="text-fg-subtle text-sm">İlk senaryoyu sen oluştur!</p>
+          <div className="text-4xl mb-3">📝</div>
+          <p className="text-fg font-bold mb-1">İlk senaryoyu sen yaz</p>
+          <p className="text-fg-subtle text-sm mb-4">Topluluğa bir soru sun ve tartışma başlat.</p>
+          <Link href="/senaryo-olustur" className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-bold text-white" style={{ background: 'var(--k-blue-500)' }}>
+            <Plus size={15} /> Senaryo Oluştur
+          </Link>
         </div>
       ) : (
         <>
@@ -797,7 +815,12 @@ export default function KesfetPage() {
   ] as const
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-6" style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+    <div className="max-w-2xl mx-auto" style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
+
+      {/* ── Stories bar (24h) — sits above everything, edge-to-edge ── */}
+      <StoriesBar />
+
+      <div className="px-4 py-6" style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
 
       {/* ── Header ── */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -868,6 +891,7 @@ export default function KesfetPage() {
         </div>
       )}
       {tab === 'kategoriler' && <CategoriesTab />}
+      </div>
     </div>
   )
 }

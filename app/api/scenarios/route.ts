@@ -19,17 +19,27 @@ export const GET = optionalAuth(async (req, { userId }) => {
   const sort = url.searchParams.get('sort') ?? 'recent' // recent | popular
   const editorPick = url.searchParams.get('editor_pick') === 'true'
   const userCreatedOnly = url.searchParams.get('user_created') === 'true'
+  const storiesOnly = url.searchParams.get('stories_only') === 'true'
 
   let query = supabase
     .from('scenarios')
     .select(`
-      id, content, category, active_date, answer_count, comment_count, generated_at, is_user_created, tags, upvotes,
-      author:profiles!scenarios_user_id_fkey(username, display_name, avatar_url)
+      id, content, category, active_date, answer_count, comment_count, generated_at, created_at, is_user_created, tags, upvotes, is_story, expires_at,
+      author:profiles!scenarios_user_id_fkey(id, username, display_name, avatar_url)
     `)
     .eq('is_approved', true)
 
-  if (userCreatedOnly) {
+  if (storiesOnly) {
+    // Only stories that haven't expired
+    const now = new Date().toISOString()
+    query = (query as any)
+      .eq('is_story', true)
+      .gt('expires_at', now)
+  } else if (userCreatedOnly) {
     query = query.eq('is_user_created', true)
+    // Exclude expired stories from regular feed
+    const now = new Date().toISOString()
+    query = (query as any).or(`is_story.is.null,is_story.eq.false,expires_at.gt.${now}`)
   }
 
   if (category && CATEGORIES.includes(category as typeof CATEGORIES[number])) {
@@ -75,7 +85,7 @@ export const GET = optionalAuth(async (req, { userId }) => {
   }))
 
   const nextCursor = data && data.length === limit
-    ? data[data.length - 1].generated_at
+    ? (data[data.length - 1].generated_at ?? data[data.length - 1].created_at ?? null)
     : null
 
   return NextResponse.json({ scenarios, nextCursor })
@@ -89,6 +99,7 @@ export const POST = withAuth(async (req, { userId }) => {
     tags?: unknown
     scenario_type?: unknown
     debate_question?: unknown
+    is_story?: unknown
   }>(req)
 
   const content = String(body.content ?? '').trim()
@@ -119,8 +130,21 @@ export const POST = withAuth(async (req, { userId }) => {
     ? String(body.debate_question ?? '').trim().slice(0, 280) || null
     : null
 
+  const isStory = body.is_story === true
+  const expiresAt = isStory
+    ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+    : null
+
   // Quota check (tier-based daily limit)
   await checkQuota(supabase, userId, 'scenarios_per_day')
+
+  // Auto-approve for users with >= 50 points (trusted community members)
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('total_points')
+    .eq('id', userId)
+    .single()
+  const autoApprove = (profile?.total_points ?? 0) >= 50
 
   const { data: scenario, error } = await supabase
     .from('scenarios')
@@ -130,9 +154,10 @@ export const POST = withAuth(async (req, { userId }) => {
       user_id: userId,
       author_id: userId,
       is_user_created: true,
-      is_approved: false,
+      is_approved: autoApprove,
       tags,
       debate_question: debateQuestion,
+      ...(isStory ? { is_story: true, expires_at: expiresAt } : {}),
     } as any)
     .select(`
       id, content, category, answer_count, created_at, is_user_created,
@@ -148,7 +173,7 @@ export const POST = withAuth(async (req, { userId }) => {
   // Award mission progress
   await awardMission(supabase, userId, 'create_scenario')
 
-  return NextResponse.json({ scenario }, { status: 201 })
+  return NextResponse.json({ scenario, approved: autoApprove }, { status: 201 })
 })
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { FollowButton } from '@/components/profile/FollowButton'
 import { formatDate, formatPoints } from '@/lib/utils/formatting'
 import { getTier, getTierProgress, getAllTiers } from '@/lib/utils/tier'
+import { TierBadge } from '@/components/ui/TierBadge'
 import { ACHIEVEMENT_LABELS } from '@/types'
 import {
   Settings, Trophy, Swords, Flame, Star, Calendar, Target,
@@ -171,7 +172,7 @@ export default function ProfilClient({
             </div>
             <div className="flex items-center gap-2 mt-0.5">
               <p className="text-fg-subtle text-sm">@{profile.username}</p>
-              <span className={`text-xs font-semibold ${tier.color}`}>{tier.emoji} {tier.label}</span>
+              <TierBadge points={profile.total_points} size="sm" />
             </div>
           </div>
 
@@ -299,7 +300,7 @@ export default function ProfilClient({
               </p>
             )}
             {localPinned.length === 0 ? (
-              <EmptyState icon={<Pin size={22} />} text={isOwnProfile ? 'Henüz sabitlenmiş cevap yok' : 'Vitrin boş'} />
+              <EmptyState icon={<Pin size={22} />} text={isOwnProfile ? 'Henüz sabitlenmiş cevap yok' : 'Vitrin boş'} cta={isOwnProfile ? { label: 'Cevap sabitle →', href: '/oyun' } : undefined} />
             ) : localPinned.map((a: any, i: number) => {
               const sc = Array.isArray(a.scenario) ? a.scenario[0] : a.scenario
               const totalVotes = (a.vote_count ?? 0) + (a.verdict_count ?? 0)
@@ -490,7 +491,7 @@ export default function ProfilClient({
         {activeTab === 'duellolar' && (
           <div className="space-y-1.5">
             {(!recentDuels || recentDuels.length === 0) ? (
-              <EmptyState icon={<Swords size={22} />} text="Henüz düello yok" />
+              <EmptyState icon={<Swords size={22} />} text="Henüz düello yok" cta={isOwnProfile ? { label: 'Düello Başlat →', href: '/oyun' } : undefined} />
             ) : (
               (recentDuels as any[]).map(duel => (
                 <DuelRow key={duel.id} duel={duel} profileId={profile.id} />
@@ -503,7 +504,7 @@ export default function ProfilClient({
         {activeTab === 'cevaplar' && (
           <div className="space-y-2">
             {(!recentAnswers || recentAnswers.length === 0) ? (
-              <EmptyState icon={<Star size={22} />} text="Henüz cevap yok" />
+              <EmptyState icon={<Star size={22} />} text="Henüz cevap yok" cta={isOwnProfile ? { label: 'Bugün oyna →', href: '/oyun' } : undefined} />
             ) : (
               (recentAnswers as any[]).map((a: any) => {
                 const sc = Array.isArray(a.scenario) ? a.scenario[0] : a.scenario
@@ -557,7 +558,9 @@ export default function ProfilClient({
               </Link>
             )}
             {userScenarios.length === 0 ? (
-              !isOwnProfile && <EmptyState icon={<Sparkles size={22} />} text="Henüz senaryo yok" />
+              isOwnProfile
+                ? <EmptyState icon={<Sparkles size={22} />} text="Henüz senaryo paylaşmadın" cta={{ label: 'Senaryo Oluştur →', href: '/senaryo-olustur' }} />
+                : <EmptyState icon={<Sparkles size={22} />} text="Henüz senaryo yok" />
             ) : userScenarios.map((s: any) => (
               <Link key={s.id} href={`/arsiv/${s.id}`}>
                 <div className="border border-stroke rounded-xl p-4 bg-surface hover:bg-surface-2 transition-colors cursor-pointer">
@@ -592,7 +595,7 @@ export default function ProfilClient({
         {activeTab === 'basarimlar' && (
           <div>
             {(!achievements || achievements.length === 0) ? (
-              <EmptyState icon={<Medal size={22} />} text="Henüz başarım kazanılmadı" />
+              <EmptyState icon={<Medal size={22} />} text="Henüz başarım kazanılmadı" cta={isOwnProfile ? { label: 'Nasıl kazanılır? →', href: '/oyun' } : undefined} />
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {(achievements as any[]).map((a: any) => {
@@ -660,11 +663,20 @@ function DuelRow({ duel, profileId }: { duel: any; profileId: string }) {
   )
 }
 
-function EmptyState({ icon, text }: { icon: React.ReactNode; text: string }) {
+function EmptyState({ icon, text, cta }: { icon: React.ReactNode; text: string; cta?: { label: string; href: string } }) {
   return (
-    <div className="text-center py-16">
-      <div className="flex justify-center mb-3 text-fg-subtle opacity-25">{icon}</div>
-      <p className="text-sm text-fg-muted">{text}</p>
+    <div className="text-center py-12">
+      <div className="flex justify-center mb-3 text-fg-subtle opacity-30">{icon}</div>
+      <p className="text-sm font-medium text-fg-muted mb-1">{text}</p>
+      {cta && (
+        <a
+          href={cta.href}
+          className="inline-flex items-center gap-1.5 mt-3 px-4 py-2 rounded-full text-xs font-bold text-white"
+          style={{ background: 'var(--k-blue-500)' }}
+        >
+          {cta.label}
+        </a>
+      )}
     </div>
   )
 }

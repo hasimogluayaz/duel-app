@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/Button'
 import { useToast } from '@/components/ui/Toast'
 import { cn } from '@/lib/utils/cn'
-import { FileText, Flame, Smile, Mic2, Tag, X, ArrowLeft, Plus } from 'lucide-react'
+import { FileText, Flame, Smile, Mic2, Tag, X, ArrowLeft, Plus, Sparkles, Timer } from 'lucide-react'
 import Link from 'next/link'
 
 const CATEGORIES = [
@@ -69,6 +69,8 @@ export function SenaryoOlusturClient({ profile }: Props) {
   const [tagInput, setTagInput] = useState('')
   const [tags, setTags] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
+  const [improving, setImproving] = useState(false)
+  const [isStory, setIsStory] = useState(false)
 
   const selectedType = SCENARIO_TYPES.find(t => t.key === scenarioType)!
   const contentLen = content.length
@@ -96,14 +98,41 @@ export function SenaryoOlusturClient({ profile }: Props) {
         category,
         scenario_type: scenarioType,
         tags,
+        is_story: isStory,
         debate_question: scenarioType === 'debate' ? debateQuestion.trim() : undefined,
       }),
     })
     const json = await res.json()
     if (!res.ok) { toast(json.error || 'Senaryo oluşturulamadı.', 'error'); setSubmitting(false); return }
 
-    toast('Senaryonun incelemeye gönderildi! Onaylanınca yayınlanır. +30 puan', 'success')
+    if (json.approved) {
+      toast(isStory ? 'Story yayınlandı! 24 saatte kaybolacak ⏳' : 'Senaryonun yayınlandı! 🎉 +30 puan', 'success')
+    } else {
+      toast('Senaryonun incelemeye gönderildi. Kısa sürede yayınlanır.', 'success')
+    }
     router.push('/kesfet?tab=senaryolar')
+  }
+
+  async function improveWithAI() {
+    if (content.trim().length < 10 || improving) return
+    setImproving(true)
+    try {
+      const res = await fetch('/api/scenarios/improve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: content.trim(), category, scenario_type: scenarioType }),
+      })
+      const json = await res.json()
+      if (res.ok && json.improved) {
+        setContent(json.improved)
+        toast('Senaryo iyileştirildi ✨', 'success')
+      } else {
+        toast(json.error || 'Geliştirilemedi, tekrar dene.', 'error')
+      }
+    } catch {
+      toast('Bağlantı hatası.', 'error')
+    }
+    setImproving(false)
   }
 
   const MODE_COLORS: Record<string, string> = {
@@ -179,11 +208,56 @@ export function SenaryoOlusturClient({ profile }: Props) {
           rows={4}
           className="w-full bg-surface border border-stroke rounded-xl px-4 py-3 text-sm text-fg placeholder:text-fg-subtle focus:outline-none focus:border-fg/30 transition-colors resize-none leading-relaxed"
         />
-        <div className="flex justify-between mt-1 text-xs text-fg-subtle">
-          <span>{contentLen < 20 ? `En az 20 karakter (${20 - contentLen} eksik)` : ''}</span>
-          <span className={contentLen > 250 ? 'text-amber-400' : ''}>{contentLen}/280</span>
+        <div className="flex items-center justify-between mt-2 gap-2">
+          <button
+            type="button"
+            onClick={improveWithAI}
+            disabled={content.trim().length < 10 || improving}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all"
+            style={{
+              background: 'var(--k-blue-50)',
+              color: 'var(--k-blue-600)',
+              borderColor: 'var(--k-blue-200)',
+              opacity: (content.trim().length < 10 || improving) ? 0.4 : 1,
+            }}
+          >
+            <Sparkles size={12} />
+            {improving ? 'Geliştiriliyor…' : 'AI ile geliştir'}
+          </button>
+          <span className={`text-xs font-mono ${contentLen > 250 ? 'text-amber-400' : 'text-fg-subtle'}`}>{contentLen}/280</span>
         </div>
       </div>
+
+      {/* 24h Story toggle */}
+      <button
+        type="button"
+        onClick={() => setIsStory(s => !s)}
+        className="w-full flex items-center gap-3 px-4 py-3 rounded-xl border transition-all"
+        style={{
+          background: isStory ? 'var(--k3-warm-50)' : 'var(--surface)',
+          borderColor: isStory ? 'var(--k3-warm-200)' : 'var(--stroke)',
+        }}
+      >
+        <span
+          className="w-9 h-9 rounded-[10px] flex items-center justify-center shrink-0"
+          style={{ background: isStory ? 'var(--k3-warm-100)' : 'var(--surface-2)', color: isStory ? 'var(--k3-warm-600)' : 'var(--fg-subtle)' }}
+        >
+          <Timer size={18} />
+        </span>
+        <div className="flex-1 text-left">
+          <p className="text-sm font-semibold text-fg">24 Saatlik Story</p>
+          <p className="text-xs text-fg-subtle mt-0.5">24 saat sonra otomatik silinir — anlık tartışmalar için</p>
+        </div>
+        <div
+          className="w-11 h-6 rounded-full transition-all relative shrink-0"
+          style={{ background: isStory ? 'var(--k3-warm-500)' : 'var(--stroke-strong)' }}
+        >
+          <div
+            className="absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-all"
+            style={{ left: isStory ? 'calc(100% - 22px)' : '2px' }}
+          />
+        </div>
+      </button>
 
       {/* Debate question — only for debate type */}
       {scenarioType === 'debate' && (

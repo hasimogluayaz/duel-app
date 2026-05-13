@@ -9,6 +9,7 @@ import {
   Heart, Eye, Share2, Swords, MessageCircle,
 } from 'lucide-react'
 import Link from 'next/link'
+import { TierBadge } from '@/components/ui/TierBadge'
 
 interface FeedDuel {
   id: string
@@ -204,7 +205,7 @@ export function DuelFeedCard({ duel: initialDuel, userId, onVoted }: Props) {
                   <p className="text-xs font-semibold text-fg truncate group-hover/user:text-primary/40 transition-colors">
                     {s.profile?.display_name || s.profile?.username || `Taraf ${s.side}`}
                   </p>
-                  <span className={`text-[10px] font-bold ${s.tier.color}`}>{s.tier.emoji} {s.tier.label}</span>
+                  <TierBadge points={s.profile?.total_points ?? 0} size="xs" />
                 </div>
               </Link>
 
