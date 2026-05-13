@@ -59,9 +59,9 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
           className="lg:hidden sticky top-0 z-40 border-b border-stroke"
           style={{
             height: 54,
-            background: 'rgba(244,246,250,0.94)',
-            backdropFilter: 'blur(10px)',
-            WebkitBackdropFilter: 'blur(10px)',
+            background: 'color-mix(in oklab, var(--bg) 94%, transparent)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
           }}
         >
           <div className="flex items-center gap-2.5 px-3.5 h-full">

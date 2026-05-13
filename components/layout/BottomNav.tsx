@@ -87,9 +87,9 @@ export function BottomNav({ userId, username }: Props) {
         style={{
           height: 68,
           paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-          background: 'rgba(255,255,255,0.96)',
-          backdropFilter: 'blur(10px)',
-          WebkitBackdropFilter: 'blur(10px)',
+          background: 'color-mix(in oklab, var(--surface) 96%, transparent)',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
         }}
       >
         <div className="flex items-center justify-around h-full px-1">
