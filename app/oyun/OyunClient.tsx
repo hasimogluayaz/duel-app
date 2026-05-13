@@ -579,11 +579,47 @@ export function OyunClient({
           {isGuest && communityAnswers.length > 2 && (
             <button
               onClick={() => setJoinModal(true)}
-              className="w-full text-center text-xs text-primary font-semibold py-3 hover:bg-surface-2 transition-colors mx-3"
-              style={{ borderRadius: 12, border: '1px dashed var(--stroke)', background: 'var(--surface)' }}
+              className="w-full text-center text-xs text-primary font-semibold py-3 hover:bg-surface-2 transition-colors"
+              style={{ borderRadius: 12, border: '1px dashed var(--stroke)', background: 'var(--surface)', margin: '0 12px', width: 'calc(100% - 24px)' }}
             >
               +{communityAnswers.length - 2} cevap daha — katılınca gör →
             </button>
+          )}
+
+          {/* ── Bugün · canlı pinned card ── */}
+          {scenario && (
+            <Link href="/oyun" style={{ textDecoration: 'none', padding: '0 12px', display: 'block' }}>
+              <div className="k3-card" style={{
+                background: 'var(--bg, #f4f6fa)',
+                padding: '14px 16px',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12,
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                    <span className="live-dot" style={{ background: '#16a34a' }} />
+                    <span style={{ font: '700 11px Geist, sans-serif', color: 'var(--fg-subtle)', letterSpacing: '0.05em', textTransform: 'uppercase' }}>
+                      Bugün · canlı
+                    </span>
+                  </div>
+                  <p style={{ font: '600 13.5px Geist, sans-serif', color: 'var(--fg)', lineHeight: 1.4, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {scenario.content}
+                  </p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 5, font: '500 11.5px Geist Mono, monospace', color: 'var(--fg-subtle)' }}>
+                    <span className="tab-nums">{communityAnswers.length} cevap</span>
+                    {activeDuels.length > 0 && (
+                      <span className="tab-nums">· {activeDuels.length} düello</span>
+                    )}
+                  </div>
+                </div>
+                <div style={{
+                  flexShrink: 0, padding: '7px 14px', borderRadius: 10,
+                  background: 'var(--k-blue-500)', color: '#fff',
+                  font: '600 12px Geist, sans-serif', whiteSpace: 'nowrap',
+                }}>
+                  {userAnswer ? 'Düello →' : 'Cevapla →'}
+                </div>
+              </div>
+            </Link>
           )}
         </div>
       )}
