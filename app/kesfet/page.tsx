@@ -15,8 +15,9 @@ import BookmarkButton from '@/components/bookmarks/BookmarkButton'
 import { cn } from '@/lib/utils/cn'
 import { getTier } from '@/lib/utils/tier'
 import FollowSuggestions from '@/components/social/FollowSuggestions'
-import TrendingScenarios from '@/components/social/TrendingScenarios'
+import TrendingTags from '@/components/social/TrendingTags'
 import ScenarioCard from '@/components/scenarios/ScenarioCard'
+import { DuelFeedCard } from '@/components/feed/DuelFeedCard'
 
 // ─── Feed Types ───────────────────────────────────────────────────────────────
 type FeedDuel = {
@@ -406,7 +407,20 @@ function FeedTab() {
       ) : (
         <>
           <div className="flex flex-col gap-3">
-            {duels.map(duel => <FeedCard key={duel.id} duel={duel} />)}
+            {duels.map(duel => (
+              <DuelFeedCard
+                key={duel.id}
+                duel={{
+                  ...duel,
+                  votesA: duel.challenger_answer?.vote_count ?? 0,
+                  votesB: duel.challenged_answer?.vote_count ?? 0,
+                  like_count: 0,
+                  view_count: 0,
+                  user_liked: false,
+                }}
+                userId={null}
+              />
+            ))}
           </div>
 
           {hasMore && (
@@ -835,7 +849,13 @@ export default function KesfetPage() {
 
       {tab === 'feed' && (
         <div className="space-y-5">
-          <TrendingScenarios />
+          <div className="rounded-2xl bg-surface border border-stroke p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Flame size={13} style={{ color: 'var(--k3-warm-500, #ed6f1c)' }} />
+              <span className="k3-eyebrow">Gündemdekiler</span>
+            </div>
+            <TrendingTags />
+          </div>
           <FeedTab />
         </div>
       )}
