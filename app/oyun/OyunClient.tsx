@@ -20,6 +20,8 @@ import { TugBar } from '@/components/ui/TugBar'
 import { ContentMenu } from '@/components/ui/ContentMenu'
 import BookmarkButton from '@/components/bookmarks/BookmarkButton'
 import { ModeChip } from '@/components/ui/ModeChip'
+import { ScenarioFeedCard } from '@/components/feed/ScenarioFeedCard'
+import type { ScenarioFeedItem } from '@/components/feed/ScenarioFeedCard'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ModeSwitcher } from '@/components/modes/ModeSwitcher'
@@ -273,6 +275,50 @@ export function OyunClient({
               </div>
             )}
 
+            {/* Community participation bubbles */}
+            {communityAnswers.length > 0 && (
+              <div className="relative flex items-center gap-3 mb-4">
+                {/* Avatar stack */}
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  {communityAnswers.slice(0, 4).map((a: any, i: number) => {
+                    const p = Array.isArray(a.profiles) ? a.profiles[0] : a.profiles
+                    return (
+                      <div key={a.id} style={{
+                        marginLeft: i > 0 ? -8 : 0,
+                        width: 26, height: 26, borderRadius: '50%',
+                        border: '2px solid rgba(255,255,255,0.25)',
+                        background: 'var(--k-blue-600)',
+                        color: '#fff',
+                        font: '700 9px Geist, sans-serif',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        zIndex: 4 - i,
+                        overflow: 'hidden',
+                        position: 'relative',
+                      }}>
+                        {p?.avatar_url
+                          ? <img src={p.avatar_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          : (p?.username?.[0] ?? '?').toUpperCase()
+                        }
+                      </div>
+                    )
+                  })}
+                </div>
+                <span style={{ font: '500 12.5px Geist, sans-serif', opacity: 0.85 }}>
+                  <span className="tab-nums" style={{ fontWeight: 700 }}>
+                    {communityAnswers.length >= 1000
+                      ? `${(communityAnswers.length / 1000).toFixed(1)}k`
+                      : communityAnswers.length}
+                  </span>
+                  {' '}cevap
+                </span>
+                {activeDuels.length > 0 && (
+                  <span style={{ font: '500 12.5px Geist, sans-serif', opacity: 0.85 }}>
+                    · <span className="tab-nums" style={{ fontWeight: 700 }}>{activeDuels.length}</span> aktif düello
+                  </span>
+                )}
+              </div>
+            )}
+
             {/* Answered state */}
             {userAnswer ? (
               <div className="relative flex flex-col gap-3">
@@ -328,16 +374,6 @@ export function OyunClient({
               </button>
             )}
 
-            {/* Participation strip */}
-            <div className="relative flex items-center gap-3 mt-4 flex-wrap" style={{ font: '500 12px Geist, sans-serif', opacity: 0.85 }}>
-              <span className="tab-nums">
-                <strong>{communityAnswers.length.toLocaleString('tr-TR')}</strong> cevap
-              </span>
-              <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'currentColor', opacity: 0.4 }} />
-              <span className="tab-nums" style={{ color: '#ffd4b3' }}>
-                <strong>{recentDuels.filter((d: any) => d.status === 'active').length}</strong> aktif düello
-              </span>
-            </div>
           </section>
         </div>
       )}
@@ -464,135 +500,76 @@ export function OyunClient({
             </div>
           </div>
 
-          {/* Top answer highlight — only when sorting by top and there's a clear winner */}
-          {answerSort === 'top' && sortedAnswers[0] && (sortedAnswers[0].vote_count ?? 0) > 0 && (() => {
-            const a = sortedAnswers[0]
-            const p = Array.isArray(a.profiles) ? a.profiles[0] : a.profiles
-            const userTier = p ? getTier(p.total_points ?? 0) : null
-            const isOwn = a.user_id === userId
-            return (
-              <div className="mx-3 my-3 rounded-2xl border border-amber-500/30 bg-amber-500/5 overflow-hidden">
-                <div className="flex items-center gap-2 px-4 py-2 border-b border-amber-500/20 bg-amber-500/8">
-                  <Trophy size={12} className="text-amber-400" />
-                  <span className="text-xs font-bold text-amber-400 uppercase tracking-wide">En Çok Beğenilen</span>
-                  <span className="ml-auto flex items-center gap-1 text-xs text-amber-400 font-semibold">
-                    <Star size={10} className="fill-amber-400" />
-                    {a.vote_count}
-                  </span>
-                </div>
-                <div className="px-4 py-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Link href={`/profil/${p?.username}`}>
-                      <Avatar src={p?.avatar_url} username={p?.username || '?'} size="xs" />
-                    </Link>
-                    <Link href={`/profil/${p?.username}`} className="hover:underline">
-                      <span className="text-sm font-semibold text-fg">{p?.display_name || p?.username || 'Kullanıcı'}</span>
-                    </Link>
-                    {userTier && <span className={`text-xs ${userTier.color}`}>{userTier.emoji}</span>}
-                    {isOwn && <span className="text-xs bg-primary/15 text-primary/70 px-1.5 py-0.5 rounded-full font-medium">Sen</span>}
-                  </div>
-                  <p className="text-sm text-fg leading-relaxed">{a.content}</p>
-                  <div className="flex items-center gap-3 mt-3">
-                    {!isOwn && userAnswer && p?.id && (
-                      <button
-                        onClick={() => challengeFromAnswer(p.id, p.username)}
-                        className="flex items-center gap-1 text-xs text-primary/70 hover:text-primary font-medium transition-colors"
-                      >
-                        <Swords size={10} />
-                        Meydan Oku
-                      </button>
-                    )}
-                    {!isGuest && (
-                      <div className="ml-auto">
-                        <BookmarkButton type="answer" id={a.id} size={13} />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )
-          })()}
+          {/* Top answer highlight removed — now shown in the cards grid below */}
 
-          {/* Rest of the answers */}
-          <div className="divide-y divide-stroke">
+          {/* Rest of the answers — v3 ScenarioFeedCard */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '12px 12px' }}>
             {sortedAnswers.map((a: any, i: number) => {
               // Skip first when in top mode (already shown as highlight)
               if (answerSort === 'top' && i === 0 && (a.vote_count ?? 0) > 0) return null
               const isOwn = a.user_id === userId
               const p = Array.isArray(a.profiles) ? a.profiles[0] : a.profiles
               const shouldBlur = isGuest && i >= 2
-              const userTier = p ? getTier(p.total_points ?? 0) : null
 
-              return (
+              if (shouldBlur) return (
                 <div
                   key={a.id}
-                  className={`bg-surface px-4 py-3.5 transition-colors ${
-                    isOwn ? 'bg-primary/5' : shouldBlur ? 'cursor-pointer hover:bg-surface-2' : 'hover:bg-surface-2'
-                  }`}
-                  onClick={shouldBlur ? () => setJoinModal(true) : undefined}
+                  className="k3-card"
+                  style={{ padding: '14px 16px', cursor: 'pointer' }}
+                  onClick={() => setJoinModal(true)}
                 >
-                  {shouldBlur ? (
-                    /* Locked overlay — no CSS blur (causes mobile layout issues) */
-                    <div className="flex items-center justify-center py-5">
-                      <div className="flex items-center gap-2 bg-surface-2 border border-stroke rounded-xl px-4 py-2 shadow-sm">
-                        <Lock size={12} className="text-primary/70" />
-                        <span className="text-xs font-semibold text-fg">Görmek için katıl</span>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-start gap-3">
-                      <Link href={`/profil/${p?.username}`}>
-                        <Avatar src={p?.avatar_url} username={p?.username || '?'} size="sm" />
-                      </Link>
-                      <div className="flex-1 min-w-0">
-                        {/* Author row */}
-                        <div className="flex items-center gap-1.5 mb-1 flex-wrap">
-                          <Link href={`/profil/${p?.username}`} className="hover:underline">
-                            <span className="text-sm font-semibold text-fg">
-                              {p?.display_name || p?.username || 'Kullanıcı'}
-                            </span>
-                          </Link>
-                          {userTier && <span className={`text-xs ${userTier.color}`}>{userTier.emoji}</span>}
-                          {isOwn && <span className="text-xs bg-primary/15 text-primary/70 px-1.5 py-0.5 rounded-full font-medium">Sen</span>}
-                          {(a.vote_count ?? 0) > 0 && (
-                            <span className="flex items-center gap-0.5 text-xs text-amber-400 font-semibold">
-                              <Star size={10} className="fill-amber-400" />
-                              {a.vote_count}
-                            </span>
-                          )}
-                          <span className="ml-auto">
-                            <ContentMenu
-                              targetType="answer"
-                              targetId={a.id}
-                              userId={userId}
-                              isOwn={isOwn}
-                              size={13}
-                            />
-                          </span>
-                        </div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '12px 0' }}>
+                    <Lock size={13} style={{ color: 'var(--k-blue-500)' }} />
+                    <span style={{ font: '600 13px Geist, sans-serif', color: 'var(--fg)' }}>Görmek için katıl</span>
+                  </div>
+                </div>
+              )
 
-                        {/* Answer text */}
-                        <p className="text-sm text-fg-muted leading-relaxed break-words">{a.content}</p>
+              const feedItem: ScenarioFeedItem = {
+                id: a.id,
+                mode: 'senaryo',
+                scenario_content: scenario?.content ?? '',
+                created_at: a.created_at,
+                vote_count: a.vote_count ?? 0,
+                comment_count: a.comment_count ?? 0,
+                answer_preview: a.content,
+                author: p ? {
+                  id: p.id ?? '',
+                  username: p.username,
+                  display_name: p.display_name,
+                  avatar_url: p.avatar_url,
+                } : null,
+                user_voted: false,
+              }
 
-                        {/* Action row */}
-                        <div className="flex items-center gap-3 mt-2.5">
-                          {!isOwn && userAnswer && p?.id && (
-                            <button
-                              onClick={() => challengeFromAnswer(p.id, p.username)}
-                              className="flex items-center gap-1 text-xs text-fg-subtle hover:text-primary transition-colors font-medium"
-                            >
-                              <Swords size={10} />
-                              Meydan Oku
-                            </button>
-                          )}
-                          {!isGuest && (
-                            <div className="ml-auto">
-                              <BookmarkButton type="answer" id={a.id} size={13} />
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+              return (
+                <div key={a.id} style={{ position: 'relative' }}>
+                  <ScenarioFeedCard item={feedItem} userId={userId} />
+                  {/* Meydan oku overlay button */}
+                  {!isOwn && userAnswer && p?.id && (
+                    <button
+                      onClick={() => challengeFromAnswer(p.id, p.username)}
+                      style={{
+                        position: 'absolute', bottom: 14, right: 52,
+                        display: 'flex', alignItems: 'center', gap: 5,
+                        padding: '4px 10px', borderRadius: 8,
+                        background: 'var(--k-blue-50)', color: 'var(--k-blue-600)',
+                        border: '1px solid var(--k-blue-200)',
+                        font: '600 11.5px Geist, sans-serif', cursor: 'pointer',
+                      }}
+                    >
+                      <Swords size={11} />
+                      Meydan Oku
+                    </button>
+                  )}
+                  {isOwn && (
+                    <span style={{
+                      position: 'absolute', top: 14, right: 52,
+                      background: 'var(--k-blue-500)', color: '#fff',
+                      font: '800 10px Geist, sans-serif',
+                      padding: '2px 8px', borderRadius: 999,
+                      display: 'inline-flex', alignItems: 'center',
+                    }}>SEN</span>
                   )}
                 </div>
               )
@@ -602,7 +579,8 @@ export function OyunClient({
           {isGuest && communityAnswers.length > 2 && (
             <button
               onClick={() => setJoinModal(true)}
-              className="w-full text-center text-xs text-primary font-semibold py-3 border-t border-stroke hover:bg-surface-2 transition-colors"
+              className="w-full text-center text-xs text-primary font-semibold py-3 hover:bg-surface-2 transition-colors mx-3"
+              style={{ borderRadius: 12, border: '1px dashed var(--stroke)', background: 'var(--surface)' }}
             >
               +{communityAnswers.length - 2} cevap daha — katılınca gör →
             </button>

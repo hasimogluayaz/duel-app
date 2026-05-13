@@ -241,7 +241,77 @@
     background: var(--surface);
     border: 1px solid var(--stroke);
     border-radius: 18px;
-    box-shadow: var(--k-shadow-md);
+    box-shadow: var(--k3-shadow-card, 0 1px 2px rgba(10,15,30,.04), 0 4px 16px rgba(10,15,30,.04));
+    overflow: hidden;
+  }
+  .k3-card + .k3-card {
+    margin-top: 0;
+  }
+
+  /* v3 mode badge */
+  .k-mode {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px 3px 8px;
+    border-radius: 99px;
+    font: 700 11px 'Geist', sans-serif;
+    letter-spacing: 0.025em;
+  }
+  .k-mode-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  /* mode color variants */
+  .k-mode-senaryo  { color: #2a6cf0; background: #eef4ff; }
+  .k-mode-tartisma { color: #1c2f6e; background: #e7ecf7; }
+  .k-mode-emoji    { color: #1572c4; background: #d3eaff; }
+  .k-mode-karakter { color: #1442a8; background: #dbe7ff; }
+  .k-mode-senaryo  .k-mode-dot { background: #2a6cf0; }
+  .k-mode-tartisma .k-mode-dot { background: #1c2f6e; }
+  .k-mode-emoji    .k-mode-dot { background: #4aa8ff; }
+  .k-mode-karakter .k-mode-dot { background: #1442a8; }
+
+  /* v3 avatar initials */
+  .k-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--k-blue-100, #dbe7ff);
+    color: var(--k-blue-700, #1442a8);
+    font: 700 11px 'Geist', sans-serif;
+    letter-spacing: 0;
+    flex-shrink: 0;
+  }
+
+  /* k3-tab stat chip */
+  .k3-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    border: 1px solid var(--stroke);
+    background: var(--surface-2);
+    color: var(--fg-muted);
+    font: 600 12px 'Geist', sans-serif;
+    cursor: pointer;
+    transition: background 0.1s, color 0.1s;
+    white-space: nowrap;
+  }
+  .k3-tab:hover {
+    background: var(--stroke);
+    color: var(--fg);
+  }
+  .k3-tab.active, .k3-tab[data-active="true"] {
+    background: var(--k-blue-50);
+    color: var(--k-blue-600);
+    border-color: var(--k-blue-200);
   }
 
   /* v3 side chips */
