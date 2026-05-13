@@ -9,9 +9,72 @@ import { Avatar } from '@/components/ui/Avatar'
 import { Spinner } from '@/components/ui/Spinner'
 import { timeAgo } from '@/lib/utils/formatting'
 import type { Message, Profile } from '@/types'
-import { ArrowLeft, Send, Swords } from 'lucide-react'
+import { ArrowLeft, Send, Swords, CheckCircle, XCircle } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils/cn'
+
+function DuelInviteCard({ msg, isMine, onAccept, onDecline }: {
+  msg: Message
+  isMine: boolean
+  onAccept?: () => void
+  onDecline?: () => void
+}) {
+  const data: any = (msg as any).metadata ?? {}
+  return (
+    <div style={{
+      maxWidth: 280, borderRadius: 16, overflow: 'hidden',
+      border: '1px solid var(--k-blue-200, #b8cfff)',
+      background: 'var(--k-blue-50, #eef4ff)',
+    }}>
+      {/* Header */}
+      <div style={{
+        background: 'linear-gradient(135deg, #1442a8, #2a6cf0)',
+        padding: '10px 14px',
+        display: 'flex', alignItems: 'center', gap: 8,
+      }}>
+        <Swords size={14} style={{ color: '#fff' }} />
+        <span style={{ font: '700 13px -apple-system, sans-serif', color: '#fff' }}>Düello Çağrısı</span>
+      </div>
+      {/* Body */}
+      <div style={{ padding: '12px 14px' }}>
+        <p style={{ margin: '0 0 10px', font: '500 13px/1.4 -apple-system, sans-serif', color: 'var(--fg)' }}>
+          {data.scenario_content || msg.content}
+        </p>
+        {!isMine && (
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={onAccept}
+              style={{
+                flex: 1, padding: '8px 0', borderRadius: 8, border: 'none',
+                background: '#16a34a', color: '#fff',
+                font: '600 12px -apple-system, sans-serif', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+              }}
+            >
+              <CheckCircle size={12} /> Kabul et
+            </button>
+            <button
+              onClick={onDecline}
+              style={{
+                flex: 1, padding: '8px 0', borderRadius: 8, border: '1px solid var(--stroke)',
+                background: 'transparent', color: 'var(--fg-muted)',
+                font: '600 12px -apple-system, sans-serif', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+              }}
+            >
+              <XCircle size={12} /> Reddet
+            </button>
+          </div>
+        )}
+        {isMine && (
+          <p style={{ font: '400 11px monospace', color: 'var(--fg-subtle)', margin: 0 }}>
+            Yanıt bekleniyor...
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
 
 export default function ConversationPage() {
   const params = useParams()
@@ -167,14 +230,23 @@ export default function ConversationPage() {
                 )}
                 {!isMine && sameGroup && <div className="w-6 mr-2 shrink-0" />}
                 <div className={cn('max-w-[75%] flex flex-col', isMine ? 'items-end' : 'items-start')}>
-                  <div className={cn(
-                    'px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed',
-                    isMine
-                      ? 'bg-primary text-white rounded-br-sm'
-                      : 'bg-surface border border-stroke text-fg rounded-bl-sm'
-                  )}>
-                    {msg.content}
-                  </div>
+                  {(msg as any).type === 'duel_invite' ? (
+                    <DuelInviteCard
+                      msg={msg}
+                      isMine={isMine}
+                      onAccept={() => router.push('/oyun')}
+                      onDecline={() => {}}
+                    />
+                  ) : (
+                    <div className={cn(
+                      'px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed',
+                      isMine
+                        ? 'bg-primary text-white rounded-br-sm'
+                        : 'bg-surface border border-stroke text-fg rounded-bl-sm'
+                    )}>
+                      {msg.content}
+                    </div>
+                  )}
                   {(!messages[idx + 1] || messages[idx + 1].sender_id !== msg.sender_id) && (
                     <p className="text-[11px] text-fg-subtle mt-1 px-1">{timeAgo(msg.created_at)}</p>
                   )}

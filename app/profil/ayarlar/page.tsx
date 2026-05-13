@@ -15,16 +15,19 @@ import type { Profile } from '@/types'
 import {
   User, Lock, Trash2, CheckCircle, Star, Flame, Swords,
   Camera, Gift, Copy, Check, Crown, Bell, Shield, ChevronRight,
+  Palette, EyeOff, Sun, Moon, Monitor,
 } from 'lucide-react'
 import TitleSelector from '@/components/titles/TitleSelector'
 import StreakWidget from '@/components/streak/StreakWidget'
 import NotificationPrefs from '@/components/notifications/NotificationPrefs'
 
-type SettingsTab = 'profil' | 'guvenlik' | 'bildirimler' | 'referans' | 'unvanlar' | 'hesap'
+type SettingsTab = 'profil' | 'guvenlik' | 'gorunum' | 'gizlilik' | 'bildirimler' | 'referans' | 'unvanlar' | 'hesap'
 
 const TABS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
   { id: 'profil',      label: 'Profil',       icon: <User size={15} /> },
   { id: 'guvenlik',    label: 'Güvenlik',     icon: <Shield size={15} /> },
+  { id: 'gorunum',     label: 'Görünüm',      icon: <Palette size={15} /> },
+  { id: 'gizlilik',    label: 'Gizlilik',     icon: <EyeOff size={15} /> },
   { id: 'bildirimler', label: 'Bildirimler',  icon: <Bell size={15} /> },
   { id: 'referans',    label: 'Referans',     icon: <Gift size={15} /> },
   { id: 'unvanlar',    label: 'Unvanlar',     icon: <Crown size={15} /> },
@@ -50,6 +53,12 @@ export default function AyarlarPage() {
   const [referralInput, setReferralInput] = useState('')
   const [referralLoading, setReferralLoading] = useState(false)
   const [codeCopied, setCodeCopied] = useState(false)
+  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system')
+  const [accentColor, setAccentColor] = useState('#2a6cf0')
+  const [fontSize, setFontSize] = useState<'sm' | 'md' | 'lg'>('md')
+  const [privacyPublic, setPrivacyPublic] = useState(true)
+  const [privacyDM, setPrivacyDM] = useState(true)
+  const [privacyLeaderboard, setPrivacyLeaderboard] = useState(true)
 
   useEffect(() => {
     const load = async () => {
@@ -320,6 +329,133 @@ export default function AyarlarPage() {
                 </a>
               </div>
             )}
+          </div>
+        )}
+
+        {/* ─────────────────── GÖRÜNÜM ─────────────────── */}
+        {activeTab === 'gorunum' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <div>
+              <h2 style={{ margin: 0, font: '700 16px -apple-system, sans-serif', color: 'var(--fg)' }}>Görünüm</h2>
+              <p style={{ margin: '4px 0 0', font: '400 13px -apple-system, sans-serif', color: 'var(--fg-subtle)' }}>Tema ve yazı tipi ayarları</p>
+            </div>
+
+            {/* Theme toggle */}
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--stroke)', borderRadius: 16, padding: 18 }}>
+              <p style={{ margin: '0 0 12px', font: '600 14px -apple-system, sans-serif', color: 'var(--fg)' }}>Tema</p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                {([
+                  { id: 'light' as const, label: 'Açık', icon: <Sun size={18} /> },
+                  { id: 'dark' as const, label: 'Koyu', icon: <Moon size={18} /> },
+                  { id: 'system' as const, label: 'Sistem', icon: <Monitor size={18} /> },
+                ]).map(t => (
+                  <button key={t.id} onClick={() => setTheme(t.id)} style={{
+                    padding: '14px 10px', borderRadius: 12, border: 'none', cursor: 'pointer',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                    background: theme === t.id ? 'var(--k-blue-50, #eef4ff)' : 'var(--surface-2, #f7f8fa)',
+                    outline: theme === t.id ? '2px solid var(--k-blue-500, #2a6cf0)' : '2px solid transparent',
+                    color: theme === t.id ? 'var(--k-blue-600, #1a56d6)' : 'var(--fg-muted)',
+                    transition: 'all .12s',
+                  }}>
+                    {t.icon}
+                    <span style={{ font: '600 12px -apple-system, sans-serif' }}>{t.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Accent color */}
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--stroke)', borderRadius: 16, padding: 18 }}>
+              <p style={{ margin: '0 0 12px', font: '600 14px -apple-system, sans-serif', color: 'var(--fg)' }}>Renk Vurgusu</p>
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                {['#2a6cf0','#8b5cf6','#ec4899','#16a34a','#f97316','#0ea5e9','#dc2626'].map(c => (
+                  <button key={c} onClick={() => setAccentColor(c)} style={{
+                    width: 36, height: 36, borderRadius: '50%', background: c, border: 'none', cursor: 'pointer',
+                    outline: accentColor === c ? `3px solid ${c}` : '3px solid transparent',
+                    outlineOffset: 2, transition: 'outline .12s',
+                  }} />
+                ))}
+              </div>
+            </div>
+
+            {/* Font size */}
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--stroke)', borderRadius: 16, padding: 18 }}>
+              <p style={{ margin: '0 0 12px', font: '600 14px -apple-system, sans-serif', color: 'var(--fg)' }}>Yazı Boyutu</p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                {([
+                  { id: 'sm' as const, label: 'Küçük', size: '13px' },
+                  { id: 'md' as const, label: 'Orta', size: '15px' },
+                  { id: 'lg' as const, label: 'Büyük', size: '17px' },
+                ]).map(f => (
+                  <button key={f.id} onClick={() => setFontSize(f.id)} style={{
+                    padding: '12px 10px', borderRadius: 12, border: 'none', cursor: 'pointer',
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                    background: fontSize === f.id ? 'var(--k-blue-50, #eef4ff)' : 'var(--surface-2, #f7f8fa)',
+                    outline: fontSize === f.id ? '2px solid var(--k-blue-500, #2a6cf0)' : '2px solid transparent',
+                    color: fontSize === f.id ? 'var(--k-blue-600, #1a56d6)' : 'var(--fg-muted)',
+                    transition: 'all .12s',
+                  }}>
+                    <span style={{ font: `600 ${f.size} -apple-system, sans-serif` }}>Aa</span>
+                    <span style={{ font: '500 11px -apple-system, sans-serif' }}>{f.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ─────────────────── GİZLİLİK ─────────────────── */}
+        {activeTab === 'gizlilik' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+            <div>
+              <h2 style={{ margin: 0, font: '700 16px -apple-system, sans-serif', color: 'var(--fg)' }}>Gizlilik</h2>
+              <p style={{ margin: '4px 0 0', font: '400 13px -apple-system, sans-serif', color: 'var(--fg-subtle)' }}>Hesap görünürlüğünü ve paylaşımı yönet</p>
+            </div>
+
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--stroke)', borderRadius: 16, overflow: 'hidden' }}>
+              {[
+                { label: 'Profil herkese açık', desc: 'Profilini giriş yapmayan kullanıcılar da görebilir', state: privacyPublic, set: setPrivacyPublic },
+                { label: 'Herkesten DM al', desc: 'Takip etmediğin kişiler de sana mesaj gönderebilir', state: privacyDM, set: setPrivacyDM },
+                { label: 'Liderlik tablosunda görün', desc: 'Puanların genel liderlik sıralamasında gösterilir', state: privacyLeaderboard, set: setPrivacyLeaderboard },
+              ].map((item, i, arr) => (
+                <div key={item.label} style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '16px 18px',
+                  borderBottom: i < arr.length - 1 ? '1px solid var(--stroke)' : 'none',
+                }}>
+                  <div>
+                    <p style={{ margin: 0, font: '600 14px -apple-system, sans-serif', color: 'var(--fg)' }}>{item.label}</p>
+                    <p style={{ margin: '2px 0 0', font: '400 12px -apple-system, sans-serif', color: 'var(--fg-subtle)' }}>{item.desc}</p>
+                  </div>
+                  <button
+                    onClick={() => item.set(!item.state)}
+                    style={{
+                      width: 44, height: 24, borderRadius: 99, border: 'none', cursor: 'pointer',
+                      background: item.state ? 'var(--k-blue-500, #2a6cf0)' : 'var(--stroke, #e4e7ed)',
+                      position: 'relative', transition: 'background .15s', flexShrink: 0,
+                    }}
+                  >
+                    <span style={{
+                      position: 'absolute', top: 2, left: item.state ? 22 : 2,
+                      width: 20, height: 20, borderRadius: '50%', background: '#fff',
+                      transition: 'left .15s', boxShadow: '0 1px 3px rgba(0,0,0,.2)',
+                    }} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--stroke)', borderRadius: 16, padding: 18 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div>
+                  <p style={{ margin: 0, font: '600 14px -apple-system, sans-serif', color: 'var(--fg)' }}>Engellenenler</p>
+                  <p style={{ margin: '2px 0 0', font: '400 12px -apple-system, sans-serif', color: 'var(--fg-subtle)' }}>Engellediğin kullanıcıları yönet</p>
+                </div>
+                <span style={{ font: '500 12px -apple-system, sans-serif', color: 'var(--k-blue-500)', cursor: 'pointer' }}>
+                  Görüntüle →
+                </span>
+              </div>
+            </div>
           </div>
         )}
 

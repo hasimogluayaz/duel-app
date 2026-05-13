@@ -8,7 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Spinner } from '@/components/ui/Spinner'
 import { timeAgo } from '@/lib/utils/formatting'
 import type { Notification } from '@/types'
-import { Bell, Swords, ArrowUp, Trophy, User, Settings2 } from 'lucide-react'
+import { Bell, Swords, ArrowUp, Trophy, User, Settings2, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 
 // ─── Universal URL resolver ───────────────────────────────────────────────────
@@ -59,8 +59,12 @@ function NotifIcon({ type }: { type: string }) {
     vote_received: { icon: <ArrowUp size={15} />, color: '#16a34a' },
     vote_milestone:{ icon: <ArrowUp size={15} />, color: '#16a34a' },
     new_follower:  { icon: <User size={15} />, color: 'var(--k-blue-500, #2a6cf0)' },
+    new_comment:   { icon: <MessageCircle size={15} />, color: '#7c3aed' },
+    comment_reply: { icon: <MessageCircle size={15} />, color: '#7c3aed' },
+    answer_comment:{ icon: <MessageCircle size={15} />, color: '#7c3aed' },
     achievement:   { icon: <Trophy size={15} />, color: 'var(--k-sky-500, #1f8df0)' },
     tier_up:       { icon: <Trophy size={15} />, color: 'var(--k-blue-500, #2a6cf0)' },
+    system:        { icon: <Settings2 size={15} />, color: '#64748b' },
   }
   const m = map[type] ?? { icon: <Bell size={15} />, color: 'var(--k-blue-500, #2a6cf0)' }
   return (
@@ -79,6 +83,7 @@ const TYPE_GROUP: Record<string, string> = {
   duel_invite: 'duel', duel_result: 'duel', duel_accepted: 'duel',
   new_follower: 'follow', vote_received: 'vote', vote_milestone: 'vote',
   new_comment: 'mention', comment_reply: 'mention', answer_comment: 'mention',
+  system: 'system',
 }
 
 export default function BildirimlerPage() {
@@ -87,7 +92,7 @@ export default function BildirimlerPage() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
-  const [tab, setTab] = useState<'all' | 'duel' | 'mention'>('all')
+  const [tab, setTab] = useState<'all' | 'duel' | 'mention' | 'system'>('all')
 
   useEffect(() => {
     const load = async () => {
@@ -161,6 +166,7 @@ export default function BildirimlerPage() {
           { id: 'all', label: 'Tümü' },
           { id: 'duel', label: 'Düellolar' },
           { id: 'mention', label: 'Bahsetmeler' },
+          { id: 'system', label: 'Sistem' },
         ] as const).map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
             padding: '8px 14px', borderRadius: 999,
@@ -210,8 +216,17 @@ export default function BildirimlerPage() {
                   <div style={{ marginTop: 2, font: '400 13px -apple-system, sans-serif', color: 'var(--fg-muted)' }}>
                     {n.message}
                   </div>
-                  <div style={{ marginTop: 4, font: '400 11px monospace', color: 'var(--fg-subtle)' }}>
-                    {timeAgo(n.created_at)}
+                  <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ font: '400 11px monospace', color: 'var(--fg-subtle)' }}>
+                      {timeAgo(n.created_at)}
+                    </span>
+                    {n.type === 'system' && (
+                      <span style={{
+                        padding: '1px 7px', borderRadius: 999, border: '1px solid #e2e8f0',
+                        font: '600 10px -apple-system, sans-serif', color: '#64748b',
+                        background: '#f8fafc',
+                      }}>Sistem</span>
+                    )}
                   </div>
                 </div>
                 {!n.is_read && (

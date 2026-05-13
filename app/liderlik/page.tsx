@@ -9,7 +9,7 @@ import { formatPoints } from '@/lib/utils/formatting'
 import { getTier } from '@/lib/utils/tier'
 import Link from 'next/link'
 
-type Period = 'weekly' | 'monthly' | 'all_time' | 'friends'
+type Period = 'daily' | 'weekly' | 'monthly' | 'all_time' | 'friends'
 
 interface Entry {
   rank: number
@@ -22,10 +22,12 @@ interface Entry {
   active_title?: string | null
   win_count: number
   duel_count: number
+  rank_change?: number | null
   is_me?: boolean
 }
 
 const PERIOD_LABELS: Record<Period, string> = {
+  daily: 'Bugün',
   weekly: 'Hafta',
   monthly: 'Ay',
   all_time: 'Tüm Zaman',
@@ -174,13 +176,14 @@ export default function LiderlikPage() {
             {/* Table header */}
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'window inner width > 640px ? "50px 1fr 90px 90px 90px" : "40px 1fr 90px"',
+              gridTemplateColumns: '50px 1fr 60px 90px 90px 90px',
               padding: '12px 18px',
               borderBottom: '1px solid var(--stroke)',
               background: 'var(--surface-2)',
-            }} className="hidden sm:grid" data-cols="5">
+            }} className="hidden sm:grid" data-cols="6">
               <span className="k3-eyebrow">№</span>
               <span className="k3-eyebrow">Oyuncu</span>
+              <span className="k3-eyebrow" style={{ textAlign: 'center' }}>±</span>
               <span className="k3-eyebrow" style={{ textAlign: 'right' }}>Düello</span>
               <span className="k3-eyebrow" style={{ textAlign: 'right' }}>Galip</span>
               <span className="k3-eyebrow" style={{ textAlign: 'right' }}>Puan</span>
@@ -238,7 +241,7 @@ export default function LiderlikPage() {
                   </div>
 
                   {/* Desktop row */}
-                  <div className="hidden sm:grid grid-cols-[50px_1fr_90px_90px_90px] items-center gap-2 py-3.5 px-5 hover:bg-surface-2 transition-colors"
+                  <div className="hidden sm:grid grid-cols-[50px_1fr_60px_90px_90px_90px] items-center gap-2 py-3.5 px-5 hover:bg-surface-2 transition-colors"
                     style={{
                       borderBottom: i === entries.length - 1 ? 'none' : '1px solid var(--stroke)',
                       background: isMe ? 'var(--k-blue-50)' : 'transparent',
@@ -270,6 +273,20 @@ export default function LiderlikPage() {
                         </div>
                         <div style={{ font: '400 11.5px Geist Mono, monospace', color: 'var(--fg-subtle)' }}>@{u.username}</div>
                       </div>
+                    </div>
+                    {/* Rank change */}
+                    <div style={{ textAlign: 'center' }}>
+                      {u.rank_change != null && u.rank_change !== 0 ? (
+                        <span className="tab-nums" style={{
+                          font: '700 11px Geist Mono, monospace',
+                          color: u.rank_change > 0 ? '#16a34a' : '#dc2626',
+                          display: 'inline-flex', alignItems: 'center', gap: 1,
+                        }}>
+                          {u.rank_change > 0 ? '▲' : '▼'}{Math.abs(u.rank_change)}
+                        </span>
+                      ) : (
+                        <span style={{ font: '500 11px monospace', color: 'var(--fg-subtle)' }}>—</span>
+                      )}
                     </div>
                     <span className="tab-nums" style={{ textAlign: 'right', font: '500 13px Geist Mono, monospace', color: 'var(--fg-muted)' }}>
                       {u.duel_count}

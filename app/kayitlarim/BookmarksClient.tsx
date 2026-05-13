@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Bookmark, MessageSquare, Layers, Swords, Plus, ArrowUp, Filter } from 'lucide-react'
 import { ModeChip } from '@/components/ui/ModeChip'
 
-type TabType = 'answers' | 'scenarios'
+type TabType = 'all' | 'answers' | 'scenarios' | 'duels' | 'readlater'
 
 interface AnswerBookmark {
   id: string
@@ -31,13 +31,13 @@ interface ScenarioBookmark {
 }
 
 export default function BookmarksClient() {
-  const [tab, setTab] = useState<TabType>('answers')
+  const [tab, setTab] = useState<TabType>('all')
   const [answers, setAnswers] = useState<AnswerBookmark[]>([])
   const [scenarios, setScenarios] = useState<ScenarioBookmark[]>([])
   const [loading, setLoading] = useState(false)
-  const [loadedTabs, setLoadedTabs] = useState<Set<TabType>>(new Set())
+  const [loadedTabs, setLoadedTabs] = useState<Set<string>>(new Set())
 
-  const load = async (type: TabType) => {
+  const load = async (type: 'answers' | 'scenarios') => {
     if (loadedTabs.has(type)) return
     setLoading(true)
     const res = await fetch(`/api/bookmarks?type=${type}`)
@@ -48,11 +48,16 @@ export default function BookmarksClient() {
     setLoading(false)
   }
 
-  useEffect(() => { load('answers') }, [])
+  useEffect(() => {
+    load('answers')
+    load('scenarios')
+  }, [])
 
   const switchTab = (t: TabType) => {
     setTab(t)
-    load(t)
+    if (t === 'answers') load('answers')
+    if (t === 'scenarios') load('scenarios')
+    if (t === 'all') { load('answers'); load('scenarios') }
   }
 
   const removeAnswerBookmark = async (id: string, answerId: string) => {
@@ -101,10 +106,10 @@ export default function BookmarksClient() {
       {/* ── Collection tiles ── */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
         {[
-          { label: 'Cevaplar', icon: <MessageSquare size={18} />, color: 'var(--k-blue-500, #2a6cf0)', n: answers.length, type: 'answers' as TabType },
+          { label: 'Favorilerim', icon: <MessageSquare size={18} />, color: 'var(--k-blue-500, #2a6cf0)', n: answers.length + scenarios.length, type: 'all' as TabType },
           { label: 'Senaryolar', icon: <Layers size={18} />, color: 'var(--k-navy-500, #1c2f6e)', n: scenarios.length, type: 'scenarios' as TabType },
-          { label: 'Düello havuzu', icon: <Swords size={18} />, color: 'var(--k-sky-500, #1f8df0)', n: null, type: null, dashed: false },
-          { label: 'Yeni koleksiyon', icon: <Plus size={18} />, color: 'var(--k-text-3, #8e96a6)', n: null, type: null, dashed: true },
+          { label: 'Düello havuzu', icon: <Swords size={18} />, color: 'var(--k-sky-500, #1f8df0)', n: 0, type: 'duels' as TabType, dashed: false },
+          { label: 'Yeni koleksiyon', icon: <Plus size={18} />, color: 'var(--k-text-3, #8e96a6)', n: null, type: null as TabType | null, dashed: true },
         ].map((col, i) => (
           <button key={i}
             onClick={() => col.type && switchTab(col.type)}
@@ -112,7 +117,7 @@ export default function BookmarksClient() {
               padding: 14, borderRadius: 14,
               background: col.type === tab ? `color-mix(in oklab, ${col.color} 8%, white)` : 'var(--surface, #fff)',
               textAlign: 'left', cursor: col.type ? 'pointer' : 'default',
-              border: col.dashed
+              border: (col as any).dashed
                 ? '1.5px dashed var(--stroke, #d6dae3)'
                 : col.type === tab
                   ? `2px solid ${col.color}`
@@ -133,14 +138,17 @@ export default function BookmarksClient() {
       </div>
 
       {/* ── Tab pills ── */}
-      <div style={{ display: 'flex', gap: 6 }}>
+      <div style={{ display: 'flex', gap: 6, overflowX: 'auto', scrollbarWidth: 'none', paddingBottom: 2 }}>
         {([
+          { id: 'all' as TabType, label: 'Tümü', count: answers.length + scenarios.length },
           { id: 'answers' as TabType, label: 'Cevaplar', count: answers.length },
           { id: 'scenarios' as TabType, label: 'Senaryolar', count: scenarios.length },
+          { id: 'duels' as TabType, label: 'Düellolar', count: 0 },
+          { id: 'readlater' as TabType, label: 'Sonra Oku', count: 0 },
         ]).map(t => (
           <button key={t.id} onClick={() => switchTab(t.id)} style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
-            padding: '8px 14px', borderRadius: 999, whiteSpace: 'nowrap',
+            padding: '8px 14px', borderRadius: 999, whiteSpace: 'nowrap', flexShrink: 0,
             border: `1px solid ${tab === t.id ? 'transparent' : 'var(--stroke, #e4e7ed)'}`,
             background: tab === t.id ? 'var(--fg, #0f1320)' : 'var(--surface, #fff)',
             color: tab === t.id ? '#fff' : 'var(--fg-muted)',
@@ -161,6 +169,80 @@ export default function BookmarksClient() {
             <div key={i} style={{ height: 88, borderRadius: 14, background: 'var(--surface-2, #f0f2f5)' }} />
           ))}
         </div>
+      ) : (tab === 'duels') ? (
+        <EmptyState text="Kaydedilmiş düello yok" icon={<Swords size={28} />} cta={{ label: 'Düello Başlat', href: '/oyun' }} />
+      ) : (tab === 'readlater') ? (
+        <EmptyState text="Sonra okunacak içerik yok" icon={<Layers size={28} />} cta={{ label: 'Senaryolara Bak', href: '/arsiv' }} />
+      ) : (tab === 'all') ? (
+        answers.length === 0 && scenarios.length === 0 ? (
+          <EmptyState text="Henüz hiçbir şey kaydetmedin" icon={<Bookmark size={28} />} cta={{ label: 'Senaryolara Göz At', href: '/arsiv' }} />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {answers.slice(0, 5).map((b) => b.answer && (
+              <div key={b.id} style={{
+                background: 'var(--surface, #fff)', border: '1px solid var(--stroke, #e4e7ed)',
+                borderRadius: 14, padding: 16,
+                display: 'flex', gap: 12, alignItems: 'flex-start',
+              }}>
+                <span style={{
+                  width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                  background: 'var(--k-blue-100, #dbe7ff)', color: 'var(--k-blue-600, #1a56d6)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  font: '700 14px -apple-system, sans-serif',
+                }}>
+                  {(b.answer.user?.display_name || b.answer.user?.username || '?')[0].toUpperCase()}
+                </span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                    <ModeChip mode="senaryo" />
+                    <span style={{ font: '500 11px monospace', color: 'var(--fg-subtle)' }}>Cevap</span>
+                  </div>
+                  {b.answer.scenario && (
+                    <Link href={`/arsiv/${b.answer.scenario.id}`} style={{ textDecoration: 'none' }}>
+                      <div style={{ font: '500 13px/1.4 -apple-system, sans-serif', color: 'var(--fg-muted)', marginBottom: 4 }}>
+                        {b.answer.scenario.content}
+                      </div>
+                    </Link>
+                  )}
+                  <div style={{ font: '400 14px/1.5 -apple-system, sans-serif', color: 'var(--fg)' }}>
+                    {b.answer.content}
+                  </div>
+                </div>
+                <button onClick={() => removeAnswerBookmark(b.id, b.answer!.id)}
+                  style={{ background: 'none', border: 'none', color: 'var(--k-blue-500)', cursor: 'pointer', padding: 4, flexShrink: 0 }}>
+                  <Bookmark size={18} fill="currentColor" />
+                </button>
+              </div>
+            ))}
+            {scenarios.slice(0, 5).map((b) => b.scenario && (
+              <div key={b.id} style={{
+                background: 'var(--surface, #fff)', border: '1px solid var(--stroke, #e4e7ed)',
+                borderRadius: 14, padding: 16,
+                display: 'flex', gap: 12, alignItems: 'flex-start',
+              }}>
+                <span style={{
+                  width: 36, height: 36, borderRadius: '50%', flexShrink: 0,
+                  background: 'var(--k-navy-100, #ccd5ea)', color: 'var(--k-navy-600, #122351)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', font: '700 14px sans-serif',
+                }}>📄</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+                    <ModeChip mode="senaryo" />
+                  </div>
+                  <Link href={`/arsiv/${b.scenario.id}`} style={{ textDecoration: 'none' }}>
+                    <div style={{ font: '600 14px/1.4 -apple-system, sans-serif', color: 'var(--fg)' }}>
+                      {b.scenario.content}
+                    </div>
+                  </Link>
+                </div>
+                <button onClick={() => removeScenarioBookmark(b.id, b.scenario!.id)}
+                  style={{ background: 'none', border: 'none', color: 'var(--k-blue-500)', cursor: 'pointer', padding: 4, flexShrink: 0 }}>
+                  <Bookmark size={18} fill="currentColor" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )
       ) : tab === 'answers' ? (
         answers.length === 0 ? (
           <EmptyState text="Kaydedilmiş cevap yok" icon={<MessageSquare size={28} />} />
@@ -279,7 +361,7 @@ export default function BookmarksClient() {
   )
 }
 
-function EmptyState({ text, icon }: { text: string; icon: React.ReactNode }) {
+function EmptyState({ text, icon, cta }: { text: string; icon: React.ReactNode; cta?: { label: string; href: string } }) {
   return (
     <div style={{
       background: 'var(--surface, #fff)', border: '1px solid var(--stroke, #e4e7ed)',
@@ -289,6 +371,13 @@ function EmptyState({ text, icon }: { text: string; icon: React.ReactNode }) {
         {icon}
       </div>
       <p style={{ margin: 0, font: '600 15px -apple-system, sans-serif', color: 'var(--fg)' }}>{text}</p>
+      {cta && (
+        <Link href={cta.href} style={{
+          display: 'inline-block', marginTop: 14, padding: '8px 18px', borderRadius: 999,
+          background: 'var(--k-blue-500, #2a6cf0)', color: '#fff',
+          font: '600 13px -apple-system, sans-serif', textDecoration: 'none',
+        }}>{cta.label}</Link>
+      )}
     </div>
   )
 }

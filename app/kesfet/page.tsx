@@ -572,15 +572,14 @@ function FriendsTab() {
 
 // ─── Categories Tab ───────────────────────────────────────────────────────────
 const CATEGORIES = [
-  { key: 'genel',      emoji: '🌍', label: 'Genel' },
-  { key: 'ask',        emoji: '❤️', label: 'Aşk' },
-  { key: 'is',         emoji: '💼', label: 'İş' },
-  { key: 'aile',       emoji: '👨‍👩‍👧', label: 'Aile' },
-  { key: 'sosyal',     emoji: '👥', label: 'Sosyal' },
-  { key: 'teknoloji',  emoji: '💻', label: 'Teknoloji' },
-  { key: 'dunya',      emoji: '🌏', label: 'Dünya' },
-  { key: 'mizah',      emoji: '😂', label: 'Mizah' },
-  { key: 'felsefe',    emoji: '🤔', label: 'Felsefe' },
+  { key: 'aile',       emoji: '👨‍👩‍👧', label: 'Aile',       count: '1.2k' },
+  { key: 'ask',        emoji: '❤️',  label: 'Aşk',        count: '3.2k' },
+  { key: 'is',         emoji: '💼',  label: 'İş Hayatı',  count: '940' },
+  { key: 'etik',       emoji: '⚖️',  label: 'Etik',       count: '612' },
+  { key: 'felsefe',    emoji: '🤔',  label: 'Felsefe',    count: '480' },
+  { key: 'dunya',      emoji: '🌍',  label: 'Gündem',     count: '1.4k' },
+  { key: 'sosyal',     emoji: '👥',  label: 'Arkadaşlık', count: '860' },
+  { key: 'mizah',      emoji: '😂',  label: 'Mizah',      count: '720' },
 ]
 
 function CategoriesTab() {
@@ -637,16 +636,16 @@ function CategoriesTab() {
       {/* Category grid */}
       <div>
         <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--fg-subtle)', textTransform: 'uppercase', letterSpacing: '.08em', marginBottom: 10 }}>
-          Kategoriler
+          Bölümler
         </p>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10 }}>
           {CATEGORIES.map((cat, i) => {
-            const colors = ['#2a6cf0','#dc2626','#1442a8','#1c2f6e','#16a34a','#1f8df0','#4aa8ff','#f97316','#8b5cf6']
+            const colors = ['#2a6cf0','#dc2626','#1442a8','#1c2f6e','#16a34a','#1f8df0','#f97316','#8b5cf6']
             const c = colors[i % colors.length]
             return (
               <button
                 key={cat.key}
-                onClick={() => setSelected(s => s === cat.key ? null : cat.key)}
+                onClick={() => setSelected((s: string | null) => s === cat.key ? null : cat.key)}
                 style={{
                   padding: 14, borderRadius: 14,
                   background: selected === cat.key
@@ -665,6 +664,7 @@ function CategoriesTab() {
                   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18,
                 }}>{cat.emoji}</span>
                 <span style={{ font: '600 14px -apple-system, sans-serif', color: 'var(--fg)' }}>{cat.label}</span>
+                <span style={{ font: '500 11px monospace', color: 'var(--fg-subtle)' }}>{cat.count} senaryo</span>
               </button>
             )
           })}
@@ -802,6 +802,58 @@ function SenaryolarTab() {
   )
 }
 
+// ─── Featured Scenario (Editor's Pick) ───────────────────────────────────────
+function FeaturedScenario() {
+  const [scenario, setScenario] = useState<any | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetch('/api/scenarios?editor_pick=true&limit=1')
+      .then(r => r.json())
+      .then(d => { setScenario(d.scenarios?.[0] ?? null); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [])
+
+  if (loading) return (
+    <div style={{ height: 120, borderRadius: 18, background: 'var(--surface-2)' }} className="animate-pulse" />
+  )
+  if (!scenario) return null
+
+  return (
+    <Link href={`/arsiv/${scenario.id}`} style={{ textDecoration: 'none' }}>
+      <div style={{
+        borderRadius: 18, overflow: 'hidden', position: 'relative',
+        background: 'linear-gradient(135deg, #1442a8 0%, #2a6cf0 60%, #4aa8ff 100%)',
+        padding: '20px 22px', color: '#fff',
+        boxShadow: '0 4px 24px rgba(42,108,240,.25)',
+      }}>
+        <div aria-hidden style={{
+          position: 'absolute', right: -30, top: -30,
+          width: 160, height: 160, borderRadius: '50%',
+          background: 'rgba(255,255,255,0.07)',
+        }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+          <Star size={11} style={{ fill: '#fcd34d', color: '#fcd34d' }} />
+          <span style={{ font: '700 10px -apple-system, sans-serif', letterSpacing: '.07em', textTransform: 'uppercase', color: '#fcd34d' }}>
+            Haftanın Senaryosu · Editör Seçimi
+          </span>
+        </div>
+        <p style={{ margin: 0, font: '600 15px/1.5 -apple-system, sans-serif', color: '#fff', position: 'relative' }}>
+          {scenario.content}
+        </p>
+        <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 12, font: '500 12px -apple-system, sans-serif', color: 'rgba(255,255,255,.75)', position: 'relative' }}>
+          <span>{scenario.answer_count} cevap</span>
+          <span>·</span>
+          <span style={{ textTransform: 'capitalize' }}>{scenario.category}</span>
+          <span style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
+            Cevapla <span style={{ fontSize: 14 }}>→</span>
+          </span>
+        </div>
+      </div>
+    </Link>
+  )
+}
+
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function KesfetPage() {
   const [tab, setTab] = useState<'feed' | 'senaryolar' | 'friends' | 'ara' | 'kategoriler'>('feed')
@@ -872,6 +924,8 @@ export default function KesfetPage() {
 
       {tab === 'feed' && (
         <div className="space-y-5">
+          {/* Featured scenario — editor's pick */}
+          <FeaturedScenario />
           <div className="rounded-2xl bg-surface border border-stroke p-4">
             <div className="flex items-center gap-2 mb-3">
               <Flame size={13} style={{ color: 'var(--k3-warm-500, #ed6f1c)' }} />
@@ -879,7 +933,15 @@ export default function KesfetPage() {
             </div>
             <TrendingTags />
           </div>
-          <FeedTab />
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <TrendingUp size={13} style={{ color: 'var(--k3-warm-500, #ed6f1c)' }} />
+                <span className="k3-eyebrow">Yükselenler · Son 24 saat</span>
+              </div>
+            </div>
+            <FeedTab />
+          </div>
         </div>
       )}
       {tab === 'senaryolar' && <SenaryolarTab />}
