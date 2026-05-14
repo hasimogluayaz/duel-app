@@ -24,7 +24,6 @@ import { ScenarioFeedCard } from '@/components/feed/ScenarioFeedCard'
 import type { ScenarioFeedItem } from '@/components/feed/ScenarioFeedCard'
 import Link from 'next/link'
 import Image from 'next/image'
-import { ModeSwitcher } from '@/components/modes/ModeSwitcher'
 
 interface Props {
   scenario: Scenario | null
@@ -182,11 +181,6 @@ export function OyunClient({
 
   return (
     <div className="max-w-2xl mx-auto pb-6 overflow-hidden">
-
-      {/* ── Mode switcher ── */}
-      <div className="px-3 pt-3 pb-2">
-        <ModeSwitcher />
-      </div>
 
       {/* ── Guest banner ── */}
       {isGuest && (
@@ -464,6 +458,36 @@ export function OyunClient({
         )
       )}
 
+      {/* ── Feed filter chips — always visible after hero ── */}
+      {scenario && (
+        <div className="px-3 pt-2 pb-1">
+          <div className="flex gap-1.5 overflow-x-auto scrollbar-none -mx-1 px-1">
+            {([
+              { id: 'top',    label: 'En çok oylanan', icon: <Trophy size={13} /> },
+              { id: 'new',    label: 'Yeni',            icon: <Zap size={13} /> },
+              { id: 'duels',  label: 'Düellolar',       icon: <Swords size={13} /> },
+              { id: 'follow', label: 'Takip',           icon: <Users size={13} /> },
+              { id: 'live',   label: 'Canlı Akış',      icon: <span className="live-dot" style={{ background: '#16a34a', flexShrink: 0 }} /> },
+            ] as const).map(f => (
+              <button
+                key={f.id}
+                onClick={() => {
+                  setFeedFilter(f.id)
+                  if (f.id === 'follow') loadFollowFeed()
+                }}
+                className={`inline-flex items-center gap-1.5 px-3 h-8 rounded-full text-[13px] font-medium whitespace-nowrap transition-all border ${
+                  feedFilter === f.id
+                    ? 'bg-fg text-bg border-transparent'
+                    : 'bg-surface text-fg-muted border-stroke hover:text-fg'
+                }`}
+              >
+                {f.icon}{f.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ── Community Feed ── */}
       {communityAnswers.length > 0 && feedFilter !== 'duels' && feedFilter !== 'follow' && feedFilter !== 'live' && (
         <div>
@@ -473,31 +497,6 @@ export function OyunClient({
               Bugünün Cevapları
               <span className="ml-2 text-sm font-normal text-fg-subtle">{communityAnswers.length}</span>
             </h2>
-            {/* Filter chips — design style */}
-            <div className="flex gap-1.5 overflow-x-auto scrollbar-none -mx-1 px-1">
-              {([
-                { id: 'top',    label: 'En çok oylanan', icon: <Trophy size={13} /> },
-                { id: 'new',    label: 'Yeni',            icon: <Zap size={13} /> },
-                { id: 'duels',  label: 'Düellolar',       icon: <Swords size={13} /> },
-                { id: 'follow', label: 'Takip',           icon: <Users size={13} /> },
-                { id: 'live',   label: 'Canlı Akış',      icon: <span className="live-dot" style={{ background: '#16a34a', flexShrink: 0 }} /> },
-              ] as const).map(f => (
-                <button
-                  key={f.id}
-                  onClick={() => {
-                    setFeedFilter(f.id)
-                    if (f.id === 'follow') loadFollowFeed()
-                  }}
-                  className={`inline-flex items-center gap-1.5 px-3 h-8 rounded-full text-[13px] font-medium whitespace-nowrap transition-all border ${
-                    feedFilter === f.id
-                      ? 'bg-fg text-bg border-transparent'
-                      : 'bg-surface text-fg-muted border-stroke hover:text-fg'
-                  }`}
-                >
-                  {f.icon}{f.label}
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Top answer highlight removed — now shown in the cards grid below */}
