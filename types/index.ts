@@ -322,6 +322,7 @@ export interface Conversation {
   user: Profile
   last_message: Message
   unread_count: number
+  pending_duel?: string | null
 }
 
 // Points config

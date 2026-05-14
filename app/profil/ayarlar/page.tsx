@@ -5,82 +5,127 @@ export const dynamic = 'force-dynamic'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Button } from '@/components/ui/Button'
-import { Input, Textarea } from '@/components/ui/Input'
-import { Card } from '@/components/ui/Card'
 import { Avatar } from '@/components/ui/Avatar'
+import { Spinner } from '@/components/ui/Spinner'
 import { useToast } from '@/components/ui/Toast'
 import { formatPoints } from '@/lib/utils/formatting'
 import type { Profile } from '@/types'
 import {
-  User, Lock, Trash2, CheckCircle, Star, Flame, Swords,
-  Camera, Gift, Copy, Check, Crown, Bell, Shield, ChevronRight,
-  Palette, EyeOff, Sun, Moon, Monitor,
+  User, Lock, Trash2, Star, Flame, Swords,
+  Bell, Shield, ChevronRight, Sun, Moon, Monitor,
+  Archive, Download, Swords as SwordsIcon,
 } from 'lucide-react'
-import TitleSelector from '@/components/titles/TitleSelector'
-import StreakWidget from '@/components/streak/StreakWidget'
+import Link from 'next/link'
 import NotificationPrefs from '@/components/notifications/NotificationPrefs'
 
-type SettingsTab = 'profil' | 'guvenlik' | 'gorunum' | 'gizlilik' | 'bildirimler' | 'referans' | 'unvanlar' | 'hesap'
+// ─── Toggle ───────────────────────────────────────────────────────────────────
+function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button onClick={() => onChange(!on)} style={{
+      width: 38, height: 22, borderRadius: 99, border: 'none', cursor: 'pointer',
+      background: on ? 'var(--k-blue-500, #2a6cf0)' : 'var(--k-slate-200, #d6dae3)',
+      position: 'relative', transition: 'background .15s', padding: 0, flexShrink: 0,
+    }}>
+      <span style={{
+        position: 'absolute', top: 2, left: on ? 18 : 2, width: 18, height: 18, borderRadius: '50%',
+        background: '#fff', transition: 'left .15s', boxShadow: '0 1px 2px rgba(0,0,0,.2)',
+      }} />
+    </button>
+  )
+}
 
-const TABS: { id: SettingsTab; label: string; icon: React.ReactNode }[] = [
-  { id: 'profil',      label: 'Profil',       icon: <User size={15} /> },
-  { id: 'guvenlik',    label: 'Güvenlik',     icon: <Shield size={15} /> },
-  { id: 'gorunum',     label: 'Görünüm',      icon: <Palette size={15} /> },
-  { id: 'gizlilik',    label: 'Gizlilik',     icon: <EyeOff size={15} /> },
-  { id: 'bildirimler', label: 'Bildirimler',  icon: <Bell size={15} /> },
-  { id: 'referans',    label: 'Referans',     icon: <Gift size={15} /> },
-  { id: 'unvanlar',    label: 'Unvanlar',     icon: <Crown size={15} /> },
-  { id: 'hesap',       label: 'Hesap',        icon: <Trash2 size={15} /> },
-]
+// ─── Setting row ──────────────────────────────────────────────────────────────
+function SettingRow({ icon, label, hint, right, onClick, danger, last }: {
+  icon?: React.ReactNode
+  label: string
+  hint?: string
+  right?: React.ReactNode
+  onClick?: () => void
+  danger?: boolean
+  last?: boolean
+}) {
+  return (
+    <div onClick={onClick} style={{
+      display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px',
+      borderBottom: last ? 'none' : '1px solid var(--stroke, #e4e7ed)',
+      cursor: onClick ? 'pointer' : 'default',
+    }}>
+      {icon && (
+        <span style={{
+          width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+          background: danger ? 'color-mix(in oklab, #dc2626 12%, white)' : 'var(--surface-2, #f0f2f5)',
+          color: danger ? '#dc2626' : 'var(--fg-muted)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>{icon}</span>
+      )}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ font: '500 14px -apple-system, sans-serif', color: danger ? '#dc2626' : 'var(--fg)' }}>{label}</div>
+        {hint && <div style={{ marginTop: 2, font: '400 12px -apple-system, sans-serif', color: 'var(--fg-subtle)' }}>{hint}</div>}
+      </div>
+      {right}
+    </div>
+  )
+}
+
+// ─── Section title ────────────────────────────────────────────────────────────
+function SectionTitle({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{
+      font: '600 11px -apple-system, sans-serif',
+      color: 'var(--fg-subtle)', textTransform: 'uppercase', letterSpacing: '.07em',
+      marginBottom: 8, paddingLeft: 2,
+    }}>{children}</div>
+  )
+}
+
+// ─── Card wrapper ─────────────────────────────────────────────────────────────
+function SCard({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{
+      background: 'var(--surface, #fff)',
+      border: '1px solid var(--stroke, #e4e7ed)',
+      borderRadius: 14, overflow: 'hidden',
+    }}>{children}</div>
+  )
+}
 
 export default function AyarlarPage() {
   const router = useRouter()
   const supabase = createClient()
   const toast = useToast()
 
-  const [activeTab, setActiveTab] = useState<SettingsTab>('profil')
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [pwLoading, setPwLoading] = useState(false)
-  const [avatarUploading, setAvatarUploading] = useState(false)
-  const [form, setForm] = useState({ display_name: '', bio: '', avatar_url: '' })
-  const [pwForm, setPwForm] = useState({ current: '', next: '', confirm: '' })
-  const [deleteConfirm, setDeleteConfirm] = useState('')
-  const [referralCode, setReferralCode] = useState<string | null>(null)
-  const [referralCount, setReferralCount] = useState(0)
-  const [referralInput, setReferralInput] = useState('')
-  const [referralLoading, setReferralLoading] = useState(false)
-  const [codeCopied, setCodeCopied] = useState(false)
+  const [section, setSection] = useState<string | null>(null)
+
+  // Görünüm state
   const [theme, setTheme] = useState<'light' | 'dark' | 'system'>('system')
   const [accentColor, setAccentColor] = useState('#2a6cf0')
   const [fontSize, setFontSize] = useState<'sm' | 'md' | 'lg'>('md')
-  const [privacyPublic, setPrivacyPublic] = useState(true)
-  const [privacyDM, setPrivacyDM] = useState(true)
-  const [privacyLeaderboard, setPrivacyLeaderboard] = useState(true)
+
+  // Bildirimler state
+  const [notif, setNotif] = useState({ duel: true, vote: true, mention: true, follow: false, daily: true })
+
+  // Gizlilik state
+  const [priv, setPriv] = useState({ profile: true, dms: true, leaderboard: true })
+
+  // Profil form
+  const [form, setForm] = useState({ display_name: '', bio: '' })
+  const [saving, setSaving] = useState(false)
+
+  // Şifre form
+  const [pwForm, setPwForm] = useState({ current: '', next: '', confirm: '' })
+  const [pwLoading, setPwLoading] = useState(false)
 
   useEffect(() => {
     const load = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/giris'); return }
-
-      const [profileRes, referralRes] = await Promise.all([
-        supabase.from('profiles').select('*').eq('id', user.id).single(),
-        fetch('/api/referral'),
-      ])
-
-      if (profileRes.data) {
-        setProfile(profileRes.data)
-        setForm({ display_name: profileRes.data.display_name ?? '', bio: profileRes.data.bio ?? '', avatar_url: profileRes.data.avatar_url ?? '' })
+      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single()
+      if (data) {
+        setProfile(data)
+        setForm({ display_name: data.display_name ?? '', bio: data.bio ?? '' })
       }
-
-      if (referralRes.ok) {
-        const rd = await referralRes.json()
-        setReferralCode(rd.referral_code)
-        setReferralCount(rd.referral_count)
-      }
-
       setLoading(false)
     }
     load()
@@ -90,570 +135,308 @@ export default function AyarlarPage() {
     e.preventDefault()
     if (!profile) return
     setSaving(true)
-    const { error } = await supabase
-      .from('profiles')
-      .update({
-        display_name: form.display_name || null,
-        bio: form.bio || null,
-        avatar_url: form.avatar_url || null,
-      })
+    const { error } = await supabase.from('profiles')
+      .update({ display_name: form.display_name || null, bio: form.bio || null })
       .eq('id', profile.id)
-    if (error) toast('Profil kaydedilemedi.', 'error')
-    else toast('Profil güncellendi!', 'success')
+    toast(error ? 'Profil kaydedilemedi.' : 'Profil güncellendi!', error ? 'error' : 'success')
     setSaving(false)
-  }
-
-  async function uploadAvatar(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file || !profile) return
-    if (file.size > 2 * 1024 * 1024) { toast('Dosya en fazla 2MB olabilir.', 'error'); return }
-    if (!file.type.startsWith('image/')) { toast('Sadece resim dosyası yükleyebilirsin.', 'error'); return }
-    setAvatarUploading(true)
-    const ext = file.name.split('.').pop() ?? 'jpg'
-    const path = `avatars/${profile.id}.${ext}`
-    const { error: uploadError } = await supabase.storage
-      .from('avatars')
-      .upload(path, file, { upsert: true, contentType: file.type })
-    if (uploadError) { toast('Yükleme başarısız: ' + uploadError.message, 'error'); setAvatarUploading(false); return }
-    const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(path)
-    setForm(f => ({ ...f, avatar_url: publicUrl + '?t=' + Date.now() }))
-    toast('Fotoğraf yüklendi! Kaydetmeyi unutma.', 'success')
-    setAvatarUploading(false)
   }
 
   async function changePassword(e: React.FormEvent) {
     e.preventDefault()
-    if (!pwForm.current) { toast('Mevcut şifreyi gir.', 'error'); return }
-    if (pwForm.next !== pwForm.confirm) { toast('Yeni şifreler eşleşmiyor.', 'error'); return }
-    if (pwForm.next.length < 8) { toast('Yeni şifre en az 8 karakter olmalı.', 'error'); return }
+    if (pwForm.next !== pwForm.confirm) { toast('Şifreler eşleşmiyor.', 'error'); return }
+    if (pwForm.next.length < 8) { toast('En az 8 karakter.', 'error'); return }
     setPwLoading(true)
     const { data: { user: authUser } } = await supabase.auth.getUser()
-    const email = authUser?.email
-    if (!email) { toast('Oturum hatası.', 'error'); setPwLoading(false); return }
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password: pwForm.current })
+    if (!authUser?.email) { toast('Oturum hatası.', 'error'); setPwLoading(false); return }
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email: authUser.email, password: pwForm.current })
     if (signInError) { toast('Mevcut şifre yanlış.', 'error'); setPwLoading(false); return }
     const { error } = await supabase.auth.updateUser({ password: pwForm.next })
-    if (error) toast('Şifre değiştirilemedi: ' + error.message, 'error')
-    else { toast('Şifre güncellendi!', 'success'); setPwForm({ current: '', next: '', confirm: '' }) }
+    toast(error ? 'Şifre değiştirilemedi.' : 'Şifre güncellendi!', error ? 'error' : 'success')
+    if (!error) setPwForm({ current: '', next: '', confirm: '' })
     setPwLoading(false)
   }
 
-  async function deleteAccount() {
-    if (deleteConfirm !== profile?.username) { toast('Kullanıcı adı eşleşmiyor.', 'error'); return }
-    const res = await fetch('/api/account/delete', { method: 'DELETE' })
-    if (!res.ok) { toast('Hesap silinemedi.', 'error'); return }
-    await supabase.auth.signOut()
-    router.push('/')
-  }
-
-  async function applyReferral() {
-    if (!referralInput.trim()) return
-    setReferralLoading(true)
-    const res = await fetch('/api/referral', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code: referralInput.trim() }),
-    })
-    const data = await res.json()
-    if (res.ok) {
-      toast(`Referans kodu uygulandı! ${data.reward} puan kazandınız`, 'success')
-      setReferralInput('')
-    } else {
-      toast(data.error || 'Referans kodu uygulanamadı.', 'error')
-    }
-    setReferralLoading(false)
-  }
-
-  function copyReferralCode() {
-    if (!referralCode) return
-    navigator.clipboard.writeText(referralCode)
-    setCodeCopied(true)
-    setTimeout(() => setCodeCopied(false), 2000)
-  }
-
   if (loading) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="animate-spin w-8 h-8 border-2 border-primary border-t-transparent rounded-full" />
+    <div className="min-h-screen flex items-center justify-center"><Spinner size="lg" /></div>
+  )
+
+  // ── Expanded profile edit ──
+  if (section === 'profil') return (
+    <div className="max-w-2xl mx-auto px-4 py-6 flex flex-col gap-5">
+      <button onClick={() => setSection(null)} style={{
+        background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center',
+        gap: 6, font: '500 14px -apple-system, sans-serif', color: 'var(--fg-muted)',
+      }}>← Geri</button>
+      <h2 style={{ margin: 0, font: '700 18px -apple-system, sans-serif', color: 'var(--fg)' }}>Profil Bilgileri</h2>
+      <form onSubmit={saveProfile} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <label style={{ font: '500 13px -apple-system, sans-serif', color: 'var(--fg-muted)' }}>Görünen Ad</label>
+          <input value={form.display_name} onChange={e => setForm(f => ({ ...f, display_name: e.target.value }))}
+            maxLength={50} placeholder="Adın Soyadın"
+            style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid var(--stroke)', background: 'var(--surface-2)', color: 'var(--fg)', font: '400 14px -apple-system, sans-serif', outline: 'none' }} />
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <label style={{ font: '500 13px -apple-system, sans-serif', color: 'var(--fg-muted)' }}>Biyografi</label>
+          <textarea value={form.bio} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))}
+            maxLength={160} rows={3} placeholder="Kendin hakkında kısa bir şeyler yaz..."
+            style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid var(--stroke)', background: 'var(--surface-2)', color: 'var(--fg)', font: '400 14px -apple-system, sans-serif', outline: 'none', resize: 'none' }} />
+        </div>
+        <button type="submit" disabled={saving} style={{
+          padding: '11px', borderRadius: 10, border: 'none', cursor: 'pointer',
+          background: 'linear-gradient(135deg, #1442a8, #2a6cf0)', color: '#fff',
+          font: '600 14px -apple-system, sans-serif', opacity: saving ? 0.7 : 1,
+        }}>{saving ? 'Kaydediliyor...' : 'Değişiklikleri Kaydet'}</button>
+      </form>
     </div>
   )
 
-  return (
-    <div className="max-w-2xl mx-auto">
-
-      {/* ── User header ── */}
-      {profile && (
-        <div style={{
-          position: 'relative', overflow: 'hidden',
-          borderBottom: '1px solid var(--stroke)',
-          background: 'var(--surface)',
-          padding: '16px 16px 14px',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div className="shrink-0">
-              <Avatar src={form.avatar_url || profile.avatar_url} username={profile.username} size="lg" />
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ font: '700 16px -apple-system, sans-serif', color: 'var(--fg)' }}>{form.display_name || profile.username}</div>
-              <div style={{ font: '400 12.5px monospace', color: 'var(--fg-subtle)' }}>@{profile.username}</div>
-            </div>
-            <div className="flex items-center gap-4 shrink-0 text-center">
-              <div>
-                <div className="text-sm font-black text-fg flex items-center gap-1 justify-center">
-                  <Star size={11} className="text-amber-400 fill-amber-400" />
-                  {formatPoints(profile.total_points)}
-                </div>
-                <div className="text-[11px] text-fg-subtle">puan</div>
-              </div>
-              {profile.streak_count > 0 && (
-                <div>
-                  <div className="text-sm font-black text-amber-400 flex items-center gap-1 justify-center">
-                    <Flame size={11} />
-                    {profile.streak_count}
-                  </div>
-                  <div className="text-[11px] text-fg-subtle">seri</div>
-                </div>
-              )}
-            </div>
+  // ── Expanded password change ──
+  if (section === 'sifre') return (
+    <div className="max-w-2xl mx-auto px-4 py-6 flex flex-col gap-5">
+      <button onClick={() => setSection(null)} style={{
+        background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center',
+        gap: 6, font: '500 14px -apple-system, sans-serif', color: 'var(--fg-muted)',
+      }}>← Geri</button>
+      <h2 style={{ margin: 0, font: '700 18px -apple-system, sans-serif', color: 'var(--fg)' }}>Şifre Değiştir</h2>
+      <form onSubmit={changePassword} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {[
+          { label: 'Mevcut Şifre', key: 'current' as const, ph: 'Mevcut şifreni gir' },
+          { label: 'Yeni Şifre', key: 'next' as const, ph: 'En az 8 karakter' },
+          { label: 'Yeni Şifre Tekrar', key: 'confirm' as const, ph: 'Şifreyi tekrar gir' },
+        ].map(f => (
+          <div key={f.key} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <label style={{ font: '500 13px -apple-system, sans-serif', color: 'var(--fg-muted)' }}>{f.label}</label>
+            <input type="password" value={pwForm[f.key]} onChange={e => setPwForm(p => ({ ...p, [f.key]: e.target.value }))}
+              placeholder={f.ph}
+              style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid var(--stroke)', background: 'var(--surface-2)', color: 'var(--fg)', font: '400 14px -apple-system, sans-serif', outline: 'none' }} />
           </div>
-        </div>
+        ))}
+        <button type="submit" disabled={pwLoading} style={{
+          padding: '11px', borderRadius: 10, border: '1px solid var(--stroke)', cursor: 'pointer',
+          background: 'var(--surface)', color: 'var(--fg)',
+          font: '600 14px -apple-system, sans-serif', opacity: pwLoading ? 0.7 : 1,
+        }}>{pwLoading ? 'Güncelleniyor...' : 'Şifreyi Güncelle'}</button>
+      </form>
+    </div>
+  )
+
+  // ── Expanded notifications ──
+  if (section === 'bildirimler') return (
+    <div className="max-w-2xl mx-auto px-4 py-6 flex flex-col gap-5">
+      <button onClick={() => setSection(null)} style={{
+        background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center',
+        gap: 6, font: '500 14px -apple-system, sans-serif', color: 'var(--fg-muted)',
+      }}>← Geri</button>
+      <h2 style={{ margin: 0, font: '700 18px -apple-system, sans-serif', color: 'var(--fg)' }}>Bildirim Tercihleri</h2>
+      <NotificationPrefs />
+    </div>
+  )
+
+  // ── Main settings view ──
+  return (
+    <div className="max-w-2xl mx-auto px-4 py-6" style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+      <h1 style={{ margin: 0, font: '700 22px -apple-system, BlinkMacSystemFont, sans-serif', letterSpacing: '-0.02em', color: 'var(--fg)' }}>
+        Ayarlar
+      </h1>
+
+      {/* Account card */}
+      {profile && (
+        <SCard>
+          <div style={{ padding: 16, display: 'flex', alignItems: 'center', gap: 14 }}>
+            <Avatar src={profile.avatar_url} username={profile.username} size="lg" />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ font: '700 16px -apple-system, sans-serif', color: 'var(--fg)' }}>
+                {profile.display_name || profile.username}
+              </div>
+              <div style={{ font: '400 12.5px Geist Mono, monospace', color: 'var(--fg-subtle)' }}>
+                @{profile.username}
+              </div>
+            </div>
+            <button
+              onClick={() => setSection('profil')}
+              style={{
+                padding: '6px 14px', height: 32, borderRadius: 999,
+                border: '1px solid var(--stroke)', background: 'var(--surface)',
+                color: 'var(--fg-muted)', font: '500 12.5px -apple-system, sans-serif', cursor: 'pointer',
+              }}
+            >Profili düzenle</button>
+          </div>
+        </SCard>
       )}
 
-      {/* ── Tab bar ── */}
-      <div role="tablist" style={{
-        display: 'flex', borderBottom: '1px solid var(--stroke)',
-        overflowX: 'auto', background: 'var(--surface)',
-        position: 'sticky', top: 54, zIndex: 10,
-        scrollbarWidth: 'none',
-      }}>
-        {TABS.map(tab => (
-          <button
-            key={tab.id}
-            role="tab"
-            aria-selected={activeTab === tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            style={{
-              flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6,
-              padding: '10px 16px',
-              font: `${activeTab === tab.id ? 600 : 500} 13px -apple-system, sans-serif`,
-              color: tab.id === 'hesap'
-                ? '#dc2626'
-                : activeTab === tab.id
-                  ? 'var(--fg)'
-                  : 'var(--fg-subtle)',
-              background: 'transparent', border: 'none',
-              borderBottom: `2px solid ${activeTab === tab.id ? 'var(--k-blue-500, #2a6cf0)' : 'transparent'}`,
-              cursor: 'pointer', whiteSpace: 'nowrap',
-              marginLeft: tab.id === 'hesap' ? 'auto' : undefined,
-            }}
-          >
-            {tab.icon}
-            <span className="hidden sm:inline">{tab.label}</span>
-          </button>
-        ))}
-      </div>
+      {/* 2-column grid on desktop */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
 
-      {/* ── Tab content ── */}
-      <div className="px-4 py-6">
-
-        {/* ─────────────────── PROFIL ─────────────────── */}
-        {activeTab === 'profil' && (
-          <div className="space-y-5">
-            <div>
-              <h2 className="text-base font-bold text-fg mb-0.5">Profil Bilgileri</h2>
-              <p className="text-sm text-fg-subtle">Görünen adın, biyografin ve profil fotoğrafın</p>
-            </div>
-
-            <form onSubmit={saveProfile} className="space-y-4">
-              {/* Avatar */}
-              <div className="flex items-center gap-4 p-4 bg-surface rounded-xl border border-stroke">
-                <div className="relative shrink-0">
-                  <Avatar src={form.avatar_url || profile?.avatar_url} username={profile?.username || '?'} size="lg" />
-                  <label className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-primary flex items-center justify-center cursor-pointer shadow-lg hover:opacity-80 transition-opacity">
-                    {avatarUploading
-                      ? <div className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin" />
-                      : <Camera size={11} className="text-white" />
-                    }
-                    <input type="file" accept="image/*" className="sr-only" onChange={uploadAvatar} disabled={avatarUploading} />
-                  </label>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-fg mb-1">Profil Fotoğrafı</p>
-                  <Input
-                    placeholder="ya da resim URL'si yapıştır..."
-                    value={form.avatar_url}
-                    onChange={e => setForm(f => ({ ...f, avatar_url: e.target.value }))}
-                    type="url"
-                  />
-                  <p className="text-xs text-fg-subtle mt-1">Max 2MB · JPG, PNG, GIF, WebP</p>
-                </div>
-              </div>
-
-              <Input
-                label="Görünen Ad"
-                placeholder="Adın Soyadın"
-                value={form.display_name}
-                onChange={e => setForm(f => ({ ...f, display_name: e.target.value }))}
-                maxLength={50}
-              />
-              <Textarea
-                label="Biyografi"
-                placeholder="Kendin hakkında kısa bir şeyler yaz..."
-                value={form.bio}
-                onChange={e => setForm(f => ({ ...f, bio: e.target.value }))}
-                rows={3}
-                maxLength={160}
-                charCount={form.bio.length}
-                maxChars={160}
-              />
-
-              <Button type="submit" loading={saving} className="btn-gradient w-full">
-                <CheckCircle size={15} />
-                Değişiklikleri Kaydet
-              </Button>
-            </form>
-
-            {/* Quick links */}
-            {profile && (
-              <div className="flex gap-3 pt-2">
-                <a href={`/profil/${profile.username}`} className="flex-1">
-                  <Button variant="secondary" className="w-full" size="sm">
-                    <User size={13} />
-                    Profilimi Gör
-                  </Button>
-                </a>
-                <a href="/oyun" className="flex-1">
-                  <Button className="w-full btn-gradient" size="sm">
-                    <Swords size={13} />
-                    Oynamaya Git
-                  </Button>
-                </a>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* ─────────────────── GÖRÜNÜM ─────────────────── */}
-        {activeTab === 'gorunum' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <div>
-              <h2 style={{ margin: 0, font: '700 16px -apple-system, sans-serif', color: 'var(--fg)' }}>Görünüm</h2>
-              <p style={{ margin: '4px 0 0', font: '400 13px -apple-system, sans-serif', color: 'var(--fg-subtle)' }}>Tema ve yazı tipi ayarları</p>
-            </div>
-
-            {/* Theme toggle */}
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--stroke)', borderRadius: 16, padding: 18 }}>
-              <p style={{ margin: '0 0 12px', font: '600 14px -apple-system, sans-serif', color: 'var(--fg)' }}>Tema</p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+        {/* Görünüm */}
+        <div>
+          <SectionTitle>Görünüm</SectionTitle>
+          <SCard>
+            <div style={{ padding: 14 }}>
+              <div style={{ font: '500 13px -apple-system, sans-serif', color: 'var(--fg-muted)', marginBottom: 10 }}>Tema</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
                 {([
-                  { id: 'light' as const, label: 'Açık', icon: <Sun size={18} /> },
-                  { id: 'dark' as const, label: 'Koyu', icon: <Moon size={18} /> },
-                  { id: 'system' as const, label: 'Sistem', icon: <Monitor size={18} /> },
+                  { id: 'light' as const, label: 'Açık', bg: '#f7f8fa', fg: '#0f1320', icon: <Sun size={16} /> },
+                  { id: 'dark' as const, label: 'Koyu', bg: '#0f1320', fg: '#f7f8fa', icon: <Moon size={16} /> },
+                  { id: 'system' as const, label: 'Sistem', bg: 'linear-gradient(90deg,#f7f8fa 50%,#0f1320 50%)', fg: '#646c7e', icon: <Monitor size={16} /> },
                 ]).map(t => (
                   <button key={t.id} onClick={() => setTheme(t.id)} style={{
-                    padding: '14px 10px', borderRadius: 12, border: 'none', cursor: 'pointer',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                    background: theme === t.id ? 'var(--k-blue-50, #eef4ff)' : 'var(--surface-2, #f7f8fa)',
-                    outline: theme === t.id ? '2px solid var(--k-blue-500, #2a6cf0)' : '2px solid transparent',
-                    color: theme === t.id ? 'var(--k-blue-600, #1a56d6)' : 'var(--fg-muted)',
-                    transition: 'all .12s',
+                    padding: 0, height: 64, borderRadius: 10, cursor: 'pointer',
+                    background: t.bg, position: 'relative', overflow: 'hidden',
+                    border: `2px solid ${theme === t.id ? 'var(--k-blue-500,#2a6cf0)' : 'var(--stroke,#e4e7ed)'}`,
+                    transition: 'border-color .12s',
                   }}>
-                    {t.icon}
-                    <span style={{ font: '600 12px -apple-system, sans-serif' }}>{t.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Accent color */}
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--stroke)', borderRadius: 16, padding: 18 }}>
-              <p style={{ margin: '0 0 12px', font: '600 14px -apple-system, sans-serif', color: 'var(--fg)' }}>Renk Vurgusu</p>
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                {['#2a6cf0','#8b5cf6','#ec4899','#16a34a','#f97316','#0ea5e9','#dc2626'].map(c => (
-                  <button key={c} onClick={() => setAccentColor(c)} style={{
-                    width: 36, height: 36, borderRadius: '50%', background: c, border: 'none', cursor: 'pointer',
-                    outline: accentColor === c ? `3px solid ${c}` : '3px solid transparent',
-                    outlineOffset: 2, transition: 'outline .12s',
-                  }} />
-                ))}
-              </div>
-            </div>
-
-            {/* Font size */}
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--stroke)', borderRadius: 16, padding: 18 }}>
-              <p style={{ margin: '0 0 12px', font: '600 14px -apple-system, sans-serif', color: 'var(--fg)' }}>Yazı Boyutu</p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-                {([
-                  { id: 'sm' as const, label: 'Küçük', size: '13px' },
-                  { id: 'md' as const, label: 'Orta', size: '15px' },
-                  { id: 'lg' as const, label: 'Büyük', size: '17px' },
-                ]).map(f => (
-                  <button key={f.id} onClick={() => setFontSize(f.id)} style={{
-                    padding: '12px 10px', borderRadius: 12, border: 'none', cursor: 'pointer',
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                    background: fontSize === f.id ? 'var(--k-blue-50, #eef4ff)' : 'var(--surface-2, #f7f8fa)',
-                    outline: fontSize === f.id ? '2px solid var(--k-blue-500, #2a6cf0)' : '2px solid transparent',
-                    color: fontSize === f.id ? 'var(--k-blue-600, #1a56d6)' : 'var(--fg-muted)',
-                    transition: 'all .12s',
-                  }}>
-                    <span style={{ font: `600 ${f.size} -apple-system, sans-serif` }}>Aa</span>
-                    <span style={{ font: '500 11px -apple-system, sans-serif' }}>{f.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ─────────────────── GİZLİLİK ─────────────────── */}
-        {activeTab === 'gizlilik' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-            <div>
-              <h2 style={{ margin: 0, font: '700 16px -apple-system, sans-serif', color: 'var(--fg)' }}>Gizlilik</h2>
-              <p style={{ margin: '4px 0 0', font: '400 13px -apple-system, sans-serif', color: 'var(--fg-subtle)' }}>Hesap görünürlüğünü ve paylaşımı yönet</p>
-            </div>
-
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--stroke)', borderRadius: 16, overflow: 'hidden' }}>
-              {[
-                { label: 'Profil herkese açık', desc: 'Profilini giriş yapmayan kullanıcılar da görebilir', state: privacyPublic, set: setPrivacyPublic },
-                { label: 'Herkesten DM al', desc: 'Takip etmediğin kişiler de sana mesaj gönderebilir', state: privacyDM, set: setPrivacyDM },
-                { label: 'Liderlik tablosunda görün', desc: 'Puanların genel liderlik sıralamasında gösterilir', state: privacyLeaderboard, set: setPrivacyLeaderboard },
-              ].map((item, i, arr) => (
-                <div key={item.label} style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  padding: '16px 18px',
-                  borderBottom: i < arr.length - 1 ? '1px solid var(--stroke)' : 'none',
-                }}>
-                  <div>
-                    <p style={{ margin: 0, font: '600 14px -apple-system, sans-serif', color: 'var(--fg)' }}>{item.label}</p>
-                    <p style={{ margin: '2px 0 0', font: '400 12px -apple-system, sans-serif', color: 'var(--fg-subtle)' }}>{item.desc}</p>
-                  </div>
-                  <button
-                    onClick={() => item.set(!item.state)}
-                    style={{
-                      width: 44, height: 24, borderRadius: 99, border: 'none', cursor: 'pointer',
-                      background: item.state ? 'var(--k-blue-500, #2a6cf0)' : 'var(--stroke, #e4e7ed)',
-                      position: 'relative', transition: 'background .15s', flexShrink: 0,
-                    }}
-                  >
                     <span style={{
-                      position: 'absolute', top: 2, left: item.state ? 22 : 2,
-                      width: 20, height: 20, borderRadius: '50%', background: '#fff',
-                      transition: 'left .15s', boxShadow: '0 1px 3px rgba(0,0,0,.2)',
-                    }} />
+                      position: 'absolute', bottom: 6, left: 0, right: 0, textAlign: 'center',
+                      font: '600 11px -apple-system, sans-serif', color: t.fg,
+                    }}>{t.label}</span>
+                    {theme === t.id && (
+                      <span style={{
+                        position: 'absolute', top: 4, right: 4, width: 16, height: 16, borderRadius: '50%',
+                        background: 'var(--k-blue-500,#2a6cf0)', color: '#fff',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 900,
+                      }}>✓</span>
+                    )}
                   </button>
-                </div>
-              ))}
-            </div>
-
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--stroke)', borderRadius: 16, padding: 18 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div>
-                  <p style={{ margin: 0, font: '600 14px -apple-system, sans-serif', color: 'var(--fg)' }}>Engellenenler</p>
-                  <p style={{ margin: '2px 0 0', font: '400 12px -apple-system, sans-serif', color: 'var(--fg-subtle)' }}>Engellediğin kullanıcıları yönet</p>
-                </div>
-                <span style={{ font: '500 12px -apple-system, sans-serif', color: 'var(--k-blue-500)', cursor: 'pointer' }}>
-                  Görüntüle →
-                </span>
+                ))}
               </div>
             </div>
-          </div>
-        )}
-
-        {/* ─────────────────── GÜVENLİK ─────────────────── */}
-        {activeTab === 'guvenlik' && (
-          <div className="space-y-5">
-            <div>
-              <h2 className="text-base font-bold text-fg mb-0.5">Güvenlik</h2>
-              <p className="text-sm text-fg-subtle">Hesabını güvende tut</p>
-            </div>
-
-            <Card>
-              <div className="flex items-center gap-2.5 mb-5">
-                <div className="w-8 h-8 rounded-lg bg-primary/15 flex items-center justify-center">
-                  <Lock size={15} className="text-primary/70" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-fg">Şifre Değiştir</p>
-                  <p className="text-xs text-fg-subtle">En az 8 karakterli yeni bir şifre belirle</p>
-                </div>
-              </div>
-              <form onSubmit={changePassword} className="space-y-4">
-                <Input type="password" label="Mevcut Şifre" placeholder="Mevcut şifreni gir"
-                  value={pwForm.current} onChange={e => setPwForm(f => ({ ...f, current: e.target.value }))} />
-                <Input type="password" label="Yeni Şifre" placeholder="En az 8 karakter"
-                  value={pwForm.next} onChange={e => setPwForm(f => ({ ...f, next: e.target.value }))} />
-                <Input type="password" label="Yeni Şifre Tekrar" placeholder="Şifreyi tekrar gir"
-                  value={pwForm.confirm} onChange={e => setPwForm(f => ({ ...f, confirm: e.target.value }))} />
-                <Button type="submit" loading={pwLoading} variant="secondary" className="w-full">
-                  Şifreyi Güncelle
-                </Button>
-              </form>
-            </Card>
-
-            {/* Email info */}
-            <div className="p-4 bg-surface-2 rounded-xl border border-stroke">
-              <p className="text-xs font-medium text-fg-subtle uppercase tracking-wider mb-1">E-posta Adresi</p>
-              <p className="text-sm text-fg">Oturum açılan e-posta adresi Supabase üzerinden yönetilir.</p>
-            </div>
-          </div>
-        )}
-
-        {/* ─────────────────── BİLDİRİMLER ─────────────────── */}
-        {activeTab === 'bildirimler' && (
-          <div className="space-y-5">
-            <div>
-              <h2 className="text-base font-bold text-fg mb-0.5">Bildirim Tercihleri</h2>
-              <p className="text-sm text-fg-subtle">Hangi bildirimleri almak istediğini seç</p>
-            </div>
-            <NotificationPrefs />
-          </div>
-        )}
-
-        {/* ─────────────────── REFERANS ─────────────────── */}
-        {activeTab === 'referans' && (
-          <div className="space-y-5">
-            <div>
-              <h2 className="text-base font-bold text-fg mb-0.5">Arkadaşını Davet Et</h2>
-              <p className="text-sm text-fg-subtle">Her başarılı davet için her ikiniz de 100 puan kazanır</p>
-            </div>
-
-            {referralCode && (
-              <Card>
-                <p className="text-xs font-medium text-fg-subtle uppercase tracking-wider mb-3">Referans Kodun</p>
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex-1 bg-surface-2 border border-stroke rounded-xl px-4 py-3 font-mono text-xl font-black text-primary tracking-widest text-center">
-                    {referralCode}
-                  </div>
-                  <button
-                    onClick={copyReferralCode}
-                    className="p-3 rounded-xl bg-primary text-white hover:opacity-80 transition-opacity"
-                    title="Kodu kopyala"
-                  >
-                    {codeCopied ? <Check size={18} /> : <Copy size={18} />}
-                  </button>
-                </div>
-
-                <p className="text-xs font-medium text-fg-subtle uppercase tracking-wider mb-2">Davet Linkin</p>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-surface-2 border border-stroke rounded-lg px-3 py-2 text-xs text-fg-subtle truncate font-mono">
-                    {typeof window !== 'undefined' ? `${window.location.origin}/giris?ref=${referralCode}` : `/giris?ref=${referralCode}`}
-                  </div>
-                  <button
-                    onClick={() => {
-                      const url = `${window.location.origin}/giris?ref=${referralCode}`
-                      navigator.clipboard.writeText(url)
-                      setCodeCopied(true)
-                      setTimeout(() => setCodeCopied(false), 2000)
-                    }}
-                    className="p-2.5 rounded-lg bg-primary text-white hover:opacity-80 transition-opacity shrink-0"
-                  >
-                    {codeCopied ? <Check size={14} /> : <Copy size={14} />}
-                  </button>
-                </div>
-
-                {referralCount > 0 && (
-                  <p className="text-sm text-fg-subtle mt-4 text-center">
-                    Şimdiye kadar <strong className="text-amber-400">{referralCount}</strong> kişiyi davet ettin
-                  </p>
-                )}
-              </Card>
-            )}
-
-            <Card>
-              <p className="text-sm font-medium text-fg mb-1">Bir davet koduyla mı katıldın?</p>
-              <p className="text-xs text-fg-subtle mb-3">Referans kodunu uygula ve puan kazan</p>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Referans kodunu gir"
-                  value={referralInput}
-                  onChange={e => setReferralInput(e.target.value.toUpperCase())}
-                  className="flex-1 font-mono tracking-widest"
-                  maxLength={8}
-                />
-                <Button onClick={applyReferral} loading={referralLoading} disabled={!referralInput.trim()} variant="secondary">
-                  Uygula
-                </Button>
-              </div>
-            </Card>
-          </div>
-        )}
-
-        {/* ─────────────────── UNVANLAR ─────────────────── */}
-        {activeTab === 'unvanlar' && profile && (
-          <div className="space-y-5">
-            <div>
-              <h2 className="text-base font-bold text-fg mb-0.5">Unvanlar & Seri</h2>
-              <p className="text-sm text-fg-subtle">Aktif unvanını seç, serisini koru</p>
-            </div>
-            <TitleSelector userId={profile.id} currentTitle={(profile as any).active_title} />
-            <StreakWidget
-              streak={profile.streak_count ?? 0}
-              freezeCount={(profile as any).streak_freeze_count ?? 0}
-              userId={profile.id}
+            <SettingRow
+              icon={<span style={{ fontSize: 14, fontWeight: 700 }}>⬤</span>}
+              label="Renk vurgusu"
+              hint="Mavi tonları aktif"
+              right={<ChevronRight size={16} style={{ color: 'var(--fg-subtle)' }} />}
             />
-          </div>
-        )}
+            <SettingRow
+              icon={<span style={{ font: '700 14px Geist,sans-serif', color: 'var(--fg-muted)' }}>Aa</span>}
+              label="Yazı boyutu"
+              hint={fontSize === 'sm' ? 'Küçük' : fontSize === 'lg' ? 'Büyük' : 'Normal'}
+              right={<ChevronRight size={16} style={{ color: 'var(--fg-subtle)' }} />}
+              last
+            />
+          </SCard>
+        </div>
 
-        {/* ─────────────────── HESAP ─────────────────── */}
-        {activeTab === 'hesap' && (
-          <div className="space-y-5">
-            <div>
-              <h2 className="text-base font-bold text-fg mb-0.5">Hesap Yönetimi</h2>
-              <p className="text-sm text-fg-subtle">Hesabınla ilgili kritik işlemler</p>
-            </div>
+        {/* Bildirimler */}
+        <div>
+          <SectionTitle>Bildirimler</SectionTitle>
+          <SCard>
+            <SettingRow
+              icon={<SwordsIcon size={16} />}
+              label="Düello çağrıları"
+              hint="Biri seni düelloya davet ettiğinde"
+              right={<Toggle on={notif.duel} onChange={v => setNotif({ ...notif, duel: v })} />}
+            />
+            <SettingRow
+              icon={<Star size={16} />}
+              label="Oy bildirimleri"
+              hint="Cevabın oy aldığında"
+              right={<Toggle on={notif.vote} onChange={v => setNotif({ ...notif, vote: v })} />}
+            />
+            <SettingRow
+              icon={<span style={{ font: '700 14px Geist,sans-serif' }}>@</span>}
+              label="Bahsetmeler"
+              hint="Biri seni etiketlediğinde"
+              right={<Toggle on={notif.mention} onChange={v => setNotif({ ...notif, mention: v })} />}
+            />
+            <SettingRow
+              icon={<User size={16} />}
+              label="Yeni takipçi"
+              right={<Toggle on={notif.follow} onChange={v => setNotif({ ...notif, follow: v })} />}
+            />
+            <SettingRow
+              icon={<Bell size={16} />}
+              label="Günlük senaryo hatırlatıcı"
+              hint="Her gün 09:00'da"
+              right={<Toggle on={notif.daily} onChange={v => setNotif({ ...notif, daily: v })} />}
+              last
+            />
+          </SCard>
+        </div>
 
-            {/* Sign out */}
-            <Card>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-bold text-fg">Oturumu Kapat</p>
-                  <p className="text-xs text-fg-subtle mt-0.5">Tüm cihazlarda oturumunu kapat</p>
-                </div>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={async () => {
-                    await supabase.auth.signOut()
-                    router.push('/')
-                  }}
-                >
-                  Çıkış
-                </Button>
-              </div>
-            </Card>
+        {/* Gizlilik */}
+        <div>
+          <SectionTitle>Gizlilik</SectionTitle>
+          <SCard>
+            <SettingRow
+              icon={<Shield size={16} />}
+              label="Profil herkese açık"
+              hint="Kapatırsan sadece takip ettiklerin görür"
+              right={<Toggle on={priv.profile} onChange={v => setPriv({ ...priv, profile: v })} />}
+            />
+            <SettingRow
+              icon={<Bell size={16} />}
+              label="DM herkesten al"
+              right={<Toggle on={priv.dms} onChange={v => setPriv({ ...priv, dms: v })} />}
+            />
+            <SettingRow
+              icon={<Star size={16} />}
+              label="Liderlik tablosunda görün"
+              right={<Toggle on={priv.leaderboard} onChange={v => setPriv({ ...priv, leaderboard: v })} />}
+            />
+            <SettingRow
+              icon={<Trash2 size={16} />}
+              label="Engellenenler"
+              hint="0 kullanıcı engellendi"
+              right={<ChevronRight size={16} style={{ color: 'var(--fg-subtle)' }} />}
+              onClick={() => {}}
+              last
+            />
+          </SCard>
+        </div>
 
-            {/* Danger zone */}
-            <div className="border border-red-500/25 rounded-2xl overflow-hidden">
-              <div className="bg-red-500/8 border-b border-red-500/20 px-4 py-3 flex items-center gap-2">
-                <Trash2 size={14} className="text-red-400" />
-                <span className="text-sm font-bold text-red-400">Tehlikeli Bölge</span>
-              </div>
-              <div className="p-4 space-y-4">
-                <p className="text-sm text-fg-muted">
-                  Hesabını silmek için kullanıcı adını (<strong className="text-fg">{profile?.username}</strong>) yaz.
-                  Tüm verilerinin kalıcı olarak silineceğini unutma.
-                </p>
-                <div className="flex gap-3">
-                  <Input
-                    placeholder={`${profile?.username} yaz`}
-                    value={deleteConfirm}
-                    onChange={e => setDeleteConfirm(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button
-                    variant="danger"
-                    disabled={deleteConfirm !== profile?.username}
-                    onClick={deleteAccount}
-                  >
-                    Sil
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
+        {/* Hesap */}
+        <div>
+          <SectionTitle>Hesap</SectionTitle>
+          <SCard>
+            <SettingRow
+              icon={<User size={16} />}
+              label="Profili düzenle"
+              hint="Görünen ad ve biyografi"
+              right={<ChevronRight size={16} style={{ color: 'var(--fg-subtle)' }} />}
+              onClick={() => setSection('profil')}
+            />
+            <SettingRow
+              icon={<Lock size={16} />}
+              label="Şifre değiştir"
+              right={<ChevronRight size={16} style={{ color: 'var(--fg-subtle)' }} />}
+              onClick={() => setSection('sifre')}
+            />
+            <SettingRow
+              icon={<Bell size={16} />}
+              label="Bildirim tercihleri"
+              right={<ChevronRight size={16} style={{ color: 'var(--fg-subtle)' }} />}
+              onClick={() => setSection('bildirimler')}
+            />
+            <SettingRow
+              icon={<Download size={16} />}
+              label="Verilerimi indir"
+              hint="GDPR / KVKK"
+              right={<ChevronRight size={16} style={{ color: 'var(--fg-subtle)' }} />}
+            />
+            <SettingRow
+              icon={<User size={16} />}
+              label="Oturumu kapat"
+              right={<ChevronRight size={16} style={{ color: 'var(--fg-subtle)' }} />}
+              onClick={async () => { await supabase.auth.signOut(); router.push('/') }}
+            />
+            <SettingRow
+              icon={<Trash2 size={16} />}
+              label="Hesabı sil"
+              hint="Bu işlem geri alınamaz"
+              danger
+              right={<ChevronRight size={16} style={{ color: '#dc2626' }} />}
+              onClick={() => router.push('/profil/ayarlar/hesap-sil')}
+              last
+            />
+          </SCard>
+        </div>
       </div>
+
+      <p style={{ font: '400 12px Geist Mono, monospace', color: 'var(--fg-subtle)', textAlign: 'center', paddingBottom: 8 }}>
+        Kapisio · Türkiye · KVKK uyumlu · SSL korumalı
+      </p>
     </div>
   )
 }

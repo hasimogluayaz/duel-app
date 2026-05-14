@@ -49,7 +49,22 @@ export async function GET() {
       ])
 
       if (!profile || !lastMsgs?.[0]) return null
-      return { user: profile, last_message: lastMsgs[0], unread_count: unread ?? 0 }
+
+      // Check for pending duel invite between these two users
+      const { data: pendingDuel } = await supabase
+        .from('duels')
+        .select('id, scenario:scenarios(content)')
+        .or(`and(challenger_id.eq.${user.id},challenged_id.eq.${partnerId}),and(challenger_id.eq.${partnerId},challenged_id.eq.${user.id})`)
+        .eq('status', 'pending')
+        .limit(1)
+        .maybeSingle()
+
+      const sc = pendingDuel?.scenario
+      const pending_duel = pendingDuel
+        ? (Array.isArray(sc) ? sc[0]?.content : (sc as any)?.content) ?? 'Bekleyen düello çağrısı'
+        : null
+
+      return { user: profile, last_message: lastMsgs[0], unread_count: unread ?? 0, pending_duel }
     })
   )
 

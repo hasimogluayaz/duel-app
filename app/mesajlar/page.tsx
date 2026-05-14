@@ -9,7 +9,7 @@ import { Avatar } from '@/components/ui/Avatar'
 import { Spinner } from '@/components/ui/Spinner'
 import { timeAgo } from '@/lib/utils/formatting'
 import type { Conversation } from '@/types'
-import { MessageCircle, Search } from 'lucide-react'
+import { MessageCircle, Search, Swords } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils/cn'
 
@@ -146,6 +146,17 @@ export default function MesajlarPage() {
                     <p className={cn('text-[13px] truncate', c.unread_count > 0 ? 'text-fg-muted font-medium' : 'text-fg-subtle')}>
                       {c.last_message.content}
                     </p>
+                    {c.pending_duel && (
+                      <div style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 4,
+                        marginTop: 3, padding: '2px 7px', borderRadius: 99,
+                        background: 'var(--k-blue-50, #eef4ff)',
+                        font: '600 10.5px -apple-system, sans-serif',
+                        color: 'var(--k-blue-600, #1442a8)',
+                      }}>
+                        <Swords size={10} /> Bekleyen düello çağrısı
+                      </div>
+                    )}
                   </div>
                 </div>
               </Link>
