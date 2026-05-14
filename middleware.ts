@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
 
   const isProtected = protectedRoutes.some(route => pathname.startsWith(route))
-  const isAuthRoute = authRoutes.some(route => pathname.startsWith(route))
+  const isAuthRoute = authRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))
   const isProfileCompletion = pathname.startsWith('/auth/tamamla')
 
   // Logged-in user with incomplete Google profile → force them to /auth/tamamla
