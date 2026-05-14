@@ -12,6 +12,7 @@ import type { Message, Profile } from '@/types'
 import { ArrowLeft, Send, Swords, CheckCircle, XCircle } from 'lucide-react'
 import Link from 'next/link'
 import { cn } from '@/lib/utils/cn'
+import { ConversationList } from '../ConversationList'
 
 function DuelInviteCard({ msg, isMine, onAccept, onDecline }: {
   msg: Message
@@ -175,15 +176,15 @@ export default function ConversationPage() {
 
   if (!partner) return null
 
-  return (
-    <div className="max-w-xl mx-auto flex flex-col h-[calc(100vh-4rem)]">
-
+  // Shared chat panel (used in both mobile and desktop)
+  const chatPanel = (
+    <div className="flex flex-col flex-1 overflow-hidden h-full">
       {/* Header */}
       <div
-        className="flex items-center gap-3 px-4 py-3 border-b border-stroke bg-surface/90 backdrop-blur-md sticky z-10"
+        className="flex items-center gap-3 px-4 py-3 border-b border-stroke bg-surface/90 backdrop-blur-md shrink-0 sticky z-10 lg:static"
         style={{ top: 54 }}
       >
-        <Link href="/mesajlar" className="p-2 -ml-2 rounded-xl hover:bg-surface-2 transition-colors text-fg-muted hover:text-fg shrink-0">
+        <Link href="/mesajlar" className="p-2 -ml-2 rounded-xl hover:bg-surface-2 transition-colors text-fg-muted hover:text-fg shrink-0 lg:hidden">
           <ArrowLeft size={18} />
         </Link>
         <Link href={`/profil/${partner.username}`} className="flex items-center gap-3 flex-1 min-w-0 hover:opacity-80 transition-opacity">
@@ -259,7 +260,7 @@ export default function ConversationPage() {
       </div>
 
       {/* Input */}
-      <form onSubmit={sendMessage} className="flex items-end gap-2 px-4 py-3 border-t border-stroke bg-surface/80 backdrop-blur-md">
+      <form onSubmit={sendMessage} className="flex items-end gap-2 px-4 py-3 border-t border-stroke bg-surface/80 backdrop-blur-md shrink-0">
         <textarea
           value={input}
           onChange={e => setInput(e.target.value)}
@@ -285,5 +286,27 @@ export default function ConversationPage() {
         </button>
       </form>
     </div>
+  )
+
+  return (
+    <>
+      {/* ── DESKTOP split-view (lg+) ── */}
+      <div className="hidden lg:flex h-[calc(100vh-4rem)] overflow-hidden">
+        {/* Left pane: conversation list */}
+        <div className="w-80 shrink-0 border-r border-stroke bg-surface flex flex-col overflow-hidden">
+          <div className="px-4 py-4 border-b border-stroke shrink-0">
+            <h1 className="text-[17px] font-black text-fg">Mesajlar</h1>
+          </div>
+          <ConversationList activeUsername={username} />
+        </div>
+        {/* Right pane: active chat */}
+        {chatPanel}
+      </div>
+
+      {/* ── MOBILE: full-width chat ── */}
+      <div className="lg:hidden flex flex-col h-[calc(100vh-4rem)]">
+        {chatPanel}
+      </div>
+    </>
   )
 }
