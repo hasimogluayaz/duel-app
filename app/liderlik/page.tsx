@@ -9,7 +9,7 @@ import { formatPoints } from '@/lib/utils/formatting'
 import { getTier } from '@/lib/utils/tier'
 import Link from 'next/link'
 
-type Period = 'daily' | 'weekly' | 'monthly' | 'all_time' | 'friends'
+type Period = 'daily' | 'weekly' | 'monthly' | 'all_time'
 
 interface Entry {
   rank: number
@@ -31,7 +31,6 @@ const PERIOD_LABELS: Record<Period, string> = {
   weekly: 'Hafta',
   monthly: 'Ay',
   all_time: 'Tüm Zaman',
-  friends: 'Arkadaşlar',
 }
 
 export default function LiderlikPage() {

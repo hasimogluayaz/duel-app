@@ -39,7 +39,7 @@ export default function ProfilClient({
   duelCount, winCount, achievements, recentDuels, recentAnswers,
   userScenarios = [], pinnedAnswers = [],
 }: Props) {
-  const [activeTab, setActiveTab] = useState<Tab>('genel')
+  const [activeTab, setActiveTab] = useState<Tab>('vitrin')
   const [copied, setCopied] = useState(false)
   const [localPinned, setLocalPinned] = useState<any[]>(pinnedAnswers)
   const [pinning, setPinning] = useState<string | null>(null)
@@ -78,14 +78,11 @@ export default function ProfilClient({
   }
 
   const tabs: { id: Tab; label: string }[] = [
-    ...(localPinned.length > 0 || isOwnProfile ? [{ id: 'vitrin' as Tab, label: 'Vitrin' }] : []),
-    { id: 'genel', label: 'Genel' },
-    { id: 'duellolar', label: 'Düellolar' },
+    { id: 'vitrin', label: 'Vitrin' },
     { id: 'cevaplar', label: 'Cevaplar' },
+    { id: 'duellolar', label: 'Düellolar' },
     ...(userScenarios.length > 0 || isOwnProfile ? [{ id: 'senaryolar' as Tab, label: 'Senaryolar' }] : []),
     { id: 'basarimlar', label: 'Başarımlar' },
-    { id: 'istatistik', label: 'İstatistik' },
-    { id: 'aktivite', label: 'Aktivite' },
   ]
 
   return (

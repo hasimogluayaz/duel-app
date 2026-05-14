@@ -92,7 +92,7 @@ export default function BildirimlerPage() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(true)
   const [userId, setUserId] = useState<string | null>(null)
-  const [tab, setTab] = useState<'all' | 'duel' | 'mention' | 'system'>('all')
+  const [tab, setTab] = useState<'all' | 'duel' | 'mention'>('all')
 
   useEffect(() => {
     const load = async () => {
@@ -166,7 +166,6 @@ export default function BildirimlerPage() {
           { id: 'all', label: 'Tümü' },
           { id: 'duel', label: 'Düellolar' },
           { id: 'mention', label: 'Bahsetmeler' },
-          { id: 'system', label: 'Sistem' },
         ] as const).map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
             padding: '8px 14px', borderRadius: 999,
