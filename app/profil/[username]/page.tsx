@@ -48,24 +48,21 @@ export default async function ProfilPage({ params }: Props) {
   const [
     { count: duelCount },
     { count: winCount },
-    { data: achievements },
     { data: recentDuels },
     { data: recentAnswers },
-    { count: followerCount },
-    { count: followingCount },
-    { data: userScenarios },
+    { count: answerCount },
+    { data: voteAgg },
   ] = await Promise.all([
     supabase.from('duels').select('*', { count: 'exact', head: true })
       .or(`challenger_id.eq.${profile.id},challenged_id.eq.${profile.id}`)
       .eq('status', 'completed'),
     supabase.from('duels').select('*', { count: 'exact', head: true })
       .eq('winner_id', profile.id),
-    supabase.from('achievements').select('*').eq('user_id', profile.id),
     supabase.from('duels').select(`
       id, share_token, status, created_at, winner_id,
       challenger_id, challenged_id,
-      challenger:profiles!duels_challenger_id_fkey(username, display_name, avatar_url, total_points),
-      challenged:profiles!duels_challenged_id_fkey(username, display_name, avatar_url, total_points),
+      challenger:profiles!duels_challenger_id_fkey(username, display_name, avatar_url),
+      challenged:profiles!duels_challenged_id_fkey(username, display_name, avatar_url),
       scenario:scenarios(content)
     `)
       .or(`challenger_id.eq.${profile.id},challenged_id.eq.${profile.id}`)
@@ -76,48 +73,28 @@ export default async function ProfilPage({ params }: Props) {
       scenario:scenarios(id, content, active_date)
     `)
       .eq('user_id', profile.id)
-      .order('vote_count', { ascending: false })
-      .limit(10),
-    (supabase.from('followers' as any) as any)
-      .select('id', { count: 'exact', head: true })
-      .eq('following_id', profile.id),
-    (supabase.from('followers' as any) as any)
-      .select('id', { count: 'exact', head: true })
-      .eq('follower_id', profile.id),
-    supabase.from('scenarios')
-      .select('id, content, category, answer_count, created_at')
-      .eq('user_id', profile.id)
-      .eq('is_user_created', true)
-      .eq('is_approved', true)
       .order('created_at', { ascending: false })
       .limit(20),
+    supabase.from('answers').select('*', { count: 'exact', head: true })
+      .eq('user_id', profile.id),
+    supabase.from('answers').select('vote_count')
+      .eq('user_id', profile.id),
   ])
 
-  // Fetch pinned answers (vitrin)
-  const pinnedIds: string[] = profile.pinned_answer_ids ?? []
-  const pinnedAnswers = pinnedIds.length > 0
-    ? await supabase.from('answers')
-        .select('id, content, vote_count, verdict_count, created_at, scenario:scenarios(id, content)')
-        .in('id', pinnedIds)
-        .then((r: { data: any[] | null }) => r.data ?? [])
-    : []
+  const totalVotes = (voteAgg ?? []).reduce((sum: number, r: any) => sum + (r.vote_count ?? 0), 0)
 
   return (
     <ProfilClient
-      profile={{
-        ...profile,
-        follower_count: followerCount ?? profile.follower_count ?? 0,
-        following_count: followingCount ?? profile.following_count ?? 0,
-      }}
+      profile={profile}
       currentUserId={user?.id}
       isFollowing={isFollowing}
       duelCount={duelCount ?? 0}
       winCount={winCount ?? 0}
-      achievements={achievements ?? []}
+      achievements={[]}
       recentDuels={recentDuels ?? []}
       recentAnswers={recentAnswers ?? []}
-      userScenarios={userScenarios ?? []}
-      pinnedAnswers={pinnedAnswers}
+      totalVotes={totalVotes}
+      answerCount={answerCount ?? 0}
     />
   )
 }
