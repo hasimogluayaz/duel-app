@@ -3,18 +3,13 @@
 import type { Session } from '@supabase/supabase-js'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTheme } from 'next-themes'
 import { createClient } from '@/lib/supabase/client'
 import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
-import { NotificationBell } from './NotificationBell'
-import { MessageBell } from './MessageBell'
-import { formatPoints } from '@/lib/utils/formatting'
-import { getTier } from '@/lib/utils/tier'
 import type { Profile } from '@/types'
-import { X, User, Settings, LogOut, Sun, Moon, Flame, Shield,
-  Search, Bookmark, Medal, Swords, Compass, BookOpen, Bell, Trophy, MessageCircle, Menu } from 'lucide-react'
+import { Sun, Moon, Swords, User, Settings, LogOut, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import Image from 'next/image'
 import { DuelloDrawer } from '@/components/home/DuelloDrawer'
@@ -27,6 +22,8 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
   const [profile, setProfile] = useState<Profile | null>(initialProfile ?? null)
   const [mounted, setMounted] = useState(false)
   const [duelloOpen, setDuelloOpen] = useState(false)
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -42,109 +39,54 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
     return () => subscription.unsubscribe()
   }, [])
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [])
+
   const handleSignOut = async () => {
+    setDropdownOpen(false)
     await supabase.auth.signOut()
     router.push('/')
     router.refresh()
   }
 
-  // Hide on admin pages
   if (pathname.startsWith('/admin')) return null
 
-  // ── LOGGED-IN: mobile slim top bar (design: logo + search + msg + bell) ──
-  if (profile) {
-    return (
-      <>
-        {/* Mobile top bar (lg:hidden) — design spec: 54px, logo left, 3 icons right */}
-        <header
-          className="lg:hidden sticky top-0 z-40 border-b border-stroke"
-          style={{
-            height: 54,
-            background: 'color-mix(in oklab, var(--bg) 94%, transparent)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
-          }}
-        >
-          <div className="flex items-center gap-2.5 px-3.5 h-full">
-            {/* Logo + wordmark left */}
-            <Link href="/oyun" className="shrink-0 flex items-center gap-2">
-              <Image src="/logo.png" alt="Kapisio" width={26} height={26} className="w-[26px] h-[26px] object-contain" />
-              <span className="font-black text-[17px] text-gradient" style={{ letterSpacing: '-0.03em' }}>Kapisio</span>
-            </Link>
-
-            {/* Right: theme + search + msg + bell */}
-            <div className="ml-auto flex items-center gap-0.5">
-              {mounted && (
-                <button
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                  className="w-[38px] h-[38px] flex items-center justify-center rounded-full text-fg-muted hover:bg-surface-2 transition-colors"
-                  aria-label="Tema"
-                >
-                  {theme === 'dark' ? <Sun size={19} /> : <Moon size={19} />}
-                </button>
-              )}
-              <Link
-                href="/ara"
-                className="w-[38px] h-[38px] flex items-center justify-center rounded-full text-fg-muted hover:bg-surface-2 transition-colors"
-                aria-label="Ara"
-              >
-                <Search size={19} />
-              </Link>
-              <MessageBell userId={profile.id} size={19} />
-              <NotificationBell userId={profile.id} size={19} />
-            </div>
-          </div>
-        </header>
-
-        {/* Mobile drawer removed — BottomNav "Daha" tab handles secondary menu */}
-
-        {/* Desktop top bar: very minimal — just theme + notifications (behind left sidebar) */}
-        <header className="hidden lg:flex fixed top-0 left-64 right-0 xl:right-80 z-20 border-b border-stroke bg-surface/85 backdrop-blur-md h-14 items-center justify-end px-4 gap-1">
-          {mounted && (
-            <button
-              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 rounded-xl text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors"
-            >
-              {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-          )}
-          <Link href="/ara" className="p-2 rounded-xl text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors">
-            <Search size={18} />
-          </Link>
-          <MessageBell userId={profile.id} size={18} />
-          <NotificationBell userId={profile.id} size={18} />
-          {(profile as any).is_admin && (
-            <Link href="/admin" className="p-2 rounded-xl text-primary hover:bg-primary/10 transition-colors">
-              <Shield size={18} />
-            </Link>
-          )}
-        </header>
-      </>
-    )
-  }
-
-  // ── GUEST: minimal top navbar ─────────────────────────────────────────────
   return (
     <>
       <DuelloDrawer open={duelloOpen} onClose={() => setDuelloOpen(false)} userId={profile?.id ?? null} />
 
       <nav className="sticky top-0 z-40 border-b border-stroke bg-surface/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+
+          {/* Left: logo */}
           <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity shrink-0">
             <Image src="/logo.png" alt="Kapisio" width={32} height={32} className="w-8 h-8 object-contain" />
             <span className="font-black text-xl text-gradient hidden sm:inline">Kapisio</span>
           </Link>
 
+          {/* Right */}
           <div className="flex items-center gap-2">
             {mounted && (
-              <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                className="p-2 rounded-xl text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors">
+              <button
+                onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="p-2 rounded-xl text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors"
+              >
                 {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
               </button>
             )}
+
             <Link href="/nasil-oynanir" className="hidden sm:block">
               <Button variant="ghost" size="sm" className="text-fg-muted">Nasıl Oynanır?</Button>
             </Link>
+
             <Button
               variant="outline"
               size="sm"
@@ -154,7 +96,8 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
               <Swords size={14} />
               Düello
             </Button>
-            {/* Mobile: icon only */}
+
+            {/* Mobile: Düello icon only */}
             <button
               onClick={() => setDuelloOpen(true)}
               className="sm:hidden p-2 rounded-xl text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors"
@@ -162,9 +105,60 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
             >
               <Swords size={18} />
             </button>
-            <Link href="/giris">
-              <Button variant="ghost" size="sm">Giriş Yap</Button>
-            </Link>
+
+            {profile ? (
+              /* ── Logged-in: avatar + dropdown ── */
+              <div ref={dropdownRef} className="relative">
+                <button
+                  onClick={() => setDropdownOpen(o => !o)}
+                  className="flex items-center gap-1.5 p-1 rounded-xl hover:bg-surface-2 transition-colors"
+                >
+                  <Avatar
+                    src={profile.avatar_url}
+                    fallback={profile.display_name || profile.username}
+                    size={30}
+                  />
+                  <ChevronDown size={14} className={cn('text-fg-muted transition-transform', dropdownOpen && 'rotate-180')} />
+                </button>
+
+                {dropdownOpen && (
+                  <div
+                    className="absolute right-0 top-full mt-2 w-44 rounded-2xl border border-stroke shadow-lg overflow-hidden"
+                    style={{ background: 'var(--surface)' }}
+                  >
+                    <Link
+                      href={`/profil/${profile.username}`}
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-fg hover:bg-surface-2 transition-colors"
+                    >
+                      <User size={15} className="text-fg-muted" />
+                      Profilim
+                    </Link>
+                    <Link
+                      href="/profil/ayarlar"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-fg hover:bg-surface-2 transition-colors"
+                    >
+                      <Settings size={15} className="text-fg-muted" />
+                      Ayarlar
+                    </Link>
+                    <div className="h-px bg-stroke mx-3" />
+                    <button
+                      onClick={handleSignOut}
+                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-400 hover:bg-surface-2 transition-colors"
+                    >
+                      <LogOut size={15} />
+                      Çıkış Yap
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* ── Guest: Giriş Yap ── */
+              <Link href="/giris">
+                <Button variant="ghost" size="sm">Giriş Yap</Button>
+              </Link>
+            )}
           </div>
         </div>
       </nav>
