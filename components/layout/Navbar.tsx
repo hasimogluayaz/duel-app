@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
 import type { Profile } from '@/types'
-import { Sun, Moon, Swords, User, Settings, LogOut, ChevronDown } from 'lucide-react'
+import { Sun, Moon, Swords, User, Settings, LogOut, ChevronDown, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import Image from 'next/image'
 import { DuelloDrawer } from '@/components/home/DuelloDrawer'
@@ -142,6 +142,17 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
                       <Settings size={15} className="text-fg-muted" />
                       Ayarlar
                     </Link>
+                    {profile.is_admin && (
+                      <Link
+                        href="/admin"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-surface-2 transition-colors"
+                        style={{ color: 'var(--primary)' }}
+                      >
+                        <Shield size={15} />
+                        Admin Paneli
+                      </Link>
+                    )}
                     <div className="h-px bg-stroke mx-3" />
                     <button
                       onClick={handleSignOut}

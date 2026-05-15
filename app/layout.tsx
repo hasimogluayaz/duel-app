@@ -3,9 +3,6 @@ import { Suspense } from 'react'
 import './globals.css'
 import { Navbar } from '@/components/layout/Navbar'
 import { BottomNav } from '@/components/layout/BottomNav'
-import { LeftSidebar } from '@/components/layout/LeftSidebar'
-import { RightSidebar } from '@/components/layout/RightSidebar'
-import { CreateFAB } from '@/components/layout/CreateFAB'
 import { Footer } from '@/components/layout/Footer'
 import { CookieBanner } from '@/components/layout/CookieBanner'
 import { ToastProvider } from '@/components/ui/Toast'
@@ -84,41 +81,20 @@ export default async function RootLayout({
         <ThemeProvider>
           <ToastProvider>
 
-            {initialProfile ? (
-              /* ── Logged-in: Twitter 3-column layout ── */
-              <>
-                {/* Navbar OUTSIDE flex container — mobile sticky bar must not be a flex sibling */}
-                <Navbar initialProfile={initialProfile} />
+            <div className="flex flex-col min-h-screen">
+              <Navbar initialProfile={initialProfile} />
+              <main className="flex-1 pb-20 md:pb-0">
+                {children}
+              </main>
+              {!initialProfile && <Footer />}
+            </div>
 
-                <div className="flex min-h-screen w-full max-w-full">
-
-                  {/* Left sidebar — desktop only */}
-                  <LeftSidebar profile={initialProfile} />
-
-                  {/* Main content — lg:pt-14 offsets the fixed desktop top bar (h-14 = 56px) */}
-                  <main className="flex-1 min-w-0 lg:ml-64 xl:mr-80 min-h-screen pb-24 md:pb-6 lg:pt-14">
-                    {children}
-                  </main>
-
-                  {/* Right sidebar — xl only */}
-                  <RightSidebar />
-
-                  {/* Mobile bottom nav (fixed) */}
-                  <BottomNav userId={initialProfile.id} username={initialProfile.username} isAdmin={initialProfile.is_admin} />
-
-                  {/* Mobile FAB (fixed, only on browse pages) */}
-                  <CreateFAB />
-                </div>
-              </>
-            ) : (
-              /* ── Guest: classic full-width layout ── */
-              <div className="flex flex-col min-h-screen">
-                <Navbar initialProfile={null} />
-                <main className="flex-1">
-                  {children}
-                </main>
-                <Footer />
-              </div>
+            {initialProfile && (
+              <BottomNav
+                userId={initialProfile.id}
+                username={initialProfile.username}
+                isAdmin={initialProfile.is_admin}
+              />
             )}
 
             <CookieBanner />
