@@ -32,7 +32,7 @@ export function LeftSidebar({ profile }: Props) {
   }
 
   const NAV = [
-    { href: '/oyun',        label: 'Anasayfa',       icon: Home,           match: ['/oyun', '/duel', '/emoji', '/karakter', '/tartisma'] },
+    { href: '/',            label: 'Anasayfa',       icon: Home,           match: ['/', '/duel', '/emoji', '/karakter', '/tartisma'] },
     { href: '/kesfet',      label: 'Keşfet',         icon: Compass,        match: ['/kesfet'] },
     { href: '/bildirimler', label: 'Bildirimler',    icon: Bell,           match: ['/bildirimler'] },
     { href: '/mesajlar',    label: 'Mesajlar',       icon: MessageCircle,  match: ['/mesajlar'] },
@@ -43,7 +43,9 @@ export function LeftSidebar({ profile }: Props) {
     { href: '/profil/ayarlar', label: 'Ayarlar',     icon: Settings,       match: ['/profil/ayarlar'] },
   ]
 
-  const isActive = (matches: string[]) => matches.some(m => pathname === m || pathname.startsWith(m + '/'))
+  const isActive = (matches: string[]) => matches.some(m =>
+    m === '/' ? pathname === '/' : pathname === m || pathname.startsWith(m + '/')
+  )
 
   return (
     <aside
@@ -53,7 +55,7 @@ export function LeftSidebar({ profile }: Props) {
       <div className="flex flex-col h-full px-3.5 py-4 gap-1">
 
         {/* Logo */}
-        <Link href="/oyun" className="flex items-center gap-2 px-2 py-1.5 mb-3 hover:opacity-80 transition-opacity">
+        <Link href="/" className="flex items-center gap-2 px-2 py-1.5 mb-3 hover:opacity-80 transition-opacity">
           <Image src="/logo.png" alt="Kapisio" width={32} height={32} className="w-8 h-8 object-contain" />
           <span className="text-xl font-bold tracking-tight" style={{ letterSpacing: '-0.02em' }}>Kapisio</span>
         </Link>

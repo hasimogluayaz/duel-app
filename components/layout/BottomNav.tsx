@@ -78,7 +78,9 @@ export function BottomNav({ userId, username }: Props) {
   const hideOn = ['/giris', '/kayit', '/sifre-sifirla', '/admin']
   if (hideOn.some(p => pathname.startsWith(p))) return null
 
-  const isActive = (paths: string[]) => paths.some(p => pathname === p || pathname.startsWith(p + '/'))
+  const isActive = (paths: string[]) => paths.some(p =>
+    p === '/' ? pathname === '/' : pathname === p || pathname.startsWith(p + '/')
+  )
 
   return (
     <>
@@ -96,8 +98,8 @@ export function BottomNav({ userId, username }: Props) {
           <TabItem
             icon={<Home size={21} />}
             label="Anasayfa"
-            active={isActive(['/oyun', '/duel', '/emoji', '/karakter', '/tartisma'])}
-            href="/oyun"
+            active={isActive(['/', '/duel', '/emoji', '/karakter', '/tartisma'])}
+            href="/"
           />
           <TabItem
             icon={<Compass size={21} />}

@@ -29,7 +29,7 @@ function GirisForm() {
   const searchParams = useSearchParams()
   const supabase = createClient()
   const toast = useToast()
-  const redirect = searchParams.get('redirect') || '/oyun'
+  const redirect = searchParams.get('redirect') || '/'
   const callbackError = searchParams.get('error')
 
   const [form, setForm] = useState({ email: '', password: '' })

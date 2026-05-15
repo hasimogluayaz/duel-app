@@ -5,7 +5,7 @@ import { POINTS } from '@/types'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/oyun'
+  const next = searchParams.get('next') ?? '/'
   const refCode = searchParams.get('ref')
 
   if (code) {
