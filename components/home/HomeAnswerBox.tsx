@@ -108,6 +108,10 @@ export function HomeAnswerBox({
   const [shareState, setShareState] = useState<'idle' | 'copied'>('idle')
   const [linkCopied, setLinkCopied] = useState(false)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
+  const [anonAnsweredToday, setAnonAnsweredToday] = useState(false)
+  const [clientReady, setClientReady] = useState(!!existingAnswerId || !!userId)
+
+  const wasAlreadyAnswered = useRef(existingAnswerId !== null)
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const modalTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -139,6 +143,28 @@ export function HomeAnswerBox({
     if (phase === 'submitted') fetchAnswers()
   }, [phase, fetchAnswers])
 
+  // Load existing votes on mount
+  useEffect(() => {
+    if (phase !== 'submitted') return
+    if (userId) {
+      // Fetch from DB
+      supabase
+        .from('answer_likes')
+        .select('answer_id')
+        .eq('user_id', userId)
+        .then(({ data }) => {
+          if (data) setVotedIds(new Set(data.map((d: { answer_id: string }) => d.answer_id)))
+        })
+    } else {
+      // Load from localStorage
+      try {
+        const stored = localStorage.getItem('kapisio_votes')
+        if (stored) setVotedIds(new Set(JSON.parse(stored) as string[]))
+      } catch {}
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, userId])
+
   useEffect(() => {
     if (!userId) return
     const pending = localStorage.getItem('kapisio_pending_response')
@@ -150,6 +176,15 @@ export function HomeAnswerBox({
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, scenarioId])
+
+  // Anon already-answered check (on refresh: localStorage key still set, no userId)
+  useEffect(() => {
+    if (userId) return
+    const pendingScenarioId = localStorage.getItem('kapisio_pending_scenario_id')
+    if (pendingScenarioId === scenarioId) setAnonAnsweredToday(true)
+    setClientReady(true)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scenarioId])
 
   useEffect(() => {
     if (phase !== 'submitted') return
@@ -214,22 +249,47 @@ export function HomeAnswerBox({
   }
 
   async function handleVote(answerId: string, answerUserId: string | null) {
+    if (answerUserId === userId && userId) return // can't vote own answer
+
+    // Anon user: use localStorage
     if (!userId) {
-      setShowStreakModal(true)
+      if (votedIds.has(answerId)) return // anon can't toggle off
+      // Save to localStorage
+      const newVoted = new Set(votedIds)
+      newVoted.add(answerId)
+      setVotedIds(newVoted)
+      try { localStorage.setItem('kapisio_votes', JSON.stringify([...newVoted])) } catch {}
+      setAnswers(prev =>
+        prev.map(a => a.id === answerId ? { ...a, vote_count: a.vote_count + 1 } : a)
+      )
       return
     }
-    if (answerUserId === userId || votedIds.has(answerId)) return
+
+    const alreadyVoted = votedIds.has(answerId)
 
     try {
-      await fetch('/api/vote', {
+      const res = await fetch('/api/vote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ answer_id: answerId }),
       })
-      setVotedIds(prev => { const s = new Set(prev); s.add(answerId); return s })
-      setAnswers(prev =>
-        prev.map(a => a.id === answerId ? { ...a, vote_count: a.vote_count + 1 } : a)
-      )
+      const data = await res.json() as { toggled?: string }
+
+      if (data.toggled === 'off') {
+        // Removed vote
+        setVotedIds(prev => { const s = new Set(prev); s.delete(answerId); return s })
+        setAnswers(prev =>
+          prev.map(a => a.id === answerId ? { ...a, vote_count: Math.max(0, a.vote_count - 1) } : a)
+        )
+      } else {
+        // Added vote
+        setVotedIds(prev => { const s = new Set(prev); s.add(answerId); return s })
+        if (!alreadyVoted) {
+          setAnswers(prev =>
+            prev.map(a => a.id === answerId ? { ...a, vote_count: a.vote_count + 1 } : a)
+          )
+        }
+      }
     } catch {}
   }
 
@@ -322,6 +382,17 @@ export function HomeAnswerBox({
         {StreakModal}
 
         <div className="flex flex-col gap-4 animate-slide-up">
+
+          {/* Already-answered notice (shown when user already had an answer on page load) */}
+          {wasAlreadyAnswered.current && (
+            <div
+              className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-semibold"
+              style={{ background: 'var(--k-green-50, #e7f6ec)', color: '#15803d' }}
+            >
+              <Check size={14} className="shrink-0" style={{ color: '#16a34a' }} />
+              Bugün zaten cevap verdin ✓
+            </div>
+          )}
 
           {/* Own answer card */}
           {myAnswer && (
@@ -615,7 +686,40 @@ export function HomeAnswerBox({
     )
   }
 
+  // ── Anon already-answered phase ──────────────────────────────────────────
+
+  if (anonAnsweredToday && !userId) {
+    return (
+      <>
+        {ToastEl}
+        <div
+          className="rounded-2xl border p-5 flex flex-col gap-3 text-center"
+          style={{ background: 'var(--surface)', borderColor: 'var(--stroke)' }}
+        >
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto"
+            style={{ background: 'var(--k-blue-50)', color: 'var(--primary)' }}>
+            <Check size={18} />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-fg mb-1">Bugün anonim cevap verdin</p>
+            <p className="text-xs text-fg-muted leading-relaxed">
+              Hesap oluşturursan cevabın kaydedilir, streak sayılır.
+            </p>
+          </div>
+          <Link href="/kayit" className="w-full">
+            <Button className="w-full btn-gradient">Hesap oluştur, cevabını kaydet →</Button>
+          </Link>
+        </div>
+      </>
+    )
+  }
+
   // ── Input phase ───────────────────────────────────────────────────────────
+
+  // Prevent hydration flash: don't show textarea until client-side checks are done
+  if (!clientReady) {
+    return <div className="h-[160px]" />
+  }
 
   return (
     <>

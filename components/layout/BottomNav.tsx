@@ -6,19 +6,20 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import {
   Home, Compass, User,
-  MessageCircle, Bookmark, Trophy, BookOpen, Settings, ChevronRight, Bell, Medal,
+  MessageCircle, Bookmark, Trophy, BookOpen, Settings, ChevronRight, Bell, Medal, Shield,
 } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 interface Props {
   userId?: string | null
   username?: string | null
+  isAdmin?: boolean
 }
 
 // ──────────────────────────────────────────────────────
 // Main export
 // ──────────────────────────────────────────────────────
-export function BottomNav({ userId, username }: Props) {
+export function BottomNav({ userId, username, isAdmin }: Props) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = createClient()
@@ -220,6 +221,15 @@ export function BottomNav({ userId, username }: Props) {
               color="var(--k-blue-700)"
               onClick={() => { setMoreOpen(false); router.push('/basarimlar') }}
             />
+            {isAdmin && (
+              <MoreItem
+                icon={<Shield size={18} />}
+                label="Admin Paneli"
+                hint="Senaryo ve kullanıcı yönetimi"
+                color="var(--primary)"
+                onClick={() => { setMoreOpen(false); router.push('/admin') }}
+              />
+            )}
             <MoreItem
               icon={<Settings size={18} />}
               label="Ayarlar"

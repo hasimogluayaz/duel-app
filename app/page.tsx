@@ -5,6 +5,24 @@ import { HomeAnswerBox } from '@/components/home/HomeAnswerBox'
 
 const START_DATE = new Date('2024-09-01T00:00:00Z')
 
+const CATEGORY_MAP: Record<string, string> = {
+  'is-hayati': '💼 İş hayatı',
+  'iliskiler': '❤️ İlişkiler',
+  'aile': '👨‍👩‍👧 Aile',
+  'para': '💰 Para',
+  'ahlak': '⚖️ Ahlak',
+  'dostluk': '🤝 Dostluk',
+  'kariyer': '🎯 Kariyer',
+  'saglik': '🏥 Sağlık',
+  'sosyal-medya': '📱 Sosyal medya',
+  'okul': '📚 Okul',
+  'ask': '💕 Aşk',
+  'toplum': '🏙️ Toplum',
+}
+function categoryLabel(cat: string): string {
+  return CATEGORY_MAP[cat] ?? `🏷️ ${cat.charAt(0).toUpperCase() + cat.slice(1)}`
+}
+
 function getDayNumber(): number {
   const diffMs = Date.now() - START_DATE.getTime()
   return Math.max(1, Math.floor(diffMs / (1000 * 60 * 60 * 24)) + 1)
@@ -23,7 +41,7 @@ export default async function HomePage() {
   const dayNumber = getDayNumber()
   const dateLabel = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })
 
-  let scenario: { id: string; content: string } | null = null
+  let scenario: { id: string; content: string; category?: string | null } | null = null
   let responseCount = 0
   let streakCount = 0
   let existingAnswerId: string | null = null
@@ -31,7 +49,7 @@ export default async function HomePage() {
   try {
     const { data } = await supabase
       .from('scenarios')
-      .select('id, content')
+      .select('id, content, category')
       .eq('active_date', today)
       .eq('is_approved', true)
       .single()
@@ -137,13 +155,24 @@ export default async function HomePage() {
                 >
                   BUGÜNÜN SENARYOSU
                 </p>
+
+                {/* Category tag */}
+                {scenario.category && scenario.category !== 'genel' && (
+                  <span
+                    className="inline-block text-[11px] font-semibold px-2.5 py-1 rounded-full mb-3"
+                    style={{ background: 'var(--k-blue-50, #eff6ff)', color: 'var(--primary)' }}
+                  >
+                    {categoryLabel(scenario.category)}
+                  </span>
+                )}
+
                 <p
                   className="text-[22px] sm:text-[26px] font-semibold text-fg"
                   style={{ lineHeight: 1.35, letterSpacing: '-0.012em' }}
                 >
                   {scenario.content}
                 </p>
-                {responseCount > 0 && (
+                {responseCount >= 100 && (
                   <div
                     className="mt-4 pt-3.5 border-t text-sm"
                     style={{ borderColor: 'var(--stroke)', borderStyle: 'dashed', color: 'var(--fg-subtle)' }}
@@ -153,8 +182,20 @@ export default async function HomePage() {
                     </span>{' '}kişi cevap verdi
                   </div>
                 )}
+                {responseCount >= 10 && responseCount < 100 && (
+                  <p className="mt-3 text-xs font-medium" style={{ color: 'var(--primary)' }}>
+                    İlk cevaplayanlardan biri ol!
+                  </p>
+                )}
               </div>
             </div>
+
+            {/* Hint above answer box */}
+            {!existingAnswerId && (
+              <p className="text-center text-sm" style={{ color: 'var(--fg-subtle)' }}>
+                Sen ne yapardın?
+              </p>
+            )}
 
             {/* Interactive answer box */}
             <HomeAnswerBox

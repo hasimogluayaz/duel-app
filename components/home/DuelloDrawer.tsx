@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { X, Swords, Link2, Share2, Check } from 'lucide-react'
 
@@ -21,8 +20,6 @@ const STEPS = [
 ]
 
 export function DuelloDrawer({ open, onClose, userId }: Props) {
-  const supabase = createClient()
-
   const [status, setStatus] = useState<Status>('idle')
   const [duelCode, setDuelCode] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
@@ -34,53 +31,34 @@ export function DuelloDrawer({ open, onClose, userId }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open])
 
+  const [errorMsg, setErrorMsg] = useState<string | null>(null)
+
   async function initDuel() {
     setStatus('loading')
-    const today = new Date().toISOString().split('T')[0]
+    setErrorMsg(null)
 
-    const { data: scenario } = await supabase
-      .from('scenarios')
-      .select('id')
-      .eq('active_date', today)
-      .eq('is_approved', true)
-      .single()
+    try {
+      const res = await fetch('/api/duel/invite', { method: 'POST' })
+      const data = await res.json() as { code?: string; error?: string; code_name?: string }
 
-    if (!scenario) { setStatus('not-answered'); return }
+      if (!res.ok) {
+        if (data.code_name === 'NOT_ANSWERED' || data.error?.includes('cevap')) {
+          setStatus('not-answered')
+        } else {
+          setErrorMsg(data.error ?? 'Bir hata oluştu.')
+          setStatus('error')
+        }
+        return
+      }
 
-    const { data: answer } = await supabase
-      .from('answers')
-      .select('id')
-      .eq('user_id', userId)
-      .eq('scenario_id', scenario.id)
-      .maybeSingle()
-
-    if (!answer) { setStatus('not-answered'); return }
-
-    const { data: existing } = await supabase
-      .from('duels')
-      .select('code')
-      .eq('creator_id', userId)
-      .eq('scenario_id', scenario.id)
-      .maybeSingle()
-
-    if (existing?.code) {
-      setDuelCode(existing.code)
-      setStatus('ready')
-      return
-    }
-
-    const code = Math.random().toString(36).substring(2, 8).toUpperCase()
-    const { data: newDuel, error } = await supabase
-      .from('duels')
-      .insert({ code, scenario_id: scenario.id, creator_id: userId })
-      .select('code')
-      .single()
-
-    if (newDuel) {
-      setDuelCode(newDuel.code)
-      setStatus('ready')
-    } else {
-      console.error('[DuelloDrawer] insert failed', error)
+      if (data.code) {
+        setDuelCode(data.code)
+        setStatus('ready')
+      } else {
+        setStatus('error')
+      }
+    } catch {
+      setErrorMsg('Bağlantı hatası. İnternet bağlantını kontrol et.')
       setStatus('error')
     }
   }
@@ -172,20 +150,30 @@ export function DuelloDrawer({ open, onClose, userId }: Props) {
           )}
 
           {status === 'not-answered' && (
-            <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-4 text-center">
-              <p className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-1">
-                Önce bugünün senaryosuna cevap ver
-              </p>
-              <p className="text-xs text-fg-muted">
-                Düello başlatmak için önce cevabını yazman gerekiyor.
-              </p>
+            <div className="flex flex-col gap-3">
+              <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-4 text-center">
+                <p className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-1">
+                  Önce bugünün senaryosuna cevap ver
+                </p>
+                <p className="text-xs text-fg-muted">
+                  Düello başlatmak için önce cevabını yazman gerekiyor.
+                </p>
+              </div>
+              <Link href="/" onClick={onClose} className="w-full">
+                <Button className="w-full btn-gradient">Cevapla →</Button>
+              </Link>
             </div>
           )}
 
           {status === 'error' && (
-            <p className="text-sm text-red-400 text-center">
-              Bir hata oluştu. Tekrar dene.
-            </p>
+            <div className="flex flex-col gap-2 text-center">
+              <p className="text-sm text-red-400">
+                {errorMsg ?? 'Bir hata oluştu.'}
+              </p>
+              <Button onClick={initDuel} variant="ghost" className="text-sm text-fg-muted">
+                Tekrar dene
+              </Button>
+            </div>
           )}
 
           {status === 'ready' && duelCode && (

@@ -37,7 +37,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         .eq('id', user.id)
         .single()
 
-      if (!profile?.is_admin) { router.push('/oyun'); return }
+      if (!profile?.is_admin) { router.push('/'); return }
       setUsername(profile.username)
       setChecking(false)
     }
@@ -67,7 +67,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             className={cn(
               'flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-colors',
               pathname === href
-                ? 'bg-primary/15 text-primary/40'
+                ? 'bg-primary/10 text-primary font-semibold'
                 : 'text-fg-muted hover:text-fg hover:bg-surface-2'
             )}
           >
@@ -78,7 +78,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="mt-auto pt-4 border-t border-stroke">
           <p className="text-xs text-fg-subtle px-3 mb-2">@{username}</p>
           <Link
-            href="/oyun"
+            href="/"
             className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors"
           >
             <LogOut size={14} />
@@ -140,7 +140,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 className={cn(
                   'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors',
                   pathname === href
-                    ? 'bg-primary/15 text-primary/40'
+                    ? 'bg-primary/10 text-primary font-semibold'
                     : 'text-fg-muted hover:text-fg hover:bg-surface-2'
                 )}
               >
@@ -151,7 +151,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="mt-auto pt-4 border-t border-stroke">
               <p className="text-xs text-fg-subtle px-4 mb-2">@{username}</p>
               <Link
-                href="/oyun"
+                href="/"
                 onClick={() => setSidebarOpen(false)}
                 className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors"
               >

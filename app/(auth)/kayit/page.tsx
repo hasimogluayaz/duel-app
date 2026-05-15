@@ -91,6 +91,7 @@ export default function KayitPage() {
       email: form.email,
       password: form.password,
       options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback?next=/`,
         data: {
           username: form.username.toLowerCase(),
           display_name: form.display_name,
@@ -118,7 +119,7 @@ export default function KayitPage() {
     setGoogleLoading(true)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `https://kapisio.com/auth/callback` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=/` },
     })
     if (error) {
       toast('Google ile kayıt yapılamadı.', 'error')
@@ -350,7 +351,7 @@ export default function KayitPage() {
                   setGoogleLoading(true)
                   const { error } = await supabase.auth.signInWithOAuth({
                     provider: 'google',
-                    options: { redirectTo: `${window.location.origin}/auth/callback` },
+                    options: { redirectTo: `${window.location.origin}/auth/callback?next=/` },
                   })
                   if (error) { toast('Google ile kayıt yapılamadı.', 'error'); setGoogleLoading(false) }
                 }}

@@ -61,7 +61,7 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
 
   return (
     <>
-      <DuelloDrawer open={duelloOpen} onClose={() => setDuelloOpen(false)} userId={profile?.id ?? null} />
+      <DuelloDrawer open={duelloOpen} onClose={() => setDuelloOpen(false)} userId={null} />
 
       <nav className="sticky top-0 z-40 border-b border-stroke bg-surface/90 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
