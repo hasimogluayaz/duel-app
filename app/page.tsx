@@ -2,7 +2,6 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
 import { HomeAnswerBox } from '@/components/home/HomeAnswerBox'
-import { Flame } from 'lucide-react'
 
 const START_DATE = new Date('2024-09-01T00:00:00Z')
 
@@ -88,32 +87,71 @@ export default async function HomePage() {
         }}
       />
 
-      <div className="max-w-xl mx-auto px-4 py-10 sm:py-14">
-        {/* Day badge */}
-        <div className="flex justify-center mb-7">
-          <div className="inline-flex items-center gap-2 bg-surface border border-stroke rounded-full px-4 py-1.5 text-sm text-fg-muted">
-            <Flame size={13} className="text-orange-400" />
-            <span>Gün #{dayNumber} · {dateLabel}</span>
+      <div className="max-w-xl mx-auto px-4 py-8 sm:py-12 flex flex-col gap-5">
+
+        {/* Day eyebrow badge */}
+        <div className="flex justify-center">
+          <div
+            className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold border"
+            style={{
+              background: 'var(--surface)',
+              borderColor: 'var(--stroke)',
+              color: 'var(--fg-subtle)',
+            }}
+          >
+            <span
+              className="w-1.5 h-1.5 rounded-full shrink-0"
+              style={{
+                background: 'var(--primary)',
+                boxShadow: '0 0 0 3px rgba(42,108,240,0.18)',
+              }}
+            />
+            <span>Gün #{dayNumber}</span>
+            <span style={{ color: 'var(--stroke)' }}>·</span>
+            <span>{dateLabel}</span>
           </div>
         </div>
 
         {scenario ? (
           <>
             {/* Scenario card */}
-            <div className="rounded-2xl border border-stroke bg-white dark:bg-surface shadow-sm mb-5 overflow-hidden">
-              {/* Blue top accent bar */}
-              <div className="h-1 bg-primary w-full" />
-              <div className="p-5 sm:p-6">
-                <p className="text-xs font-bold text-primary uppercase tracking-wider mb-3">
-                  Bugünün Senaryosu
+            <div
+              className="relative rounded-3xl border overflow-hidden"
+              style={{
+                background: 'var(--surface)',
+                borderColor: 'var(--stroke)',
+                boxShadow: '0 1px 0 rgba(15,19,32,.02), 0 8px 28px -16px rgba(15,19,32,.08)',
+              }}
+            >
+              {/* Blue gradient top bar */}
+              <div
+                className="h-[3px] w-full"
+                style={{
+                  background: 'linear-gradient(90deg, #1442a8, #2a6cf0 60%, #5188fa)',
+                }}
+              />
+              <div className="p-6 sm:p-8">
+                <p
+                  className="text-[10px] font-bold uppercase mb-3"
+                  style={{ letterSpacing: '0.14em', color: 'var(--primary)' }}
+                >
+                  BUGÜNÜN SENARYOSU
                 </p>
-                <p className="text-lg sm:text-xl font-bold text-fg leading-relaxed">
+                <p
+                  className="text-[22px] sm:text-[26px] font-semibold text-fg"
+                  style={{ lineHeight: 1.35, letterSpacing: '-0.012em' }}
+                >
                   {scenario.content}
                 </p>
                 {responseCount > 0 && (
-                  <p className="text-sm text-fg-subtle mt-3">
-                    {responseCount.toLocaleString('tr-TR')} kişi cevap verdi
-                  </p>
+                  <div
+                    className="mt-4 pt-3.5 border-t text-sm"
+                    style={{ borderColor: 'var(--stroke)', borderStyle: 'dashed', color: 'var(--fg-subtle)' }}
+                  >
+                    <span className="font-bold tabular-nums" style={{ color: 'var(--fg)' }}>
+                      {responseCount.toLocaleString('tr-TR')}
+                    </span>{' '}kişi cevap verdi
+                  </div>
                 )}
               </div>
             </div>
@@ -127,11 +165,15 @@ export default async function HomePage() {
             />
           </>
         ) : (
-          <div className="border border-stroke rounded-2xl bg-surface text-center py-16">
+          <div
+            className="rounded-3xl border text-center py-16"
+            style={{ background: 'var(--surface)', borderColor: 'var(--stroke)' }}
+          >
             <p className="text-fg font-semibold">Bugünkü senaryo hazırlanıyor</p>
-            <p className="text-fg-subtle text-sm mt-1">Birazdan yayınlanacak.</p>
+            <p className="text-sm mt-1" style={{ color: 'var(--fg-subtle)' }}>Birazdan yayınlanacak.</p>
           </div>
         )}
+
       </div>
     </>
   )
