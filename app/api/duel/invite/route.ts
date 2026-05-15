@@ -60,19 +60,31 @@ export const POST = withAuth(async (_req, { userId }) => {
     attempts++
   }
 
-  const { data: newDuel, error } = await supabase
+  // Try with creator_response_id first (migration 025), fall back without it
+  let newDuel: { code: string } | null = null
+  let insertError = null
+
+  const withRef = await supabase
     .from('duels')
-    .insert({
-      code,
-      scenario_id: scenario.id,
-      creator_id: userId,
-      creator_response_id: answer.id,
-    })
+    .insert({ code, scenario_id: scenario.id, creator_id: userId, creator_response_id: answer.id })
     .select('code')
     .single()
 
-  if (error) {
-    console.error('[duel/invite POST]', error)
+  if (withRef.error) {
+    // Column may not exist yet — retry without it
+    const withoutRef = await supabase
+      .from('duels')
+      .insert({ code, scenario_id: scenario.id, creator_id: userId })
+      .select('code')
+      .single()
+    newDuel = withoutRef.data
+    insertError = withoutRef.error
+  } else {
+    newDuel = withRef.data
+  }
+
+  if (insertError || !newDuel) {
+    console.error('[duel/invite POST]', insertError)
     throw new ApiError('Düello oluşturulamadı. Tekrar dene.', 500, 'DB_ERROR')
   }
 
