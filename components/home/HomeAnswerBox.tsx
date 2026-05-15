@@ -108,6 +108,9 @@ export function HomeAnswerBox({
   const [shareState, setShareState] = useState<'idle' | 'copied'>('idle')
   const [linkCopied, setLinkCopied] = useState(false)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
+  const [anonAnsweredToday, setAnonAnsweredToday] = useState(false)
+
+  const wasAlreadyAnswered = useRef(existingAnswerId !== null)
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const modalTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -150,6 +153,14 @@ export function HomeAnswerBox({
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, scenarioId])
+
+  // Anon already-answered check (on refresh: localStorage key still set, no userId)
+  useEffect(() => {
+    if (userId) return
+    const pendingScenarioId = localStorage.getItem('kapisio_pending_scenario_id')
+    if (pendingScenarioId === scenarioId) setAnonAnsweredToday(true)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scenarioId])
 
   useEffect(() => {
     if (phase !== 'submitted') return
@@ -322,6 +333,17 @@ export function HomeAnswerBox({
         {StreakModal}
 
         <div className="flex flex-col gap-4 animate-slide-up">
+
+          {/* Already-answered notice (shown when user already had an answer on page load) */}
+          {wasAlreadyAnswered.current && (
+            <div
+              className="flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-semibold"
+              style={{ background: 'var(--k-green-50, #e7f6ec)', color: '#15803d' }}
+            >
+              <Check size={14} className="shrink-0" style={{ color: '#16a34a' }} />
+              Bugün zaten cevap verdin ✓
+            </div>
+          )}
 
           {/* Own answer card */}
           {myAnswer && (
@@ -598,6 +620,34 @@ export function HomeAnswerBox({
             </div>
           </div>
 
+        </div>
+      </>
+    )
+  }
+
+  // ── Anon already-answered phase ──────────────────────────────────────────
+
+  if (anonAnsweredToday && !userId) {
+    return (
+      <>
+        {ToastEl}
+        <div
+          className="rounded-2xl border p-5 flex flex-col gap-3 text-center"
+          style={{ background: 'var(--surface)', borderColor: 'var(--stroke)' }}
+        >
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto"
+            style={{ background: 'var(--k-blue-50)', color: 'var(--primary)' }}>
+            <Check size={18} />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-fg mb-1">Bugün anonim cevap verdin</p>
+            <p className="text-xs text-fg-muted leading-relaxed">
+              Hesap oluşturursan cevabın kaydedilir, streak sayılır.
+            </p>
+          </div>
+          <Link href="/kayit" className="w-full">
+            <Button className="w-full btn-gradient">Hesap oluştur, cevabını kaydet →</Button>
+          </Link>
         </div>
       </>
     )

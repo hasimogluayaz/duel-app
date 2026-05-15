@@ -176,12 +176,6 @@ export default function AyarlarPage() {
             maxLength={50} placeholder="Adın Soyadın"
             style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid var(--stroke)', background: 'var(--surface-2)', color: 'var(--fg)', font: '400 14px -apple-system, sans-serif', outline: 'none' }} />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <label style={{ font: '500 13px -apple-system, sans-serif', color: 'var(--fg-muted)' }}>Biyografi</label>
-          <textarea value={form.bio} onChange={e => setForm(f => ({ ...f, bio: e.target.value }))}
-            maxLength={160} rows={3} placeholder="Kendin hakkında kısa bir şeyler yaz..."
-            style={{ padding: '10px 14px', borderRadius: 10, border: '1px solid var(--stroke)', background: 'var(--surface-2)', color: 'var(--fg)', font: '400 14px -apple-system, sans-serif', outline: 'none', resize: 'none' }} />
-        </div>
         <button type="submit" disabled={saving} style={{
           padding: '11px', borderRadius: 10, border: 'none', cursor: 'pointer',
           background: 'linear-gradient(135deg, #1442a8, #2a6cf0)', color: '#fff',
@@ -393,7 +387,7 @@ export default function AyarlarPage() {
             <SettingRow
               icon={<User size={16} />}
               label="Profili düzenle"
-              hint="Görünen ad ve biyografi"
+              hint="Görünen adını güncelle"
               right={<ChevronRight size={16} style={{ color: 'var(--fg-subtle)' }} />}
               onClick={() => setSection('profil')}
             />

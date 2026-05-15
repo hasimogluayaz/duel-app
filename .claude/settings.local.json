@@ -26,7 +26,18 @@
       "Bash(grep -v \"^$\")",
       "Bash(npx vercel *)",
       "Bash(mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\app\\\\api\\\\scenarios\" && mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\app\\\\api\\\\missions\" && mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\app\\\\arsiv\" && mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\app\\\\arsiv\\\\[id]\" && mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\elastic-knuth-3a344d\\\\components\\\\missions\")",
-      "Bash(mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\pensive-newton-351e35\\\\app\\\\api\\\\scenarios\\\\[id]\")"
+      "Bash(mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\pensive-newton-351e35\\\\app\\\\api\\\\scenarios\\\\[id]\")",
+      "WebFetch(domain:api.anthropic.com)",
+      "Bash(cat > *)",
+      "Bash(vercel project *)",
+      "PowerShell(Get-Content \"$env:APPDATA\\\\vercel\\\\auth.json\" -ErrorAction SilentlyContinue | ConvertFrom-Json | Select-Object token)",
+      "PowerShell(Get-ChildItem -Path \"$env:USERPROFILE\" -Filter \"auth.json\" -Recurse -ErrorAction SilentlyContinue | Where-Object { $_.FullName -match \"vercel\" } | Select-Object -First 3 FullName)",
+      "Bash(vercel whoami *)",
+      "Bash(vercel ls *)",
+      "Bash(vercel teams *)",
+      "Bash(node -e ' *)",
+      "Bash(cd \"C:\\\\duel-app\" && grep -r \"oyun\" app --include=\"*.tsx\" --include=\"*.ts\" -l 2>&1 | head -20)",
+      "Bash(mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\recursing-villani-57b850\\\\app\\\\d\\\\[kod]\")"
     ]
   }
 }

@@ -172,13 +172,18 @@ export function DuelloDrawer({ open, onClose, userId }: Props) {
           )}
 
           {status === 'not-answered' && (
-            <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-4 text-center">
-              <p className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-1">
-                Önce bugünün senaryosuna cevap ver
-              </p>
-              <p className="text-xs text-fg-muted">
-                Düello başlatmak için önce cevabını yazman gerekiyor.
-              </p>
+            <div className="flex flex-col gap-3">
+              <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-4 text-center">
+                <p className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-1">
+                  Önce bugünün senaryosuna cevap ver
+                </p>
+                <p className="text-xs text-fg-muted">
+                  Düello başlatmak için önce cevabını yazman gerekiyor.
+                </p>
+              </div>
+              <Link href="/" onClick={onClose} className="w-full">
+                <Button className="w-full btn-gradient">Cevapla →</Button>
+              </Link>
             </div>
           )}
 
