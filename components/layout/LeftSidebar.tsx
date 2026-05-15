@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client'
 import type { Profile } from '@/types'
 import {
   Home, Compass, Bell, MessageCircle, Trophy, BookOpen,
-  Bookmark, User, Settings, Plus, Flame, MoreHorizontal, LogOut,
+  Bookmark, User, Settings, Plus, Flame, MoreHorizontal, LogOut, Shield,
 } from 'lucide-react'
 
 interface Props {
@@ -165,7 +165,7 @@ export function LeftSidebar({ profile }: Props) {
                   onClick={() => setMenuOpen(false)}
                   className="flex items-center gap-2.5 px-3 py-2.5 text-sm hover:bg-surface-2 transition-colors"
                 >
-                  <User size={15} /> Profil
+                  <User size={15} /> Profilim
                 </Link>
                 <Link
                   href="/profil/ayarlar"
@@ -174,6 +174,15 @@ export function LeftSidebar({ profile }: Props) {
                 >
                   <Settings size={15} /> Ayarlar
                 </Link>
+                {profile.is_admin && (
+                  <Link
+                    href="/admin"
+                    onClick={() => setMenuOpen(false)}
+                    className="flex items-center gap-2.5 px-3 py-2.5 text-sm text-primary hover:bg-primary/5 transition-colors border-t border-stroke"
+                  >
+                    <Shield size={15} /> Admin Paneli
+                  </Link>
+                )}
                 <button
                   onClick={handleSignOut}
                   disabled={signingOut}

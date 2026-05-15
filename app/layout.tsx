@@ -104,7 +104,7 @@ export default async function RootLayout({
                   <RightSidebar />
 
                   {/* Mobile bottom nav (fixed) */}
-                  <BottomNav userId={initialProfile.id} username={initialProfile.username} />
+                  <BottomNav userId={initialProfile.id} username={initialProfile.username} isAdmin={initialProfile.is_admin} />
 
                   {/* Mobile FAB (fixed, only on browse pages) */}
                   <CreateFAB />
