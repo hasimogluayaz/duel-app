@@ -17,6 +17,7 @@ import { X, User, Settings, LogOut, Sun, Moon, Flame, Shield,
   Search, Bookmark, Medal, Swords, Compass, BookOpen, Bell, Trophy, MessageCircle, Menu } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import Image from 'next/image'
+import { DuelloDrawer } from '@/components/home/DuelloDrawer'
 
 export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) {
   const pathname = usePathname()
@@ -24,8 +25,8 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
   const supabase = createClient()
   const { theme, setTheme } = useTheme()
   const [profile, setProfile] = useState<Profile | null>(initialProfile ?? null)
-  const [mobileOpen, setMobileOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
+  const [duelloOpen, setDuelloOpen] = useState(false)
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -122,74 +123,51 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
     )
   }
 
-  // ── GUEST: full top navbar ────────────────────────────────────────────────
-  const navLinks = [
-    { href: '/oyun', label: 'Oyna' },
-    { href: '/kesfet', label: 'Keşfet' },
-    { href: '/arsiv', label: 'Arşiv' },
-    { href: '/liderlik', label: 'Liderlik' },
-    { href: '/nasil-oynanir', label: 'Nasıl Oynanır' },
-  ]
-
+  // ── GUEST: minimal top navbar ─────────────────────────────────────────────
   return (
-    <nav className="sticky top-0 z-40 border-b border-stroke bg-surface/90 backdrop-blur-md">
-      <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity shrink-0">
-          <Image src="/logo.png" alt="Kapisio" width={32} height={32} className="w-8 h-8 object-contain" />
-          <span className="font-black text-xl text-gradient hidden sm:inline">Kapisio</span>
-        </Link>
+    <>
+      <DuelloDrawer open={duelloOpen} onClose={() => setDuelloOpen(false)} userId={profile?.id ?? null} />
 
-        <div className="hidden md:flex items-center gap-1">
-          {navLinks.map(link => (
-            <Link key={link.href} href={link.href}
-              className={cn(
-                'px-4 py-2 rounded-xl text-sm font-medium transition-colors',
-                pathname === link.href ? 'text-fg font-semibold' : 'text-fg-muted hover:text-fg hover:bg-surface-2'
-              )}>
-              {link.label}
+      <nav className="sticky top-0 z-40 border-b border-stroke bg-surface/90 backdrop-blur-md">
+        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity shrink-0">
+            <Image src="/logo.png" alt="Kapisio" width={32} height={32} className="w-8 h-8 object-contain" />
+            <span className="font-black text-xl text-gradient hidden sm:inline">Kapisio</span>
+          </Link>
+
+          <div className="flex items-center gap-2">
+            {mounted && (
+              <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                className="p-2 rounded-xl text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors">
+                {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+              </button>
+            )}
+            <Link href="/nasil-oynanir" className="hidden sm:block">
+              <Button variant="ghost" size="sm" className="text-fg-muted">Nasıl Oynanır?</Button>
             </Link>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-2">
-          {mounted && (
-            <button onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 rounded-xl text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors">
-              {theme === 'dark' ? <Sun size={17} /> : <Moon size={17} />}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDuelloOpen(true)}
+              className="hidden sm:inline-flex gap-1.5"
+            >
+              <Swords size={14} />
+              Düello
+            </Button>
+            {/* Mobile: icon only */}
+            <button
+              onClick={() => setDuelloOpen(true)}
+              className="sm:hidden p-2 rounded-xl text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors"
+              aria-label="Düello"
+            >
+              <Swords size={18} />
             </button>
-          )}
-          <Link href="/giris" className="hidden md:block">
-            <Button variant="ghost" size="sm">Giriş Yap</Button>
-          </Link>
-          <Link href="/kayit" className="hidden md:block">
-            <Button size="sm" className="btn-gradient">Kayıt Ol</Button>
-          </Link>
-          <button className="md:hidden p-2 text-fg-muted hover:text-fg hover:bg-surface-2 rounded-xl transition-colors"
-            onClick={() => setMobileOpen(!mobileOpen)}>
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </div>
-      </div>
-
-      {mobileOpen && (
-        <div className="md:hidden border-t border-stroke bg-surface px-4 py-3 flex flex-col gap-1">
-          {navLinks.map(link => (
-            <Link key={link.href} href={link.href} onClick={() => setMobileOpen(false)}
-              className="px-4 py-3 rounded-xl text-sm font-medium text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors">
-              {link.label}
-            </Link>
-          ))}
-          <div className="h-px bg-stroke my-2" />
-          <div className="flex gap-2">
-            <Link href="/giris" onClick={() => setMobileOpen(false)} className="flex-1">
-              <Button variant="outline" className="w-full">Giriş Yap</Button>
-            </Link>
-            <Link href="/kayit" onClick={() => setMobileOpen(false)} className="flex-1">
-              <Button className="w-full btn-gradient">Kayıt Ol</Button>
+            <Link href="/giris">
+              <Button variant="ghost" size="sm">Giriş Yap</Button>
             </Link>
           </div>
         </div>
-      )}
-    </nav>
+      </nav>
+    </>
   )
 }

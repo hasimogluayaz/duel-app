@@ -1,16 +1,16 @@
-﻿'use client'
+'use client'
 
 export const dynamic = 'force-dynamic'
 
 import { useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { useToast } from '@/components/ui/Toast'
 import { validateUsername } from '@/lib/utils/validation'
-import { CheckCircle, Sparkles, Shield, Swords, AlertCircle } from 'lucide-react'
-import Image from 'next/image'
+import { CheckCircle, Shield, AlertCircle, Eye, EyeOff } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 const CONSENTS = [
@@ -39,12 +39,8 @@ export default function KayitPage() {
   const supabase = createClient()
   const toast = useToast()
 
-  const [form, setForm] = useState({
-    email: '',
-    password: '',
-    username: '',
-    display_name: '',
-  })
+  const [form, setForm] = useState({ email: '', password: '', username: '', display_name: '' })
+  const [showPass, setShowPass] = useState(false)
   const [consents, setConsents] = useState<Record<string, boolean>>({})
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(false)
@@ -60,33 +56,21 @@ export default function KayitPage() {
     setConsents(prev => ({ ...prev, [id]: !prev[id] }))
   }
 
-  function acceptAll() {
-    const all: Record<string, boolean> = {}
-    CONSENTS.forEach(c => { all[c.id] = true })
-    setConsents(all)
-  }
-
   function validate() {
     const errs: Record<string, string> = {}
-
     const usernameCheck = validateUsername(form.username)
     if (!usernameCheck.valid) errs.username = usernameCheck.error!
-
     if (!form.email.includes('@')) errs.email = 'Geçerli bir email girin.'
     if (form.password.length < 8) errs.password = 'Şifre en az 8 karakter olmalı.'
     if (!form.display_name.trim()) errs.display_name = 'Görünen ad gerekli.'
     if (!allConsented) errs.consents = 'Kayıt olmak için tüm onayları vermeniz zorunludur.'
-
     return errs
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const errs = validate()
-    if (Object.keys(errs).length > 0) {
-      setErrors(errs)
-      return
-    }
+    if (Object.keys(errs).length > 0) { setErrors(errs); return }
 
     setLoading(true)
     setErrors({})
@@ -103,7 +87,7 @@ export default function KayitPage() {
       return
     }
 
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
       options: {
@@ -125,23 +109,16 @@ export default function KayitPage() {
       return
     }
 
-    // Profile is created in /auth/callback after email confirmation
-    // Username + display_name are stored in user_metadata and used there
     setSuccess(true)
     setLoading(false)
   }
 
   async function handleGoogle() {
-    if (!allConsented) {
-      setShowGoogleConsent(true)
-      return
-    }
+    if (!allConsented) { setShowGoogleConsent(true); return }
     setGoogleLoading(true)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: `https://kapisio.com/auth/callback`,
-      },
+      options: { redirectTo: `https://kapisio.com/auth/callback` },
     })
     if (error) {
       toast('Google ile kayıt yapılamadı.', 'error')
@@ -157,48 +134,40 @@ export default function KayitPage() {
       toast('Email gönderilemedi. Biraz bekleyip tekrar dene.', 'error')
     } else {
       toast('Doğrulama emaili tekrar gönderildi!', 'success')
-      // 60s cooldown
       setResendCooldown(60)
-      const interval = setInterval(() => {
-        setResendCooldown(c => {
-          if (c <= 1) { clearInterval(interval); return 0 }
-          return c - 1
-        })
+      const iv = setInterval(() => {
+        setResendCooldown(c => { if (c <= 1) { clearInterval(iv); return 0 } return c - 1 })
       }, 1000)
     }
   }
 
   if (success) {
     return (
-      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 bg-bg">
-        <div className="text-center max-w-sm">
-          <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-5">
-            <CheckCircle size={40} className="text-green-500" />
-          </div>
-          <h2 className="text-2xl font-black text-fg mb-3">Neredeyse tamam! 🎉</h2>
-          <p className="text-fg-muted text-sm mb-2">
-            <strong className="text-fg">{form.email}</strong> adresine doğrulama emaili gönderdik.
-          </p>
-          <p className="text-fg-subtle text-sm mb-6">
-            Emailini kontrol edip bağlantıya tıklayarak hesabını aktif et.
-          </p>
-          <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3 mb-6 text-left">
-            <p className="text-xs text-amber-400 font-semibold mb-1">📬 Email gelmediyse</p>
-            <p className="text-xs text-fg-subtle">Spam/Gereksiz klasörünü kontrol et. Yine de gelmezse aşağıdaki butona tıkla.</p>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Button
-              variant="outline"
-              onClick={handleResend}
-              loading={resendLoading}
-              disabled={resendCooldown > 0}
-              className="w-full"
-            >
-              {resendCooldown > 0 ? `Tekrar gönder (${resendCooldown}s)` : 'Doğrulama emailini tekrar gönder'}
-            </Button>
-            <Link href="/giris">
-              <Button variant="ghost" className="w-full">Giriş sayfasına dön</Button>
-            </Link>
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-bg">
+        <div className="w-full max-w-sm">
+          <div className="bg-white dark:bg-surface border border-stroke rounded-2xl shadow-sm p-7 text-center">
+            <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-5">
+              <CheckCircle size={36} className="text-green-500" />
+            </div>
+            <h2 className="text-xl font-black text-fg mb-2">Neredeyse tamam! 🎉</h2>
+            <p className="text-sm text-fg-muted mb-1">
+              <strong className="text-fg">{form.email}</strong> adresine doğrulama emaili gönderdik.
+            </p>
+            <p className="text-xs text-fg-subtle mb-5">
+              Emailini kontrol edip bağlantıya tıklayarak hesabını aktif et.
+            </p>
+            <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl px-4 py-3 mb-5 text-left">
+              <p className="text-xs text-amber-400 font-semibold mb-0.5">📬 Email gelmediyse</p>
+              <p className="text-xs text-fg-subtle">Spam klasörünü kontrol et veya tekrar gönder.</p>
+            </div>
+            <div className="flex flex-col gap-2">
+              <Button variant="outline" onClick={handleResend} loading={resendLoading} disabled={resendCooldown > 0} className="w-full">
+                {resendCooldown > 0 ? `Tekrar gönder (${resendCooldown}s)` : 'Doğrulama emailini tekrar gönder'}
+              </Button>
+              <Link href="/giris">
+                <Button variant="ghost" className="w-full">Giriş sayfasına dön</Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -206,108 +175,50 @@ export default function KayitPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex">
-      {/* Left branding panel */}
-      <div className="hidden lg:flex flex-col justify-between w-[480px] shrink-0 bg-gradient-to-br from-secondary via-primary to-primary-dark p-12 text-white relative overflow-hidden">
-        {/* Background decorations */}
-        <div className="absolute top-0 right-0 w-72 h-72 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/3" />
-        <div className="absolute bottom-0 left-0 w-56 h-56 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/3" />
-        <div className="absolute top-1/2 right-8 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2" />
-
-        <div className="relative z-10">
-          <Link href="/" className="flex items-center gap-2 font-black text-2xl text-white">
-            <Image src="/logo.png" alt="Kapisio" width={32} height={32} className="w-8 h-8 object-contain brightness-0 invert" />
-            Kapisio
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-bg">
+      <div className="w-full max-w-sm">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Image src="/logo.png" alt="Kapisio" width={36} height={36} className="w-9 h-9 object-contain" />
+            <span className="font-black text-2xl text-gradient">Kapisio</span>
           </Link>
         </div>
 
-        <div className="relative z-10 space-y-8">
-          <div>
-            <h2 className="text-3xl font-black leading-tight mb-3">
-              Topluluğa katıl! 🔥
-            </h2>
-            <p className="text-white/80 text-base leading-relaxed">
-              Hemen ücretsiz hesap oluştur ve dünya genelindeki oyuncularla yarışmaya başla.
-            </p>
-          </div>
+        {/* Card */}
+        <div className="bg-white dark:bg-surface border border-stroke rounded-2xl shadow-sm p-7">
+          <h1 className="text-xl font-black text-fg mb-1">Kapisio&apos;ya katıl</h1>
+          <p className="text-sm text-fg-muted mb-6">Ücretsiz kaydol, oynamaya başla.</p>
 
-          <div className="space-y-4">
-            {[
-              { icon: <Sparkles size={20} />, title: 'Ücretsiz', desc: 'Sınırsız oyun, sıfır ödeme' },
-              { icon: <Swords size={20} />, title: 'Günlük Meydan Okumalar', desc: 'Her gün yeni senaryolar' },
-              { icon: <Shield size={20} />, title: 'Güvenli', desc: 'Verileriniz şifrelenerek korunur' },
-            ].map((item) => (
-              <div key={item.title} className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-                  {item.icon}
-                </div>
-                <div>
-                  <div className="font-semibold text-sm">{item.title}</div>
-                  <div className="text-white/70 text-xs">{item.desc}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="relative z-10">
-          <p className="text-white/60 text-xs">© 2025 Kapisio · Yapay zeka destekli</p>
-        </div>
-      </div>
-
-      {/* Right form panel */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-bg overflow-y-auto">
-        <div className="w-full max-w-sm">
-          {/* Mobile logo */}
-          <div className="lg:hidden text-center mb-8">
-            <Link href="/" className="inline-flex items-center gap-2 font-black text-2xl text-fg">
-              <Image src="/logo.png" alt="Kapisio" width={28} height={28} className="w-7 h-7 object-contain" />
-              <span className="text-gradient">Kapisio</span>
-            </Link>
-          </div>
-
-          <div className="mb-7">
-            <h1 className="text-2xl font-black text-fg mb-1">Hesap Oluştur ✨</h1>
-            <p className="text-fg-muted text-sm">Ücretsiz kaydol, düelloya katıl</p>
-          </div>
-
-          {/* Google button */}
+          {/* Google */}
           <button
             onClick={handleGoogle}
             disabled={googleLoading}
-            className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 dark:border-stroke dark:bg-surface-2 text-gray-700 dark:text-fg rounded-xl py-3 px-4 font-medium text-sm hover:bg-gray-50 dark:hover:bg-surface-2/80 transition-colors disabled:opacity-60 shadow-sm mb-5"
+            className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 dark:border-stroke dark:bg-surface-2 text-gray-700 dark:text-fg rounded-xl py-2.5 px-4 font-medium text-sm hover:bg-gray-50 dark:hover:bg-surface-2/80 transition-colors disabled:opacity-60 shadow-sm mb-4"
           >
             <GoogleIcon />
-            {googleLoading ? 'Yönlendiriliyor...' : 'Google ile Kayıt Ol'}
+            {googleLoading ? 'Yönlendiriliyor…' : 'Google ile Kayıt Ol'}
           </button>
 
-          <div className="relative flex items-center gap-3 mb-5">
+          {/* Divider */}
+          <div className="relative flex items-center gap-3 mb-4">
             <div className="flex-1 h-px bg-stroke" />
-            <span className="text-xs text-fg-subtle font-medium">veya email ile</span>
+            <span className="text-xs text-fg-subtle font-medium">— veya —</span>
             <div className="flex-1 h-px bg-stroke" />
           </div>
 
+          {/* Form */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
-            <div className="grid grid-cols-2 gap-3">
-              <Input
-                label="Kullanıcı Adı"
-                placeholder="kahraman42"
-                value={form.username}
-                onChange={e => setForm(f => ({ ...f, username: e.target.value }))}
-                error={errors.username}
-                autoComplete="username"
-              />
-              <Input
-                label="Görünen Ad"
-                placeholder="Adın"
-                value={form.display_name}
-                onChange={e => setForm(f => ({ ...f, display_name: e.target.value }))}
-                error={errors.display_name}
-              />
-            </div>
+            <Input
+              label="İsim"
+              placeholder="Adın Soyadın"
+              value={form.display_name}
+              onChange={e => setForm(f => ({ ...f, display_name: e.target.value }))}
+              error={errors.display_name}
+            />
             <Input
               type="email"
-              label="Email"
+              label="E-posta"
               placeholder="ornek@email.com"
               value={form.email}
               onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
@@ -315,63 +226,141 @@ export default function KayitPage() {
               autoComplete="email"
             />
             <Input
-              type="password"
-              label="Şifre"
-              placeholder="En az 8 karakter"
-              value={form.password}
-              onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-              error={errors.password}
-              autoComplete="new-password"
+              label="Kullanıcı Adı"
+              placeholder="kahraman42"
+              value={form.username}
+              onChange={e => setForm(f => ({ ...f, username: e.target.value }))}
+              error={errors.username}
+              autoComplete="username"
             />
 
-            {/* Consent checkboxes */}
-            <ConsentBlock
-              consents={consents}
-              onToggle={toggleConsent}
-              onAcceptAll={acceptAll}
-              error={errors.consents}
-            />
+            {/* Password */}
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-fg-muted">Şifre</label>
+              <div className="relative">
+                <input
+                  type={showPass ? 'text' : 'password'}
+                  placeholder="en az 8 karakter"
+                  value={form.password}
+                  onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                  autoComplete="new-password"
+                  className={cn(
+                    'w-full bg-bg border border-stroke rounded-xl px-4 py-2.5 pr-11 text-fg placeholder:text-fg-subtle',
+                    'focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all',
+                    errors.password && 'border-red-500 focus:ring-red-500'
+                  )}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(p => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-fg-muted hover:text-fg transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPass ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
+              </div>
+              {errors.password && <p className="text-sm text-red-400">{errors.password}</p>}
+            </div>
 
-            <Button
-              type="submit"
-              loading={loading}
-              disabled={!allConsented}
-              className="w-full"
-              size="lg"
-            >
-              Hesap Oluştur
+            {/* Consents */}
+            <div className="flex flex-col gap-2">
+              {CONSENTS.map(c => (
+                <label key={c.id} className="flex items-start gap-2.5 cursor-pointer group">
+                  <div className={cn(
+                    'mt-0.5 w-4 h-4 rounded border-2 flex-shrink-0 flex items-center justify-center transition-colors',
+                    consents[c.id] ? 'bg-primary border-primary' : 'border-stroke group-hover:border-primary/70 bg-surface-2'
+                  )}>
+                    {consents[c.id] && (
+                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                        <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                    <input type="checkbox" className="sr-only" checked={!!consents[c.id]} onChange={() => toggleConsent(c.id)} />
+                  </div>
+                  <span className="text-xs text-fg-muted leading-relaxed">{c.text}</span>
+                </label>
+              ))}
+              {errors.consents && (
+                <div className="flex items-center gap-1.5 text-xs text-red-400">
+                  <AlertCircle size={12} /> {errors.consents}
+                </div>
+              )}
+            </div>
+
+            <Button type="submit" loading={loading} disabled={!allConsented} className="w-full btn-gradient" size="lg">
+              Kayıt Ol
             </Button>
           </form>
 
-          {/* Google consent overlay */}
-          {showGoogleConsent && (
-            <GoogleConsentModal
-              consents={consents}
-              onToggle={toggleConsent}
-              onAcceptAll={acceptAll}
-              onConfirm={async () => {
-                if (!allConsented) return
-                setShowGoogleConsent(false)
-                setGoogleLoading(true)
-                const { error } = await supabase.auth.signInWithOAuth({
-                  provider: 'google',
-                  options: { redirectTo: `${window.location.origin}/auth/callback` },
-                })
-                if (error) { toast('Google ile kayıt yapılamadı.', 'error'); setGoogleLoading(false) }
-              }}
-              onCancel={() => setShowGoogleConsent(false)}
-              allConsented={allConsented}
-            />
-          )}
-
-          <p className="text-center text-sm text-fg-subtle mt-5">
-            Zaten hesabın var mı?{' '}
-            <Link href="/giris" className="text-primary hover:text-primary-dark font-semibold transition-colors">
-              Giriş Yap →
+          {/* Footer links */}
+          <div className="mt-5 flex flex-col gap-2 text-center">
+            <p className="text-sm text-fg-subtle">
+              Zaten hesabın var mı?{' '}
+              <Link href="/giris" className="text-primary font-semibold hover:underline">
+                Giriş yap
+              </Link>
+            </p>
+            <Link href="/" className="text-xs text-fg-subtle hover:text-fg-muted transition-colors">
+              Kayıt olmadan devam et →
             </Link>
-          </p>
+          </div>
         </div>
       </div>
+
+      {/* Google consent overlay */}
+      {showGoogleConsent && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md bg-surface border border-stroke rounded-2xl shadow-2xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-stroke flex items-center gap-3">
+              <Shield size={18} className="text-primary/70 shrink-0" />
+              <div>
+                <p className="text-sm font-bold text-fg">Google ile devam etmeden önce</p>
+                <p className="text-xs text-fg-subtle">Lütfen aşağıdaki onayları verin</p>
+              </div>
+            </div>
+            <div className="px-5 py-4 flex flex-col gap-2">
+              {CONSENTS.map(c => (
+                <label key={c.id} className="flex items-start gap-2.5 cursor-pointer">
+                  <div className={cn(
+                    'mt-0.5 w-4 h-4 rounded border-2 flex-shrink-0 flex items-center justify-center transition-colors',
+                    consents[c.id] ? 'bg-primary border-primary' : 'border-stroke bg-surface-2'
+                  )}>
+                    {consents[c.id] && (
+                      <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
+                        <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    )}
+                    <input type="checkbox" className="sr-only" checked={!!consents[c.id]} onChange={() => toggleConsent(c.id)} />
+                  </div>
+                  <span className="text-xs text-fg-muted leading-relaxed">{c.text}</span>
+                </label>
+              ))}
+            </div>
+            <div className="px-5 py-4 border-t border-stroke flex gap-3">
+              <Button variant="ghost" size="sm" onClick={() => setShowGoogleConsent(false)} className="flex-1">
+                İptal
+              </Button>
+              <Button
+                size="sm"
+                disabled={!allConsented}
+                className="flex-1 btn-gradient"
+                onClick={async () => {
+                  if (!allConsented) return
+                  setShowGoogleConsent(false)
+                  setGoogleLoading(true)
+                  const { error } = await supabase.auth.signInWithOAuth({
+                    provider: 'google',
+                    options: { redirectTo: `${window.location.origin}/auth/callback` },
+                  })
+                  if (error) { toast('Google ile kayıt yapılamadı.', 'error'); setGoogleLoading(false) }
+                }}
+              >
+                Onaylıyorum, Google ile devam et
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -384,85 +373,5 @@ function GoogleIcon() {
       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
     </svg>
-  )
-}
-
-// ── Shared consent UI ──────────────────────────────────────────────────────
-
-interface ConsentProps {
-  consents: Record<string, boolean>
-  onToggle: (id: string) => void
-  onAcceptAll: () => void
-  error?: string
-}
-
-function ConsentBlock({ consents, onToggle, error }: ConsentProps) {
-  return (
-    <div className="flex flex-col gap-2">
-      {CONSENTS.map(c => (
-        <label key={c.id} className="flex items-start gap-2.5 cursor-pointer group">
-          <div className={cn(
-            'mt-0.5 w-4 h-4 rounded border-2 flex-shrink-0 flex items-center justify-center transition-colors',
-            consents[c.id]
-              ? 'bg-primary border-primary'
-              : 'border-stroke group-hover:border-primary/70 bg-surface-2'
-          )}>
-            {consents[c.id] && (
-              <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-                <path d="M1 4L3.5 6.5L9 1" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            )}
-            <input type="checkbox" className="sr-only" checked={!!consents[c.id]} onChange={() => onToggle(c.id)} required={c.required} />
-          </div>
-          <span className="text-xs text-fg-muted leading-relaxed">{c.text}</span>
-        </label>
-      ))}
-
-      {error && (
-        <div className="flex items-center gap-1.5 text-xs text-red-400">
-          <AlertCircle size={12} />
-          {error}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function GoogleConsentModal({
-  consents,
-  onToggle,
-  onAcceptAll,
-  onConfirm,
-  onCancel,
-  allConsented,
-}: ConsentProps & { onConfirm: () => void; onCancel: () => void; allConsented: boolean }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="w-full max-w-md bg-surface border border-stroke rounded-2xl shadow-2xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-stroke flex items-center gap-3">
-          <Shield size={18} className="text-primary/70 shrink-0" />
-          <div>
-            <p className="text-sm font-bold text-fg">Google ile devam etmeden önce</p>
-            <p className="text-xs text-fg-subtle">Lütfen aşağıdaki onayları verin</p>
-          </div>
-        </div>
-        <div className="px-5 py-4">
-          <ConsentBlock consents={consents} onToggle={onToggle} onAcceptAll={() => {}} />
-        </div>
-        <div className="px-5 py-4 border-t border-stroke flex gap-3">
-          <Button variant="ghost" size="sm" onClick={onCancel} className="flex-1">
-            İptal
-          </Button>
-          <Button
-            size="sm"
-            onClick={onConfirm}
-            disabled={!allConsented}
-            className="flex-1 btn-gradient"
-          >
-            Onaylıyorum, Google ile devam et
-          </Button>
-        </div>
-      </div>
-    </div>
   )
 }

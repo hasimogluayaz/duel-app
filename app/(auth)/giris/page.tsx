@@ -1,22 +1,22 @@
-﻿'use client'
+'use client'
 
 export const dynamic = 'force-dynamic'
 
 import { Suspense, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { useToast } from '@/components/ui/Toast'
-import { Swords, Trophy, Users } from 'lucide-react'
-import Image from 'next/image'
+import { Eye, EyeOff } from 'lucide-react'
 
 export default function GirisPage() {
   return (
     <Suspense fallback={
       <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
-        <div className="text-fg-subtle">Yükleniyor...</div>
+        <div className="text-fg-subtle text-sm">Yükleniyor…</div>
       </div>
     }>
       <GirisForm />
@@ -33,6 +33,7 @@ function GirisForm() {
   const callbackError = searchParams.get('error')
 
   const [form, setForm] = useState({ email: '', password: '' })
+  const [showPass, setShowPass] = useState(false)
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [unconfirmedEmail, setUnconfirmedEmail] = useState('')
@@ -42,24 +43,24 @@ function GirisForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true)
-
     const { error } = await supabase.auth.signInWithPassword({
       email: form.email,
       password: form.password,
     })
-
     if (error) {
       if (error.message.toLowerCase().includes('email not confirmed')) {
         setUnconfirmedEmail(form.email)
       } else {
-        toast(error.message === 'Invalid login credentials'
-          ? 'Email veya şifre hatalı.'
-          : 'Giriş yapılamadı. Tekrar dene.', 'error')
+        toast(
+          error.message === 'Invalid login credentials'
+            ? 'Email veya şifre hatalı.'
+            : 'Giriş yapılamadı. Tekrar dene.',
+          'error'
+        )
       }
       setLoading(false)
       return
     }
-
     router.push(redirect)
     router.refresh()
   }
@@ -76,9 +77,7 @@ function GirisForm() {
     setGoogleLoading(true)
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: `https://kapisio.com/auth/callback?next=${redirect}`,
-      },
+      options: { redirectTo: `https://kapisio.com/auth/callback?next=${redirect}` },
     })
     if (error) {
       toast('Google ile giriş yapılamadı.', 'error')
@@ -87,151 +86,122 @@ function GirisForm() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex">
-      {/* Left branding panel — hidden on mobile */}
-      <div className="hidden lg:flex flex-col justify-between w-[480px] shrink-0 bg-gradient-to-br from-primary via-primary to-secondary p-12 text-white relative overflow-hidden">
-        {/* Background decoration */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
-
-        <div className="relative z-10">
-          <Link href="/" className="flex items-center gap-2 font-black text-2xl text-white">
-            <Image src="/logo.png" alt="Kapisio" width={32} height={32} className="w-8 h-8 object-contain brightness-0 invert" />
-            Kapisio
+    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12 bg-bg">
+      <div className="w-full max-w-sm">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <Image src="/logo.png" alt="Kapisio" width={36} height={36} className="w-9 h-9 object-contain" />
+            <span className="font-black text-2xl text-gradient">Kapisio</span>
           </Link>
         </div>
 
-        <div className="relative z-10 space-y-8">
-          <div>
-            <h2 className="text-3xl font-black leading-tight mb-3">
-              Düelloya hazır mısın?
-            </h2>
-            <p className="text-white/80 text-base leading-relaxed">
-              Günlük senaryolara cevap ver, arkadaşlarınla yarış ve liderlik tablosuna çık!
-            </p>
-          </div>
+        {/* Card */}
+        <div className="bg-white dark:bg-surface border border-stroke rounded-2xl shadow-sm p-7">
+          <h1 className="text-xl font-black text-fg mb-1">Tekrar hoş geldin</h1>
+          <p className="text-sm text-fg-muted mb-6">Hesabına giriş yap.</p>
 
-          <div className="space-y-4">
-            {[
-              { icon: <Swords size={20} />, title: 'Günlük Düellolar', desc: 'Her gün yeni senaryolar seni bekliyor' },
-              { icon: <Trophy size={20} />, title: 'Liderlik Tablosu', desc: 'En iyi oyunculara meydan oku' },
-              { icon: <Users size={20} />, title: 'Topluluk', desc: 'Binlerce oyuncuyla yarış' },
-            ].map((item) => (
-              <div key={item.title} className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-                  {item.icon}
-                </div>
-                <div>
-                  <div className="font-semibold text-sm">{item.title}</div>
-                  <div className="text-white/70 text-xs">{item.desc}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+          {callbackError === 'auth_callback' && (
+            <div className="mb-4 bg-red-500/10 border border-red-500/25 rounded-xl px-3 py-2.5 text-xs text-red-400">
+              Giriş sırasında bir hata oluştu. Tekrar dene.
+            </div>
+          )}
 
-        <div className="relative z-10">
-          <p className="text-white/60 text-xs">© 2025 Kapisio · Yapay zeka destekli</p>
-        </div>
-      </div>
-
-      {/* Right form panel */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12 bg-bg">
-        <div className="w-full max-w-sm">
-          {/* Mobile logo */}
-          <div className="lg:hidden text-center mb-8">
-            <Link href="/" className="inline-flex items-center gap-2 font-black text-2xl text-fg">
-              <Image src="/logo.png" alt="Kapisio" width={28} height={28} className="w-7 h-7 object-contain" />
-              <span className="text-gradient">Kapisio</span>
-            </Link>
-          </div>
-
-          <div className="mb-8">
-            <h1 className="text-2xl font-black text-fg mb-1">Hoş geldin! 👋</h1>
-            <p className="text-fg-muted text-sm">Hesabına giriş yap ve düelloya katıl</p>
-            {callbackError === 'auth_callback' && (
-              <div className="mt-3 bg-red-500/10 border border-red-500/25 rounded-xl px-3 py-2.5 text-xs text-red-400">
-                Giriş sırasında bir hata oluştu. Tekrar dene.
-              </div>
-            )}
-          </div>
-
-          {/* Google button */}
+          {/* Google */}
           <button
             onClick={handleGoogle}
             disabled={googleLoading}
-            className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 dark:border-stroke dark:bg-surface-2 text-gray-700 dark:text-fg rounded-xl py-3 px-4 font-medium text-sm hover:bg-gray-50 dark:hover:bg-surface-2/80 transition-colors disabled:opacity-60 shadow-sm mb-5"
+            className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 dark:border-stroke dark:bg-surface-2 text-gray-700 dark:text-fg rounded-xl py-2.5 px-4 font-medium text-sm hover:bg-gray-50 dark:hover:bg-surface-2/80 transition-colors disabled:opacity-60 shadow-sm mb-4"
           >
             <GoogleIcon />
-            {googleLoading ? 'Yönlendiriliyor...' : 'Google ile Giriş Yap'}
+            {googleLoading ? 'Yönlendiriliyor…' : 'Google ile Giriş Yap'}
           </button>
 
-          <div className="relative flex items-center gap-3 mb-5">
+          {/* Divider */}
+          <div className="relative flex items-center gap-3 mb-4">
             <div className="flex-1 h-px bg-stroke" />
-            <span className="text-xs text-fg-subtle font-medium">veya email ile</span>
+            <span className="text-xs text-fg-subtle font-medium">— veya —</span>
             <div className="flex-1 h-px bg-stroke" />
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3.5">
             <Input
               type="email"
-              label="Email"
+              label="E-posta"
               placeholder="ornek@email.com"
               value={form.email}
               onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
               required
               autoComplete="email"
             />
-            <div>
-              <Input
-                type="password"
-                label="Şifre"
-                placeholder="••••••••"
-                value={form.password}
-                onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-                required
-                autoComplete="current-password"
-              />
-              <div className="flex justify-end mt-1.5">
-                <Link href="/sifre-sifirla" className="text-xs text-primary hover:text-primary-dark transition-colors">
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-sm font-medium text-fg-muted">Şifre</label>
+              <div className="relative">
+                <input
+                  type={showPass ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  value={form.password}
+                  onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
+                  required
+                  autoComplete="current-password"
+                  className="w-full bg-bg border border-stroke rounded-xl px-4 py-2.5 pr-11 text-fg placeholder:text-fg-subtle focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPass(p => !p)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-fg-muted hover:text-fg transition-colors"
+                  tabIndex={-1}
+                >
+                  {showPass ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
+              </div>
+              <div className="flex justify-end">
+                <Link href="/sifre-sifirla" className="text-xs text-primary hover:underline">
                   Şifremi unuttum
                 </Link>
               </div>
             </div>
 
-            <Button type="submit" loading={loading} className="w-full mt-1" size="lg">
+            <Button type="submit" loading={loading} className="w-full btn-gradient mt-1" size="lg">
               Giriş Yap
             </Button>
           </form>
 
-          {/* Email not confirmed banner */}
+          {/* Unconfirmed email */}
           {unconfirmedEmail && (
             <div className="mt-4 bg-amber-500/10 border border-amber-500/25 rounded-xl px-4 py-3">
               <p className="text-sm font-semibold text-amber-400 mb-1">📧 Email doğrulanmadı</p>
               <p className="text-xs text-fg-subtle mb-3">
-                <strong className="text-fg">{unconfirmedEmail}</strong> adresine gönderilen doğrulama emailini kontrol et. Spam klasörüne düşmüş olabilir.
+                <strong className="text-fg">{unconfirmedEmail}</strong> adresine doğrulama emaili gönderildi.
               </p>
               {resendSent ? (
-                <p className="text-xs text-green-400 font-medium">✓ Doğrulama emaili tekrar gönderildi!</p>
+                <p className="text-xs text-green-400 font-medium">✓ Tekrar gönderildi!</p>
               ) : (
                 <button
                   onClick={handleResendConfirmation}
                   disabled={resendLoading}
                   className="text-xs text-amber-400 hover:text-amber-300 font-semibold underline underline-offset-2 disabled:opacity-50"
                 >
-                  {resendLoading ? 'Gönderiliyor...' : 'Doğrulama emailini tekrar gönder →'}
+                  {resendLoading ? 'Gönderiliyor…' : 'Doğrulama emailini tekrar gönder →'}
                 </button>
               )}
             </div>
           )}
 
-          <p className="text-center text-sm text-fg-subtle mt-6">
-            Hesabın yok mu?{' '}
-            <Link href="/kayit" className="text-primary hover:text-primary-dark font-semibold transition-colors">
-              Ücretsiz Kayıt Ol →
+          {/* Footer links */}
+          <div className="mt-5 flex flex-col gap-2 text-center">
+            <p className="text-sm text-fg-subtle">
+              Hesabın yok mu?{' '}
+              <Link href="/kayit" className="text-primary font-semibold hover:underline">
+                Kayıt ol
+              </Link>
+            </p>
+            <Link href="/" className="text-xs text-fg-subtle hover:text-fg-muted transition-colors">
+              Kayıt olmadan devam et →
             </Link>
-          </p>
+          </div>
         </div>
       </div>
     </div>

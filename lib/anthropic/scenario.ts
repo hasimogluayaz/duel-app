@@ -11,87 +11,46 @@ function getGroqClient(): Groq {
 export async function generateDailyScenario(): Promise<string> {
   const groq = getGroqClient()
 
-  const today = new Date()
-  const dayOfWeek = today.getDay() // 0=Pazar, 1=Pazartesi...
-  const dayNames = ['Pazar', 'Pazartesi', 'Salı', 'Çarşamba', 'Perşembe', 'Cuma', 'Cumartesi']
+  const categories = [
+    'iş hayatı ve kariyer',
+    'aşk ve ilişkiler',
+    'aile baskısı',
+    'para ve borç',
+    'arkadaşlık ve sadakat',
+    'sosyal medya ve itibar',
+    'adalet ve dürüstlük',
+    'kıskançlık ve rekabet',
+  ]
+  const category = categories[new Date().getDay() % categories.length]
 
-  const prompt = `Sen Türk gençlere (18-30 yaş) yönelik viral sosyal medya senaryoları üreten bir içerik uzmanısın.
-Bugün ${dayNames[dayOfWeek]}.
+  const prompt = `Sen Kapisio için günlük senaryo yazıyorsun. Kapisio, insanların gerçek hayat durumlarında ne yapacaklarını tartıştığı bir platform.
 
-GÖREV: Aşağıdaki kriterleri karşılayan TEK bir senaryo üret.
+Bugünkü konu: ${category}
 
-VIRAL SENARYO KRİTERLERİ:
-1. İnsanları gerçekten ikiye bölen bir durum — net bir "doğru cevap" OLMASIN
-2. Herkesin yaşayabileceği ya da tanıdığı bir an
-3. Türk kültürüne, sosyal normlarına veya güncel hayata özel referanslar
-4. İnsanların "BEN NE YAPARDIN" diye düşünüp yorum yapmak isteyeceği bir his
-5. Komik, cringe, utandırıcı, ya da ahlaki çatışma yaratan
-6. Maksimum 2 kısa cümle
+İYİ SENARYO KURALI — hepsini karşılamalısın:
+1. SOMUT: Gerçek bir yer, gerçek bir ilişki, gerçek bir rakam olsun. "Bir arkadaşın" değil, "5 yıllık en iyi arkadaşın" de.
+2. İKİYE BÖLEN: Okuyanların yarısı "kesinlikle A yapardım", yarısı "kesinlikle B yapardım" desin. Herkes hemfikirse senaryo kötüdür.
+3. DUYGUSAL: Hafif rahatsız edici olsun. Haksızlık, ihanet, utanç, vicdan azabı, kıskançlık — bunlardan biri olsun.
+4. KISA: 2-3 cümle. Son cümle mutlaka "Ne yaparsın?" veya "Ne yapardın?" ile bitsin.
+5. TÜRKÇE KONUŞMA DİLİ: Resmi değil, doğal.
 
-KAÇINILACAKLAR:
-- "Patronuna yanlış mesaj attın" gibi klişe senaryolar
-- Çocuk oyunlarını hatırlatan basit sorular
-- Siyasi veya nefret içerikli şeyler
-- Çok masum / çok sıradan durumlar
+KÖTÜ ÖRNEK (çok genel, tartışma doğurmaz):
+"Arkadaşın senden para istedi ama daha önce verdiğini geri ödemedi. Ne yaparsın?"
 
-VİRAL OLABİLECEK KONULAR (bunlardan birini seç):
+İYİ ÖRNEK:
+"3 yıldır birlikte çalıştığın iş arkadaşın, senin fikirlerini toplantıda kendi fikirleri gibi sundu ve müdürden övgü aldı. Öğle yemeğinde seninle oturmak istiyor. Ne yaparsın?"
 
-💔 İLİŞKİ / ALGI:
-- Sevgilinin eski partneriyle arkadaş olmak zorunda kalma
-- Tinderdaki eşleşmenin tanıdık biri çıkması
-- Birinin seninle değil sosyal çevrenle çıkmak istediğini fark etme
-- Partner telefon şifresini paylaşmamanın ne anlama geldiği
-- "Sadece arkadaş" diyip kasıtlı kıskanç yapan biri
+İYİ ÖRNEK 2:
+"Sevgilinin telefonu masada açık kaldı. Kilit ekranında eski sevgilisinden 'özledim' mesajı gördün. Sevgilin hâlâ duşta. Ne yaparsın?"
 
-👨‍👩‍👧 AİLE / TOPLUM BASKISI:
-- Ailenin beğenmediği birini seçmek zorunda kalma
-- Kaynananın evde olduğu ilk hafta sonu
-- Annenin sosyal medyanda yorum yapması
-- Düğünde aile kavgasına dahil edilme
-- Başarılı akrabanın seni küçümsemesi
+Şimdi ${category} kategorisinde, yukarıdaki kurallara uyan YENİ bir senaryo yaz. Daha önce yazılmış örnekleri tekrar etme.
 
-💼 İŞ / PARA:
-- İşten çıkarılacağını öğrenip son gün nasıl geçireceğini bilmeme
-- Zam isteyen arkadaşa referans olmak
-- Maaşını öğrenen arkadaşın senden çok kazandığını keşfetme
-- Patronun haksız eleştirisine toplantıda cevap verip vermeme
-- Hesap ödemekte yarışan ama sonra "paylaşalım" diyen birisi
-
-📱 SOSYAL MEDYA / DİJİTAL:
-- "Görüldü" atıp saatlerce cevap vermemenin kabul görür nedenleri
-- İnstagrama koymamak için güzel anı yaşamamayı tercih etme
-- Eski sevgilinin yeni partnerini stalk etme vs. hayatına devam etme
-- Subtweet attığını bilen biriyle yüz yüze gelme
-- Arkadaşın işteki rezaletini TikTok'ta izleme
-
-🍽️ GÜNLÜK SOSYAL:
-- Sipariş yanlış gelince iade mi etmek yoksa yememek mi
-- Arkadaşın kötü kararı için "iyi fikir!" mi demek yoksa dürüst olmak mı
-- Restoranda rezalet çıkaran arkadaşı savunmak
-- Hemşehrinin yanlış bir şey yapmasına izin verip vermeme
-- Parayı asla geri vermeyeceğini bildiğin yakına borç vermek
-
-🎓 GENÇLİK / YENİ NESİL:
-- Lise arkadaşının düğününe gidemeyeceğini hissettiren servet uçurumu
-- İşe girmek için "bağlantı" kullanmak zorunda kalma
-- Herkesten önce başarıya ulaşmanın yalnızlaştırması
-- Tanımadığın biriyle aynı Spotify şarkısında bağ kurma
-- "Çok çalış" diyen ama hiç çalışmadan miras bekleyen biri
-
-BUGÜN GÜNÜN: ${dayNames[dayOfWeek]} — hafta ${dayOfWeek >= 5 ? 'sonu' : 'içi'}
-
-Senaryo yazarken dikkat et:
-- Okuyucu "acaba ne yapardım?" diye gerçekten duraksasın
-- İki taraf da haklı sayılabilsin
-- Özgün ol, internette daha önce görülmemiş bir şey yaz
-- Türkçe konuşma diline uygun, ama kaba olmayan bir dil kullan
-
-JSON formatında döndür: {"scenario": "senaryo metni", "category": "kategori"}`
+Sadece JSON döndür: {"scenario": "senaryo metni"}`
 
   const completion = await groq.chat.completions.create({
     model: 'llama-3.3-70b-versatile',
     messages: [{ role: 'user', content: prompt }],
-    temperature: 1.0,
+    temperature: 0.85,
     max_tokens: 300,
     response_format: { type: 'json_object' },
   })
@@ -99,7 +58,7 @@ JSON formatında döndür: {"scenario": "senaryo metni", "category": "kategori"}
   const text = completion.choices[0]?.message?.content ?? ''
 
   try {
-    const parsed = JSON.parse(text) as { scenario: string; category?: string }
+    const parsed = JSON.parse(text) as { scenario: string }
     if (!parsed.scenario || typeof parsed.scenario !== 'string') {
       throw new Error('Missing scenario field')
     }
