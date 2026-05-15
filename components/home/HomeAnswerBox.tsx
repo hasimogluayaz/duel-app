@@ -109,6 +109,7 @@ export function HomeAnswerBox({
   const [linkCopied, setLinkCopied] = useState(false)
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null)
   const [anonAnsweredToday, setAnonAnsweredToday] = useState(false)
+  const [clientReady, setClientReady] = useState(!!existingAnswerId || !!userId)
 
   const wasAlreadyAnswered = useRef(existingAnswerId !== null)
 
@@ -142,6 +143,28 @@ export function HomeAnswerBox({
     if (phase === 'submitted') fetchAnswers()
   }, [phase, fetchAnswers])
 
+  // Load existing votes on mount
+  useEffect(() => {
+    if (phase !== 'submitted') return
+    if (userId) {
+      // Fetch from DB
+      supabase
+        .from('answer_likes')
+        .select('answer_id')
+        .eq('user_id', userId)
+        .then(({ data }) => {
+          if (data) setVotedIds(new Set(data.map((d: { answer_id: string }) => d.answer_id)))
+        })
+    } else {
+      // Load from localStorage
+      try {
+        const stored = localStorage.getItem('kapisio_votes')
+        if (stored) setVotedIds(new Set(JSON.parse(stored) as string[]))
+      } catch {}
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase, userId])
+
   useEffect(() => {
     if (!userId) return
     const pending = localStorage.getItem('kapisio_pending_response')
@@ -159,6 +182,7 @@ export function HomeAnswerBox({
     if (userId) return
     const pendingScenarioId = localStorage.getItem('kapisio_pending_scenario_id')
     if (pendingScenarioId === scenarioId) setAnonAnsweredToday(true)
+    setClientReady(true)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scenarioId])
 
@@ -225,22 +249,47 @@ export function HomeAnswerBox({
   }
 
   async function handleVote(answerId: string, answerUserId: string | null) {
+    if (answerUserId === userId && userId) return // can't vote own answer
+
+    // Anon user: use localStorage
     if (!userId) {
-      setShowStreakModal(true)
+      if (votedIds.has(answerId)) return // anon can't toggle off
+      // Save to localStorage
+      const newVoted = new Set(votedIds)
+      newVoted.add(answerId)
+      setVotedIds(newVoted)
+      try { localStorage.setItem('kapisio_votes', JSON.stringify([...newVoted])) } catch {}
+      setAnswers(prev =>
+        prev.map(a => a.id === answerId ? { ...a, vote_count: a.vote_count + 1 } : a)
+      )
       return
     }
-    if (answerUserId === userId || votedIds.has(answerId)) return
+
+    const alreadyVoted = votedIds.has(answerId)
 
     try {
-      await fetch('/api/vote', {
+      const res = await fetch('/api/vote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ answer_id: answerId }),
       })
-      setVotedIds(prev => { const s = new Set(prev); s.add(answerId); return s })
-      setAnswers(prev =>
-        prev.map(a => a.id === answerId ? { ...a, vote_count: a.vote_count + 1 } : a)
-      )
+      const data = await res.json() as { toggled?: string }
+
+      if (data.toggled === 'off') {
+        // Removed vote
+        setVotedIds(prev => { const s = new Set(prev); s.delete(answerId); return s })
+        setAnswers(prev =>
+          prev.map(a => a.id === answerId ? { ...a, vote_count: Math.max(0, a.vote_count - 1) } : a)
+        )
+      } else {
+        // Added vote
+        setVotedIds(prev => { const s = new Set(prev); s.add(answerId); return s })
+        if (!alreadyVoted) {
+          setAnswers(prev =>
+            prev.map(a => a.id === answerId ? { ...a, vote_count: a.vote_count + 1 } : a)
+          )
+        }
+      }
     } catch {}
   }
 
@@ -654,6 +703,11 @@ export function HomeAnswerBox({
   }
 
   // ── Input phase ───────────────────────────────────────────────────────────
+
+  // Prevent hydration flash: don't show textarea until client-side checks are done
+  if (!clientReady) {
+    return <div className="h-[160px]" />
+  }
 
   return (
     <>
