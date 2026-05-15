@@ -393,6 +393,18 @@ export function HomeAnswerBox({
                   <span className="text-xs font-semibold" style={{ color: 'rgba(255,255,255,0.5)' }}>sn</span>
                 </span>
               </div>
+              <p className="mt-3 text-[12px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+                {userId ? (
+                  'Cevabın kaydedildi. Yarın da gel, serin kopmasın.'
+                ) : (
+                  <>
+                    Streak başlatmak ister misin?{' '}
+                    <Link href="/kayit" className="font-semibold" style={{ color: 'rgba(129,180,255,0.9)' }}>
+                      Hesap oluştur →
+                    </Link>
+                  </>
+                )}
+              </p>
             </div>
           </div>
 

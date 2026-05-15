@@ -69,7 +69,7 @@ export default function AyarlarPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [section, setSection] = useState<string | null>(null)
-  const [dailyReminder, setDailyReminder] = useState(true)
+  const [notif, setNotif] = useState({ duel: true, vote: true, daily: true })
 
   const [form, setForm] = useState({ display_name: '', bio: '' })
   const [saving, setSaving] = useState(false)
@@ -207,42 +207,80 @@ export default function AyarlarPage() {
         </Card>
       )}
 
-      <Card>
-        <Row
-          icon={<User size={16} />}
-          label="Profili düzenle"
-          hint="Görünen ad ve biyografi"
-          right={<ChevronRight size={16} style={{ color: 'var(--fg-subtle)' }} />}
-          onClick={() => setSection('profil')}
-        />
-        <Row
-          icon={<Lock size={16} />}
-          label="Şifre değiştir"
-          right={<ChevronRight size={16} style={{ color: 'var(--fg-subtle)' }} />}
-          onClick={() => setSection('sifre')}
-        />
-        <Row
-          icon={<Bell size={16} />}
-          label="Günlük senaryo hatırlatıcısı"
-          hint="Her gün 09:00'da bildirim"
-          right={<Toggle on={dailyReminder} onChange={setDailyReminder} />}
-        />
-        <Row
-          icon={<Download size={16} />}
-          label="Verilerimi indir"
-          hint="GDPR / KVKK"
-          right={<ChevronRight size={16} style={{ color: 'var(--fg-subtle)' }} />}
-        />
-        <Row
-          icon={<Trash2 size={16} />}
-          label="Hesabı sil"
-          hint="Bu işlem geri alınamaz"
-          danger
-          right={<ChevronRight size={16} style={{ color: '#dc2626' }} />}
-          onClick={() => router.push('/profil/ayarlar/hesap-sil')}
-          last
-        />
-      </Card>
+      {/* Profil */}
+      <div>
+        <p style={{ font: '600 11px -apple-system, sans-serif', color: 'var(--fg-subtle)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8, paddingLeft: 2 }}>Profil</p>
+        <Card>
+          <Row
+            icon={<User size={16} />}
+            label="Profili düzenle"
+            hint="Görünen ad ve biyografi"
+            right={<ChevronRight size={16} style={{ color: 'var(--fg-subtle)' }} />}
+            onClick={() => setSection('profil')}
+          />
+          <Row
+            icon={<Lock size={16} />}
+            label="Şifre değiştir"
+            right={<ChevronRight size={16} style={{ color: 'var(--fg-subtle)' }} />}
+            onClick={() => setSection('sifre')}
+            last
+          />
+        </Card>
+      </div>
+
+      {/* Bildirimler */}
+      <div>
+        <p style={{ font: '600 11px -apple-system, sans-serif', color: 'var(--fg-subtle)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8, paddingLeft: 2 }}>Bildirimler</p>
+        <Card>
+          <Row
+            icon={<Bell size={16} />}
+            label="Düello çağrıları"
+            hint="Biri seni düelloya davet ettiğinde"
+            right={<Toggle on={notif.duel} onChange={v => setNotif(n => ({ ...n, duel: v }))} />}
+          />
+          <Row
+            icon={<Bell size={16} />}
+            label="Oy bildirimleri"
+            hint="Cevabın oy aldığında"
+            right={<Toggle on={notif.vote} onChange={v => setNotif(n => ({ ...n, vote: v }))} />}
+          />
+          <Row
+            icon={<Bell size={16} />}
+            label="Günlük senaryo hatırlatıcısı"
+            hint="Her gün 09:00'da bildirim"
+            right={<Toggle on={notif.daily} onChange={v => setNotif(n => ({ ...n, daily: v }))} />}
+            last
+          />
+        </Card>
+      </div>
+
+      {/* Hesap */}
+      <div>
+        <p style={{ font: '600 11px -apple-system, sans-serif', color: 'var(--fg-subtle)', textTransform: 'uppercase', letterSpacing: '.07em', marginBottom: 8, paddingLeft: 2 }}>Hesap</p>
+        <Card>
+          <Row
+            icon={<Download size={16} />}
+            label="Verilerimi indir"
+            hint="GDPR / KVKK"
+            right={<ChevronRight size={16} style={{ color: 'var(--fg-subtle)' }} />}
+          />
+          <Row
+            icon={<User size={16} />}
+            label="Oturumu kapat"
+            right={<ChevronRight size={16} style={{ color: 'var(--fg-subtle)' }} />}
+            onClick={async () => { await supabase.auth.signOut(); router.push('/') }}
+          />
+          <Row
+            icon={<Trash2 size={16} />}
+            label="Hesabı sil"
+            hint="Bu işlem geri alınamaz"
+            danger
+            right={<ChevronRight size={16} style={{ color: '#dc2626' }} />}
+            onClick={() => router.push('/profil/ayarlar/hesap-sil')}
+            last
+          />
+        </Card>
+      </div>
 
       <p style={{ font: '400 12px Geist Mono, monospace', color: 'var(--fg-subtle)', textAlign: 'center' }}>
         Kapisio · KVKK uyumlu

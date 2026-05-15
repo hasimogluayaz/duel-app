@@ -83,6 +83,20 @@ export default async function ProfilPage({ params }: Props) {
 
   const totalVotes = (voteAgg ?? []).reduce((sum: number, r: any) => sum + (r.vote_count ?? 0), 0)
 
+  // Check if the viewed profile's user answered today's scenario
+  const today = new Date().toISOString().split('T')[0]
+  let answeredToday = false
+  try {
+    const { data: todayScenario } = await supabase
+      .from('scenarios').select('id').eq('active_date', today).eq('is_approved', true).single()
+    if (todayScenario) {
+      const { count } = await supabase.from('answers')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', profile.id).eq('scenario_id', todayScenario.id)
+      answeredToday = (count ?? 0) > 0
+    }
+  } catch {}
+
   return (
     <ProfilClient
       profile={profile}
@@ -95,6 +109,7 @@ export default async function ProfilPage({ params }: Props) {
       recentAnswers={recentAnswers ?? []}
       totalVotes={totalVotes}
       answerCount={answerCount ?? 0}
+      answeredToday={answeredToday}
     />
   )
 }

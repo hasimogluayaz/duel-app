@@ -115,8 +115,8 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
                 >
                   <Avatar
                     src={profile.avatar_url}
-                    fallback={profile.display_name || profile.username}
-                    size={30}
+                    username={profile.display_name || profile.username}
+                    size="sm"
                   />
                   <ChevronDown size={14} className={cn('text-fg-muted transition-transform', dropdownOpen && 'rotate-180')} />
                 </button>

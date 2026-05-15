@@ -22,6 +22,7 @@ interface Props {
   recentAnswers: any[]
   totalVotes: number
   answerCount: number
+  answeredToday?: boolean
   userScenarios?: any[]
   pinnedAnswers?: any[]
 }
@@ -29,7 +30,7 @@ interface Props {
 export default function ProfilClient({
   profile, currentUserId, isFollowing,
   duelCount, recentDuels, recentAnswers,
-  totalVotes, answerCount,
+  totalVotes, answerCount, answeredToday = true,
 }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('cevaplar')
 
@@ -98,6 +99,24 @@ export default function ProfilClient({
           </div>
         ))}
       </div>
+
+      {/* ── Bugün cevap vermediyse banner ── */}
+      {!answeredToday && isOwnProfile && (
+        <div
+          className="flex items-center justify-between gap-3 rounded-2xl px-4 py-3 mb-2"
+          style={{ background: 'linear-gradient(135deg, #0f1f55 0%, #1a3a8f 100%)' }}
+        >
+          <p className="text-sm text-white font-medium leading-snug">
+            🔥 <strong>{profile.streak_count ?? 0} günlük</strong> serin devam ediyor. Bugünün senaryosuna cevap ver!
+          </p>
+          <Link
+            href="/"
+            className="shrink-0 text-xs font-bold px-3 py-1.5 rounded-lg text-white border border-white/30 hover:bg-white/10 transition-colors whitespace-nowrap"
+          >
+            Cevapla →
+          </Link>
+        </div>
+      )}
 
       {/* ── Sekme çubuğu ── */}
       <div className="flex border-b border-stroke mb-5">
