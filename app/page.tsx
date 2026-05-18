@@ -40,10 +40,9 @@ export default async function HomePage() {
 
   const today = new Date().toISOString().split('T')[0]
   const dayNumber = getDayNumber()
-  const dateLabel = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })
 
   let isAdmin = false
-  let scenario: { id: string; content: string; category?: string | null } | null = null
+  let scenario: { id: string; content: string; category?: string | null; active_date?: string } | null = null
   let responseCount = 0
   let streakCount = 0
   let existingAnswerId: string | null = null
@@ -51,7 +50,7 @@ export default async function HomePage() {
   try {
     const { data } = await supabase
       .from('scenarios')
-      .select('id, content, category')
+      .select('id, content, category, active_date')
       .eq('active_date', today)
       .eq('is_approved', true)
       .single()
@@ -125,11 +124,16 @@ export default async function HomePage() {
               style={{
                 background: 'var(--primary)',
                 boxShadow: '0 0 0 3px rgba(42,108,240,0.18)',
+                animation: 'pulse 2s infinite',
               }}
             />
             <span>Gün #{dayNumber}</span>
             <span style={{ color: 'var(--stroke)' }}>·</span>
-            <span>{dateLabel}</span>
+            <span>
+              {scenario?.active_date
+                ? new Date(scenario.active_date + 'T12:00:00').toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })
+                : new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })}
+            </span>
           </div>
         </div>
 
@@ -141,53 +145,49 @@ export default async function HomePage() {
               style={{
                 background: 'var(--surface)',
                 borderColor: 'var(--stroke)',
-                boxShadow: '0 1px 0 rgba(15,19,32,.02), 0 8px 28px -16px rgba(15,19,32,.08)',
+                boxShadow: '0 2px 0 rgba(15,19,32,.04), 0 12px 32px -12px rgba(15,19,32,.12)',
               }}
             >
-              {/* Blue gradient top bar */}
+              {/* Blue gradient top bar — thicker + brighter */}
               <div
-                className="h-[3px] w-full"
-                style={{
-                  background: 'linear-gradient(90deg, #1442a8, #2a6cf0 60%, #5188fa)',
-                }}
+                className="h-1 w-full"
+                style={{ background: 'linear-gradient(90deg, #1442a8, #2a6cf0 55%, #60a5fa)' }}
               />
               <div className="p-6 sm:p-8">
-                <p
-                  className="text-[10px] font-bold uppercase mb-3"
-                  style={{ letterSpacing: '0.14em', color: 'var(--primary)' }}
-                >
-                  BUGÜNÜN SENARYOSU
-                </p>
-
-                {/* Category tag */}
-                {scenario.category && scenario.category !== 'genel' && (
-                  <span
-                    className="inline-block text-[11px] font-semibold px-2.5 py-1 rounded-full mb-3"
-                    style={{ background: 'var(--k-blue-50, #eff6ff)', color: 'var(--primary)' }}
-                  >
-                    {categoryLabel(scenario.category)}
-                  </span>
-                )}
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-[10px] font-bold uppercase" style={{ letterSpacing: '0.14em', color: 'var(--primary)' }}>
+                    BUGÜNÜN SENARYOSU
+                  </p>
+                  {/* Category tag inline */}
+                  {scenario.category && scenario.category !== 'genel' && (
+                    <span
+                      className="text-[11px] font-semibold px-2.5 py-0.5 rounded-full"
+                      style={{ background: 'var(--k-blue-50, #eff6ff)', color: 'var(--primary)' }}
+                    >
+                      {categoryLabel(scenario.category)}
+                    </span>
+                  )}
+                </div>
 
                 <p
-                  className="text-[22px] sm:text-[26px] font-semibold text-fg"
-                  style={{ lineHeight: 1.35, letterSpacing: '-0.012em' }}
+                  className="text-[21px] sm:text-[25px] font-semibold text-fg"
+                  style={{ lineHeight: 1.38, letterSpacing: '-0.012em' }}
                 >
                   {scenario.content}
                 </p>
+
+                {/* Response count */}
                 {responseCount >= 100 && (
-                  <div
-                    className="mt-4 pt-3.5 border-t text-sm"
-                    style={{ borderColor: 'var(--stroke)', borderStyle: 'dashed', color: 'var(--fg-subtle)' }}
-                  >
+                  <div className="mt-4 pt-3.5 border-t text-sm flex items-center gap-1.5"
+                    style={{ borderColor: 'var(--stroke)', borderStyle: 'dashed', color: 'var(--fg-subtle)' }}>
                     <span className="font-bold tabular-nums" style={{ color: 'var(--fg)' }}>
                       {responseCount.toLocaleString('tr-TR')}
-                    </span>{' '}kişi cevap verdi
+                    </span> kişi cevap verdi
                   </div>
                 )}
                 {responseCount >= 10 && responseCount < 100 && (
-                  <p className="mt-3 text-xs font-medium" style={{ color: 'var(--primary)' }}>
-                    İlk cevaplayanlardan biri ol!
+                  <p className="mt-3 text-xs font-semibold" style={{ color: 'var(--primary)' }}>
+                    ✦ İlk cevaplayanlardan biri ol!
                   </p>
                 )}
               </div>

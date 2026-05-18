@@ -11,7 +11,7 @@ import { Spinner } from '@/components/ui/Spinner'
 import { useToast } from '@/components/ui/Toast'
 import type { Profile } from '@/types'
 import {
-  User, Lock, Trash2, Bell, Shield, ChevronRight, Sun, Moon, Monitor, Download, LogOut,
+  User, Lock, Trash2, Bell, ChevronRight, Sun, Moon, Monitor, LogOut,
 } from 'lucide-react'
 import NotificationPrefs from '@/components/notifications/NotificationPrefs'
 
@@ -94,9 +94,6 @@ export default function AyarlarPage() {
   const [loading, setLoading] = useState(true)
   const [section, setSection] = useState<string | null>(null)
   const [mounted, setMounted] = useState(false)
-
-  const [notif, setNotif] = useState({ duel: true, vote: true, mention: true, follow: false, daily: true })
-  const [priv, setPriv] = useState({ profile: true, dms: true, leaderboard: true })
 
   const [form, setForm] = useState({ display_name: '' })
   const [saving, setSaving] = useState(false)
@@ -293,25 +290,6 @@ export default function AyarlarPage() {
               hint="Hangi bildirimleri alacağını seç"
               right={<ChevronRight size={16} style={{ color: 'var(--fg-subtle)' }} />}
               onClick={() => setSection('bildirimler')}
-              last
-            />
-          </SCard>
-        </div>
-
-        {/* Gizlilik */}
-        <div>
-          <SectionTitle>Gizlilik</SectionTitle>
-          <SCard>
-            <SettingRow
-              icon={<Shield size={16} />}
-              label="Profil herkese açık"
-              hint="Kapatırsan sadece takip ettiklerin görür"
-              right={<Toggle on={priv.profile} onChange={v => setPriv({ ...priv, profile: v })} />}
-            />
-            <SettingRow
-              icon={<Bell size={16} />}
-              label="DM herkesten al"
-              right={<Toggle on={priv.dms} onChange={v => setPriv({ ...priv, dms: v })} />}
               last
             />
           </SCard>
