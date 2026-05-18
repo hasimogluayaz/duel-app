@@ -1,7 +1,5 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
-
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -38,7 +36,7 @@ function getNotificationUrl(n: Notification): string | null {
     case 'streak_milestone':
     case 'streak_reminder':
     case 'weekly_mission_complete':
-      return '/oyun'
+      return '/'
     case 'achievement':
     case 'tier_up':
       return '/basarimlar'

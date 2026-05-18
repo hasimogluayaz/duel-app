@@ -38,7 +38,7 @@ export default function TamamlaPage() {
 
       // If already complete, skip this page
       if (u.user_metadata?.profile_complete !== false) {
-        router.replace('/oyun')
+        router.replace('/')
         return
       }
 
@@ -105,7 +105,7 @@ export default function TamamlaPage() {
     // Update JWT metadata so middleware allows through
     await supabase.auth.updateUser({ data: { profile_complete: true } })
 
-    router.replace('/oyun')
+    router.replace('/')
   }
 
   if (initializing) {

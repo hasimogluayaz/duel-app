@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const MODES = [
-  { href: '/oyun',     label: 'Senaryo', emoji: '📝' },
+  { href: '/',     label: 'Senaryo', emoji: '📝' },
   { href: '/emoji',    label: 'Emoji',   emoji: '😂' },
   { href: '/karakter', label: 'Karakter', emoji: '🎭' },
   { href: '/tartisma', label: 'Tartışma', emoji: '🔥' },

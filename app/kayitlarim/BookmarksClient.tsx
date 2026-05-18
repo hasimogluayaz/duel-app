@@ -170,7 +170,7 @@ export default function BookmarksClient() {
           ))}
         </div>
       ) : (tab === 'duels') ? (
-        <EmptyState text="Kaydedilmiş düello yok" icon={<Swords size={28} />} cta={{ label: 'Düello Başlat', href: '/oyun' }} />
+        <EmptyState text="Kaydedilmiş düello yok" icon={<Swords size={28} />} cta={{ label: 'Düello Başlat', href: '/' }} />
       ) : (tab === 'readlater') ? (
         <EmptyState text="Sonra okunacak içerik yok" icon={<Layers size={28} />} cta={{ label: 'Senaryolara Bak', href: '/arsiv' }} />
       ) : (tab === 'all') ? (

@@ -1,7 +1,5 @@
 'use client'
 
-export const dynamic = 'force-dynamic'
-
 import { useEffect, useState } from 'react'
 import { Avatar } from '@/components/ui/Avatar'
 import { Spinner } from '@/components/ui/Spinner'
@@ -102,7 +100,7 @@ export default function LiderlikPage() {
           <div className="text-4xl mb-3">🏆</div>
           <p className="text-fg font-semibold">Henüz sıralama yok</p>
           <p className="text-fg-subtle text-sm mt-1">Düelloya gir ve sıralamada yerini al!</p>
-          <Link href="/oyun" className="inline-block mt-4 text-sm text-fg-muted hover:text-fg font-semibold transition-colors">
+          <Link href="/" className="inline-block mt-4 text-sm text-fg-muted hover:text-fg font-semibold transition-colors">
             Oynamaya başla →
           </Link>
         </div>

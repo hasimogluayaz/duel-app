@@ -114,7 +114,7 @@ export default function HakkindaPage() {
       </section>
 
       <div className="text-center">
-        <Link href="/oyun">
+        <Link href="/">
           <Button size="lg" className="btn-gradient px-10">Düelloya Gir</Button>
         </Link>
       </div>

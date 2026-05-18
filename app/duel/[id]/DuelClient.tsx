@@ -348,7 +348,7 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
                 setCancelLoading(false)
                 if (res.ok) {
                   toast('Düello daveti iptal edildi.', 'success')
-                  window.location.href = '/oyun'
+                  window.location.href = '/'
                 } else {
                   const j = await res.json()
                   toast(j.error || 'İptal edilemedi.', 'error')
@@ -545,7 +545,7 @@ export function DuelClient({ duel, votesA: initialVotesA, votesB: initialVotesB,
           {/* ── Post-duel CTA ─────────────────────────── */}
           {isCompleted && (
             <div className="flex flex-col sm:flex-row gap-3 mt-2">
-              <Link href="/oyun" className="flex-1">
+              <Link href="/" className="flex-1">
                 <Button variant="secondary" className="w-full">
                   <Zap size={14} />
                   Bugün oyna

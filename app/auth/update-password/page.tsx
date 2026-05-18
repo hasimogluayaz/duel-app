@@ -68,7 +68,7 @@ function UpdatePasswordForm() {
     }
 
     setDone(true)
-    setTimeout(() => router.push('/oyun'), 2500)
+    setTimeout(() => router.push('/'), 2500)
   }
 
   return (

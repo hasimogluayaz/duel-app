@@ -11,7 +11,7 @@ export default function PremiumBasariliPage() {
 
   useEffect(() => {
     // Auto-redirect after 5 seconds
-    const t = setTimeout(() => router.push('/oyun'), 5000)
+    const t = setTimeout(() => router.push('/'), 5000)
     return () => clearTimeout(t)
   }, [router])
 
@@ -26,7 +26,7 @@ export default function PremiumBasariliPage() {
           Artık tüm premium özelliklere erişimin var. İyi kapışmalar! ⚔️
         </p>
         <div className="flex flex-col gap-3">
-          <Link href="/oyun">
+          <Link href="/">
             <Button className="w-full btn-gradient">
               <Sparkles size={16} />
               Hemen Oyna

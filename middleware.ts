@@ -1,9 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-const protectedRoutes = ['/profil/ayarlar', '/admin']
+const protectedRoutes = ['/profil/ayarlar', '/admin', '/bildirimler', '/mesajlar']
 const authRoutes = ['/giris', '/kayit']
-const removedRoutes = ['/bildirimler', '/mesajlar']
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -34,14 +33,8 @@ export async function middleware(request: NextRequest) {
   const isProtected = protectedRoutes.some(route => pathname.startsWith(route))
   const isAuthRoute = authRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))
   const isProfileCompletion = pathname.startsWith('/auth/tamamla')
-  const isRemoved = removedRoutes.some(route => pathname === route || pathname.startsWith(route + '/'))
-
-  if (isRemoved) {
-    return NextResponse.redirect(new URL('/', request.url))
-  }
 
   // Logged-in user with incomplete Google profile → force them to /auth/tamamla
-  // profile_complete is stored in user_metadata to avoid extra DB calls
   if (user && !isProfileCompletion) {
     const profileComplete = user.user_metadata?.profile_complete !== false
     if (!profileComplete) {

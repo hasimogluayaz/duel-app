@@ -52,7 +52,7 @@ export async function POST(req: Request) {
         {
           title: 'Bugünkü senaryoyu cevaplamadın',
           body: scenarioPreview,
-          url: '/oyun',
+          url: '/',
         }
       )
       sent++

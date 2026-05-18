@@ -57,7 +57,7 @@ export default function OnboardingModal({ isNew = false }: Props) {
   function finish() {
     localStorage.setItem('kapisio_onboarded_v2', '1')
     setVisible(false)
-    router.push('/oyun')
+    router.push('/')
   }
 
   if (!visible) return null

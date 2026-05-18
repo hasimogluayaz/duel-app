@@ -202,7 +202,7 @@ export default function ConversationPage() {
           </div>
         </Link>
         <Link
-          href="/oyun"
+          href="/"
           className="shrink-0 flex items-center gap-1.5 px-3 h-8 rounded-full border border-stroke text-xs font-semibold text-fg-muted hover:border-primary/40 hover:text-primary transition-colors"
         >
           <Swords size={12} /> Düello
@@ -235,7 +235,7 @@ export default function ConversationPage() {
                     <DuelInviteCard
                       msg={msg}
                       isMine={isMine}
-                      onAccept={() => router.push('/oyun')}
+                      onAccept={() => router.push('/')}
                       onDecline={() => {}}
                     />
                   ) : (

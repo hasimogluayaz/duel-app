@@ -18,7 +18,7 @@ export default function NotFound() {
           <Link href="/">
             <Button>Ana Sayfaya Dön</Button>
           </Link>
-          <Link href="/oyun">
+          <Link href="/">
             <Button variant="secondary">Oyna</Button>
           </Link>
         </div>
