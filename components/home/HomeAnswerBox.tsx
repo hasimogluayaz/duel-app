@@ -248,13 +248,16 @@ export function HomeAnswerBox({
     await doSubmit(text, false)
   }
 
+  // Track in-flight votes to prevent double-clicks
+  const votingRef = useRef<Set<string>>(new Set())
+
   async function handleVote(answerId: string, answerUserId: string | null) {
     if (answerUserId === userId && userId) return // can't vote own answer
+    if (votingRef.current.has(answerId)) return   // already in-flight
 
-    // Anon user: use localStorage
+    // Anon user: localStorage only, no toggle off
     if (!userId) {
-      if (votedIds.has(answerId)) return // anon can't toggle off
-      // Save to localStorage
+      if (votedIds.has(answerId)) return
       const newVoted = new Set(votedIds)
       newVoted.add(answerId)
       setVotedIds(newVoted)
@@ -267,30 +270,44 @@ export function HomeAnswerBox({
 
     const alreadyVoted = votedIds.has(answerId)
 
+    // ── Optimistic update ─────────────────────────────────────────────
+    votingRef.current.add(answerId)
+    if (alreadyVoted) {
+      setVotedIds(prev => { const s = new Set(prev); s.delete(answerId); return s })
+      setAnswers(prev =>
+        prev.map(a => a.id === answerId ? { ...a, vote_count: Math.max(0, a.vote_count - 1) } : a)
+      )
+    } else {
+      setVotedIds(prev => { const s = new Set(prev); s.add(answerId); return s })
+      setAnswers(prev =>
+        prev.map(a => a.id === answerId ? { ...a, vote_count: a.vote_count + 1 } : a)
+      )
+    }
+
+    // ── Sync with server, revert on error ─────────────────────────────
     try {
       const res = await fetch('/api/vote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ answer_id: answerId }),
       })
-      const data = await res.json() as { toggled?: string }
-
-      if (data.toggled === 'off') {
-        // Removed vote
+      if (!res.ok) throw new Error('vote failed')
+    } catch {
+      // Revert optimistic update
+      if (alreadyVoted) {
+        setVotedIds(prev => { const s = new Set(prev); s.add(answerId); return s })
+        setAnswers(prev =>
+          prev.map(a => a.id === answerId ? { ...a, vote_count: a.vote_count + 1 } : a)
+        )
+      } else {
         setVotedIds(prev => { const s = new Set(prev); s.delete(answerId); return s })
         setAnswers(prev =>
           prev.map(a => a.id === answerId ? { ...a, vote_count: Math.max(0, a.vote_count - 1) } : a)
         )
-      } else {
-        // Added vote
-        setVotedIds(prev => { const s = new Set(prev); s.add(answerId); return s })
-        if (!alreadyVoted) {
-          setAnswers(prev =>
-            prev.map(a => a.id === answerId ? { ...a, vote_count: a.vote_count + 1 } : a)
-          )
-        }
       }
-    } catch {}
+    } finally {
+      votingRef.current.delete(answerId)
+    }
   }
 
   // Percentile: % of answers with fewer votes than mine
