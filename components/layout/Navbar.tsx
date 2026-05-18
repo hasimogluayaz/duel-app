@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
 import type { Profile } from '@/types'
-import { Sun, Moon, Swords, User, Settings, LogOut, ChevronDown, Shield } from 'lucide-react'
+import { Sun, Moon, Swords, User, Settings, LogOut, ChevronDown, Shield, Home, Compass, Trophy, MessageCircle, Bell } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import Image from 'next/image'
 import { DuelloDrawer } from '@/components/home/DuelloDrawer'
@@ -123,9 +123,31 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
 
                 {dropdownOpen && (
                   <div
-                    className="absolute right-0 top-full mt-2 w-44 rounded-2xl border border-stroke shadow-lg overflow-hidden"
+                    className="absolute right-0 top-full mt-2 w-52 rounded-2xl border border-stroke shadow-lg overflow-hidden"
                     style={{ background: 'var(--surface)' }}
                   >
+                    {/* Ana navigasyon — mobilde görünür, masaüstünde gizli */}
+                    <div className="sm:hidden">
+                      {[
+                        { href: '/', icon: <Home size={15} className="text-fg-muted" />, label: 'Anasayfa' },
+                        { href: '/kesfet', icon: <Compass size={15} className="text-fg-muted" />, label: 'Keşfet' },
+                        { href: '/liderlik', icon: <Trophy size={15} className="text-fg-muted" />, label: 'Liderlik' },
+                        { href: '/mesajlar', icon: <MessageCircle size={15} className="text-fg-muted" />, label: 'Mesajlar' },
+                        { href: '/bildirimler', icon: <Bell size={15} className="text-fg-muted" />, label: 'Bildirimler' },
+                      ].map(({ href, icon, label }) => (
+                        <Link
+                          key={href}
+                          href={href}
+                          onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-fg hover:bg-surface-2 transition-colors"
+                        >
+                          {icon}
+                          {label}
+                        </Link>
+                      ))}
+                      <div className="h-px bg-stroke mx-3" />
+                    </div>
+
                     <Link
                       href={`/profil/${profile.username}`}
                       onClick={() => setDropdownOpen(false)}

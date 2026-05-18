@@ -2,7 +2,6 @@ import type { Metadata, Viewport } from 'next'
 import { Suspense } from 'react'
 import './globals.css'
 import { Navbar } from '@/components/layout/Navbar'
-import { BottomNav } from '@/components/layout/BottomNav'
 import { Footer } from '@/components/layout/Footer'
 import { CookieBanner } from '@/components/layout/CookieBanner'
 import { ToastProvider } from '@/components/ui/Toast'
@@ -83,19 +82,11 @@ export default async function RootLayout({
 
             <div className="flex flex-col min-h-screen">
               <Navbar initialProfile={initialProfile} />
-              <main className="flex-1 pb-20 md:pb-0">
+              <main className="flex-1">
                 {children}
               </main>
               {!initialProfile && <Footer />}
             </div>
-
-            {initialProfile && (
-              <BottomNav
-                userId={initialProfile.id}
-                username={initialProfile.username}
-                isAdmin={initialProfile.is_admin}
-              />
-            )}
 
             <CookieBanner />
             <ServiceWorkerRegister />
