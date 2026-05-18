@@ -749,6 +749,12 @@ export function HomeAnswerBox({
             e.currentTarget.style.borderColor = 'var(--stroke)'
             e.currentTarget.style.boxShadow = 'none'
           }}
+          onKeyDown={e => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault()
+              if (canSubmit && !loading) handleSubmit()
+            }
+          }}
         />
         <div className="flex items-center justify-between gap-3">
           <span
