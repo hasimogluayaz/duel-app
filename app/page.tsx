@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 
 import { createClient } from '@/lib/supabase/server'
 import { HomeAnswerBox } from '@/components/home/HomeAnswerBox'
+import { AdminGenerateButton } from '@/components/home/AdminGenerateButton'
 
 const START_DATE = new Date('2024-09-01T00:00:00Z')
 
@@ -41,6 +42,7 @@ export default async function HomePage() {
   const dayNumber = getDayNumber()
   const dateLabel = new Date().toLocaleDateString('tr-TR', { day: 'numeric', month: 'long' })
 
+  let isAdmin = false
   let scenario: { id: string; content: string; category?: string | null } | null = null
   let responseCount = 0
   let streakCount = 0
@@ -83,10 +85,11 @@ export default async function HomePage() {
     try {
       const { data } = await supabase
         .from('profiles')
-        .select('streak_count')
+        .select('streak_count, is_admin')
         .eq('id', user.id)
         .single()
       streakCount = data?.streak_count ?? 0
+      isAdmin = data?.is_admin === true
     } catch {}
   }
 
@@ -207,11 +210,14 @@ export default async function HomePage() {
           </>
         ) : (
           <div
-            className="rounded-3xl border text-center py-16"
+            className="rounded-3xl border text-center py-16 flex flex-col items-center gap-4"
             style={{ background: 'var(--surface)', borderColor: 'var(--stroke)' }}
           >
-            <p className="text-fg font-semibold">Bugünkü senaryo hazırlanıyor</p>
-            <p className="text-sm mt-1" style={{ color: 'var(--fg-subtle)' }}>Birazdan yayınlanacak.</p>
+            <div>
+              <p className="text-fg font-semibold">Bugünkü senaryo hazırlanıyor</p>
+              <p className="text-sm mt-1" style={{ color: 'var(--fg-subtle)' }}>Birazdan yayınlanacak.</p>
+            </div>
+            {isAdmin && <AdminGenerateButton />}
           </div>
         )}
 
