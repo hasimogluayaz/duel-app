@@ -47,6 +47,36 @@ export async function POST(request: Request) {
   return NextResponse.json({ scenario: data })
 }
 
+// PATCH /api/admin/scenarios — edit content or toggle is_approved
+export async function PATCH(request: Request) {
+  const admin = await assertAdmin()
+  if (!admin) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+  const body = await request.json() as { id?: string; content?: string; is_approved?: boolean }
+  const { id, content, is_approved } = body
+
+  if (!id) return NextResponse.json({ error: 'id gerekli' }, { status: 400 })
+
+  const updates: Record<string, unknown> = {}
+  if (content !== undefined) updates.content = content.trim()
+  if (is_approved !== undefined) updates.is_approved = is_approved
+
+  if (Object.keys(updates).length === 0) {
+    return NextResponse.json({ error: 'Güncellenecek alan yok' }, { status: 400 })
+  }
+
+  const service = createServiceClient()
+  const { data, error } = await service
+    .from('scenarios')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single()
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  return NextResponse.json({ scenario: data })
+}
+
 // DELETE /api/admin/scenarios?id=...
 export async function DELETE(request: Request) {
   const admin = await assertAdmin()

@@ -61,13 +61,13 @@ export const POST = withAuth(async (_req, { userId }) => {
   }
 
   // Try with creator_response_id first (migration 025), fall back without it
-  let newDuel: { code: string } | null = null
+  let newDuel: { code: string; id: string } | null = null
   let insertError = null
 
   const withRef = await supabase
     .from('duels')
     .insert({ code, scenario_id: scenario.id, creator_id: userId, creator_response_id: answer.id })
-    .select('code')
+    .select('code, id')
     .single()
 
   if (withRef.error) {
@@ -75,7 +75,7 @@ export const POST = withAuth(async (_req, { userId }) => {
     const withoutRef = await supabase
       .from('duels')
       .insert({ code, scenario_id: scenario.id, creator_id: userId })
-      .select('code')
+      .select('code, id')
       .single()
     newDuel = withoutRef.data
     insertError = withoutRef.error
@@ -87,6 +87,11 @@ export const POST = withAuth(async (_req, { userId }) => {
     console.error('[duel/invite POST]', insertError)
     throw new ApiError('Düello oluşturulamadı. Tekrar dene.', 500, 'DB_ERROR')
   }
+
+  // Register creator as participant 1 (ignore error if already exists)
+  await supabase
+    .from('duel_participants')
+    .upsert({ duel_id: newDuel.id, user_id: userId, answer_id: answer.id }, { onConflict: 'duel_id,user_id' })
 
   return NextResponse.json({
     code: newDuel.code,

@@ -47,29 +47,23 @@ export default async function DuelInvitePage({ params }: Props) {
   const [
     { data: scenario },
     { data: creator },
-    { data: creatorAnswer },
+    { data: participants },
   ] = await Promise.all([
     supabase.from('scenarios').select('id, content, active_date').eq('id', duel.scenario_id).single(),
     supabase.from('profiles').select('id, username, display_name, avatar_url').eq('id', duel.creator_id).single(),
-    supabase.from('answers').select('id, content, vote_count, created_at')
-      .eq('user_id', duel.creator_id).eq('scenario_id', duel.scenario_id).maybeSingle(),
+    supabase
+      .from('duel_participants')
+      .select('id, user_id, answer_id, joined_at, profile:profiles(id, username, display_name, avatar_url), answer:answers(id, content, vote_count)')
+      .eq('duel_id', duel.id)
+      .order('joined_at', { ascending: true }),
   ])
-
-  // Visitor's answer for this scenario (if logged in)
-  let visitorAnswer: { id: string; content: string; vote_count: number } | null = null
-  if (user && user.id !== duel.creator_id) {
-    const { data } = await supabase.from('answers').select('id, content, vote_count')
-      .eq('user_id', user.id).eq('scenario_id', duel.scenario_id).maybeSingle()
-    visitorAnswer = data ?? null
-  }
 
   return (
     <DuelInviteClient
       duel={duel}
-      scenario={scenario}
-      creator={creator}
-      creatorAnswer={creatorAnswer}
-      visitorAnswer={visitorAnswer}
+      scenario={scenario ?? null}
+      creator={creator ?? null}
+      participants={(participants ?? []) as any[]}
       currentUserId={user?.id ?? null}
     />
   )
