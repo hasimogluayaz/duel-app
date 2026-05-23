@@ -36,6 +36,7 @@ interface InviteDuel {
 interface Props {
   profile: any
   currentUserId?: string
+  viewerIsAdmin?: boolean
   isFollowing: boolean
   inviteDuels: InviteDuel[]
   recentAnswers: any[]
@@ -47,7 +48,7 @@ interface Props {
 // ── Main Component ─────────────────────────────────────────────────────────────
 
 export default function ProfilClient({
-  profile, currentUserId, isFollowing,
+  profile, currentUserId, viewerIsAdmin = false, isFollowing,
   inviteDuels, recentAnswers,
   totalVotes, answerCount, answeredToday = true,
 }: Props) {
@@ -92,7 +93,7 @@ export default function ProfilClient({
                 <Settings size={15} />
               </button>
             </Link>
-          ) : currentUserId ? (
+          ) : currentUserId && !viewerIsAdmin ? (
             <>
               <Link href={`/mesajlar/${profile.username}`}>
                 <button className="w-9 h-9 flex items-center justify-center rounded-full border border-stroke bg-surface hover:bg-surface-2 transition-colors text-fg-muted">
@@ -105,6 +106,10 @@ export default function ProfilClient({
                 Düello
               </Button>
             </>
+          ) : viewerIsAdmin ? (
+            <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded bg-amber-500/10 border border-amber-500/30 text-amber-500">
+              Admin Görünümü
+            </span>
           ) : null}
         </div>
       </div>

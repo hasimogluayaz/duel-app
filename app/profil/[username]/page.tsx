@@ -39,6 +39,17 @@ export default async function ProfilPage({ params }: Props) {
 
   if (!profile || (profile.is_admin && user?.id !== profile.id)) notFound()
 
+  // Current viewer's admin status — admins shouldn't see message/follow/duel buttons
+  let viewerIsAdmin = false
+  if (user) {
+    const { data: viewerProfile } = await supabase
+      .from('profiles')
+      .select('is_admin')
+      .eq('id', user.id)
+      .single()
+    viewerIsAdmin = (viewerProfile as { is_admin?: boolean } | null)?.is_admin === true
+  }
+
   const isFollowing = user ? await (async () => {
     const { data } = await (supabase.from('followers' as any) as any)
       .select('id').eq('follower_id', user.id).eq('following_id', profile.id).maybeSingle()
@@ -111,6 +122,7 @@ export default async function ProfilPage({ params }: Props) {
     <ProfilClient
       profile={profile}
       currentUserId={user?.id}
+      viewerIsAdmin={viewerIsAdmin}
       isFollowing={isFollowing}
       inviteDuels={inviteDuels}
       recentAnswers={recentAnswers ?? []}

@@ -121,14 +121,14 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
       if (!res.ok) { showToast(data.error ?? 'Bir hata oluştu.'); return }
       if (!data.answer) return
 
-      // 2. Join the invite duel (only for authenticated users)
-      if (isAuth && currentUserId) {
-        await fetch(`/api/duel/${duel.id}/join`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ answer_id: data.answer.id }),
-        })
-      }
+      // 2. Join the invite duel (both authenticated and anonymous — anon goes
+      //    in with user_id NULL so the answer is persisted on the duel and
+      //    shows up on refresh / for other viewers via realtime)
+      await fetch(`/api/duel/${duel.id}/join`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answer_id: data.answer.id }),
+      })
 
       // 3. Optimistically add self to participants list
       const newEntry: Participant = {
@@ -343,9 +343,11 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
 
           {/* Filled participant slots */}
           {participants.map((p, i) => {
-            const name = p.profile?.display_name || p.profile?.username || (i === 0 ? creatorName : `Katılımcı ${i + 1}`)
-            const isMe = p.user_id === currentUserId
-            const isThisCreator = p.user_id === duel.creator_id
+            const isAnonymous = !p.user_id
+            const name = p.profile?.display_name || p.profile?.username
+              || (isAnonymous ? `Misafir ${i}` : (i === 0 ? creatorName : `Katılımcı ${i + 1}`))
+            const isMe = !!p.user_id && p.user_id === currentUserId
+            const isThisCreator = !!p.user_id && p.user_id === duel.creator_id
             const totalVotes = participants.reduce((s, x) => s + (x.answer?.vote_count ?? 0), 0)
             const pct = totalVotes > 0 ? Math.round(((p.answer?.vote_count ?? 0) / totalVotes) * 100) : null
             const hasVotedThis = p.answer?.id ? votedAnswerIds.has(p.answer.id) : false
@@ -375,12 +377,16 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
                   />
                   <div className="flex-1 min-w-0">
                     <span className="text-[13px] font-semibold text-fg truncate block">{isMe ? 'Sen' : name}</span>
-                    {(isThisCreator || isMe) && (
+                    {(isThisCreator || isMe) ? (
                       <span
                         className="text-[9px] font-bold tracking-widest px-1.5 py-0.5 rounded"
                         style={{ color: 'var(--primary)', background: 'var(--k-blue-50, #eff6ff)' }}
                       >
                         {isThisCreator ? 'DAVET EDEN' : 'SEN'}
+                      </span>
+                    ) : isAnonymous && (
+                      <span className="text-[9px] font-bold tracking-widest px-1.5 py-0.5 rounded bg-fg-subtle/10 text-fg-subtle">
+                        ANONİM
                       </span>
                     )}
                   </div>
