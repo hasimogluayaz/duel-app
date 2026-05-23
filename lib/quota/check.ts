@@ -49,13 +49,24 @@ export async function checkQuota(
   }
 
   if (key === 'duels_per_day') {
-    const { count } = await supabase
-      .from('duels')
-      .select('id', { count: 'exact', head: true })
-      .eq('challenger_id', userId)
-      .gte('created_at', todayStart.toISOString())
+    // Count duels created by user TODAY — covers both classic challenges
+    // (challenger_id) and new invite duels (creator_id).
+    const todayIso = todayStart.toISOString()
+    const [{ count: classic }, { count: invite }] = await Promise.all([
+      supabase
+        .from('duels')
+        .select('id', { count: 'exact', head: true })
+        .eq('challenger_id', userId)
+        .gte('created_at', todayIso),
+      supabase
+        .from('duels')
+        .select('id', { count: 'exact', head: true })
+        .eq('creator_id', userId)
+        .gte('created_at', todayIso),
+    ])
+    const total = (classic ?? 0) + (invite ?? 0)
 
-    if ((count ?? 0) >= limit) {
+    if (total >= limit) {
       throw new ApiError(
         `Günlük düello limitine ulaştın (${limit}/gün). Premium'a geç veya yarın tekrar dene.`,
         429,
@@ -107,19 +118,23 @@ export async function getUserQuotaUsage(supabase: any, userId: string) {
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
 
+  const todayIso = todayStart.toISOString()
   const [
     { data: profile },
     { count: scenariosToday },
-    { count: duelsToday },
+    { count: classicDuelsToday },
+    { count: inviteDuelsToday },
     { count: answersToday },
-    { count: analysisTotal },
+    { data: analysisProfile },
   ] = await Promise.all([
     supabase.from('profiles').select('total_points, is_premium, premium_until').eq('id', userId).single(),
-    supabase.from('scenarios').select('id', { count: 'exact', head: true }).eq('user_id', userId).eq('is_user_created', true).gte('created_at', todayStart.toISOString()),
-    supabase.from('duels').select('id', { count: 'exact', head: true }).eq('challenger_id', userId).gte('created_at', todayStart.toISOString()),
-    supabase.from('answers').select('id', { count: 'exact', head: true }).eq('user_id', userId).gte('created_at', todayStart.toISOString()),
+    supabase.from('scenarios').select('id', { count: 'exact', head: true }).eq('user_id', userId).eq('is_user_created', true).gte('created_at', todayIso),
+    supabase.from('duels').select('id', { count: 'exact', head: true }).eq('challenger_id', userId).gte('created_at', todayIso),
+    supabase.from('duels').select('id', { count: 'exact', head: true }).eq('creator_id', userId).gte('created_at', todayIso),
+    supabase.from('answers').select('id', { count: 'exact', head: true }).eq('user_id', userId).gte('created_at', todayIso),
     supabase.from('profiles').select('personality_analysis_count').eq('id', userId).single(),
   ])
+  const duelsToday = (classicDuelsToday ?? 0) + (inviteDuelsToday ?? 0)
 
   const limits = profile ? getQuotaLimits(profile) : getQuotaLimits({ total_points: 0, is_premium: false, premium_until: null })
 
@@ -127,9 +142,9 @@ export async function getUserQuotaUsage(supabase: any, userId: string) {
     limits,
     usage: {
       scenarios_per_day: scenariosToday ?? 0,
-      duels_per_day: duelsToday ?? 0,
+      duels_per_day: duelsToday,
       answers_per_day: answersToday ?? 0,
-      ai_analysis_total: (analysisTotal as any)?.personality_analysis_count ?? 0,
+      ai_analysis_total: (analysisProfile as any)?.personality_analysis_count ?? 0,
     },
     is_premium: profile?.is_premium ?? false,
   }

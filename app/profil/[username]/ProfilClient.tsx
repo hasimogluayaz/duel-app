@@ -8,8 +8,9 @@ import { FollowButton } from '@/components/profile/FollowButton'
 import { formatDate } from '@/lib/utils/formatting'
 import {
   Settings, Swords, Star, MessageCircle,
-  Clock, Users, Bot, ChevronRight, Trophy,
+  Clock, Users, Bot, ChevronRight, Trophy, Crown,
 } from 'lucide-react'
+import { isPremiumActive } from '@/lib/premium/check'
 
 type Tab = 'cevaplar' | 'duellolar'
 
@@ -67,6 +68,7 @@ export default function ProfilClient({
   // Separate active vs expired for tab counter
   const today = new Date().toISOString().split('T')[0]
   const activeDuels = inviteDuels.filter(d => d.scenario?.active_date === today)
+  const showsPremium = isPremiumActive(profile)
 
   return (
     <div className="max-w-xl mx-auto px-4 py-8">
@@ -74,11 +76,25 @@ export default function ProfilClient({
       {/* ── Header ─────────────────────────────────────────── */}
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-center gap-4">
-          <Avatar src={profile.avatar_url} username={profile.username} size="xl" className="w-16 h-16 sm:w-20 sm:h-20" />
+          <div className="relative">
+            <Avatar src={profile.avatar_url} username={profile.username} size="xl" className="w-16 h-16 sm:w-20 sm:h-20" />
+            {showsPremium && (
+              <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-gradient-to-br from-amber-400 to-orange-500 border-2 border-bg flex items-center justify-center shadow">
+                <Crown size={12} className="text-white" />
+              </div>
+            )}
+          </div>
           <div>
-            <h1 className="text-xl font-black text-fg tracking-tight leading-tight">
-              {profile.display_name || profile.username}
-            </h1>
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <h1 className="text-xl font-black text-fg tracking-tight leading-tight">
+                {profile.display_name || profile.username}
+              </h1>
+              {showsPremium && (
+                <span className="text-[10px] font-bold tracking-wider px-1.5 py-0.5 rounded bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-sm">
+                  ⚡ PREMIUM
+                </span>
+              )}
+            </div>
             <p className="text-sm text-fg-subtle mt-0.5">@{profile.username}</p>
             {profile.bio && (
               <p className="text-sm text-fg-muted mt-2 max-w-xs leading-relaxed">{profile.bio}</p>

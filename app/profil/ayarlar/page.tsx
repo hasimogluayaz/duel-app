@@ -11,8 +11,9 @@ import { Spinner } from '@/components/ui/Spinner'
 import { useToast } from '@/components/ui/Toast'
 import type { Profile } from '@/types'
 import {
-  User, Lock, Trash2, Bell, ChevronRight, Sun, Moon, Monitor, LogOut,
+  User, Lock, Trash2, Bell, ChevronRight, Sun, Moon, Monitor, LogOut, Crown, CreditCard,
 } from 'lucide-react'
+import { isPremiumActive } from '@/lib/premium/check'
 import NotificationPrefs from '@/components/notifications/NotificationPrefs'
 
 // ─── Toggle ───────────────────────────────────────────────────────────────────
@@ -292,6 +293,52 @@ export default function AyarlarPage() {
               onClick={() => setSection('bildirimler')}
               last
             />
+          </SCard>
+        </div>
+
+        {/* Premium */}
+        <div>
+          <SectionTitle>Premium</SectionTitle>
+          <SCard>
+            {isPremiumActive(profile as any) ? (
+              <>
+                <div style={{ padding: 14, display: 'flex', alignItems: 'center', gap: 12, borderBottom: '1px solid var(--stroke)' }}>
+                  <span style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg, #fbbf24, #f97316)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <Crown size={16} />
+                  </span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ font: '700 14px -apple-system, sans-serif', color: 'var(--fg)' }}>Premium aktif ⚡</div>
+                    {(profile as any)?.premium_until && (
+                      <div style={{ font: '400 11px -apple-system, sans-serif', color: 'var(--fg-subtle)', marginTop: 2 }}>
+                        Yenileme: {new Date((profile as any).premium_until).toLocaleDateString('tr-TR')}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <SettingRow
+                  icon={<CreditCard size={16} />}
+                  label="Aboneliği yönet"
+                  hint="Faturalama ve iptal"
+                  right={<ChevronRight size={16} style={{ color: 'var(--fg-subtle)' }} />}
+                  onClick={async () => {
+                    const res = await fetch('/api/stripe/portal', { method: 'POST' })
+                    const data = await res.json()
+                    if (data.url) window.location.href = data.url
+                    else toast(data.error ?? 'Portal açılamadı.', 'error')
+                  }}
+                  last
+                />
+              </>
+            ) : (
+              <SettingRow
+                icon={<Crown size={16} />}
+                label="Premium'a geç"
+                hint="Sınırsız düello, streak freeze, AI analiz"
+                right={<ChevronRight size={16} style={{ color: 'var(--fg-subtle)' }} />}
+                onClick={() => router.push('/premium')}
+                last
+              />
+            )}
           </SCard>
         </div>
 
