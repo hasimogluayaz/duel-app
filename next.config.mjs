@@ -3,10 +3,11 @@ import { withSentryConfig } from '@sentry/nextjs'
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
-    // Type errors caught locally — don't block Vercel deploys
-    ignoreBuildErrors: true,
+    // Type errors block deploys — keep codebase clean
+    ignoreBuildErrors: false,
   },
   eslint: {
+    // Lint warnings shouldn't block deploys but type errors do
     ignoreDuringBuilds: true,
   },
 

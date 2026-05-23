@@ -152,8 +152,8 @@ export function HomeAnswerBox({
         .from('answer_likes')
         .select('answer_id')
         .eq('user_id', userId)
-        .then(({ data }) => {
-          if (data) setVotedIds(new Set(data.map((d: { answer_id: string }) => d.answer_id)))
+        .then(({ data }: { data: { answer_id: string }[] | null }) => {
+          if (data) setVotedIds(new Set(data.map(d => d.answer_id)))
         })
     } else {
       // Load from localStorage
@@ -261,7 +261,7 @@ export function HomeAnswerBox({
       const newVoted = new Set(votedIds)
       newVoted.add(answerId)
       setVotedIds(newVoted)
-      try { localStorage.setItem('kapisio_votes', JSON.stringify([...newVoted])) } catch {}
+      try { localStorage.setItem('kapisio_votes', JSON.stringify(Array.from(newVoted))) } catch {}
       setAnswers(prev =>
         prev.map(a => a.id === answerId ? { ...a, vote_count: a.vote_count + 1 } : a)
       )

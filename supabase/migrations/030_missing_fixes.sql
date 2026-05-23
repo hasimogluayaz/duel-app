@@ -62,8 +62,18 @@ ALTER TABLE public.achievements
     'season_birinci', 'season_ikinci', 'season_ucuncu'
   ));
 
--- ── 5. Stories cleanup function (safe to run even if exists) ──────────────────
+-- ── 5. Stories cleanup function (table-safe: only deletes if table exists) ──
+-- Uses plpgsql + EXECUTE so the function body isn't validated against the
+-- stories table at creation time. Cron can call it harmlessly even if
+-- migration 023 (stories) was never run.
 CREATE OR REPLACE FUNCTION public.cleanup_expired_stories()
-RETURNS void LANGUAGE sql SECURITY DEFINER AS $$
-  DELETE FROM public.stories WHERE expires_at < now();
+RETURNS void LANGUAGE plpgsql SECURITY DEFINER AS $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.tables
+    WHERE table_schema = 'public' AND table_name = 'stories'
+  ) THEN
+    EXECUTE 'DELETE FROM public.stories WHERE expires_at < now()';
+  END IF;
+END;
 $$;

@@ -64,7 +64,7 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
   useEffect(() => {
     const ch = supabase
       .channel(`invite-${duel.code}`)
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'answers' }, (payload) => {
+      .on('postgres_changes' as any, { event: 'UPDATE', schema: 'public', table: 'answers' }, (payload: { new: { id: string; vote_count: number } }) => {
         const updated = payload.new as { id: string; vote_count: number }
         setParticipants(prev =>
           prev.map(p =>
