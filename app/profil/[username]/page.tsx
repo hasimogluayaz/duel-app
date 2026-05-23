@@ -45,29 +45,12 @@ export default async function ProfilPage({ params }: Props) {
     return !!data
   })() : false
 
+  // ── Fetch answers + vote total ──
   const [
-    { count: duelCount },
-    { count: winCount },
-    { data: recentDuels },
     { data: recentAnswers },
     { count: answerCount },
     { data: voteAgg },
   ] = await Promise.all([
-    supabase.from('duels').select('*', { count: 'exact', head: true })
-      .or(`challenger_id.eq.${profile.id},challenged_id.eq.${profile.id}`)
-      .eq('status', 'completed'),
-    supabase.from('duels').select('*', { count: 'exact', head: true })
-      .eq('winner_id', profile.id),
-    supabase.from('duels').select(`
-      id, share_token, status, created_at, winner_id,
-      challenger_id, challenged_id,
-      challenger:profiles!duels_challenger_id_fkey(username, display_name, avatar_url),
-      challenged:profiles!duels_challenged_id_fkey(username, display_name, avatar_url),
-      scenario:scenarios(content)
-    `)
-      .or(`challenger_id.eq.${profile.id},challenged_id.eq.${profile.id}`)
-      .order('created_at', { ascending: false })
-      .limit(20),
     supabase.from('answers').select(`
       id, content, vote_count, created_at,
       scenario:scenarios(id, content, active_date)
@@ -83,7 +66,34 @@ export default async function ProfilPage({ params }: Props) {
 
   const totalVotes = (voteAgg ?? []).reduce((sum: number, r: any) => sum + (r.vote_count ?? 0), 0)
 
-  // Check if the viewed profile's user answered today's scenario
+  // ── Fetch invite duels (new system via duel_participants) ──
+  const { data: participantRows } = await (supabase as any)
+    .from('duel_participants')
+    .select('duel_id')
+    .eq('user_id', profile.id)
+
+  const duelIds: string[] = (participantRows ?? []).map((r: any) => r.duel_id)
+
+  const { data: rawInviteDuels } = duelIds.length > 0
+    ? await (supabase as any)
+      .from('duels')
+      .select(`
+        id, code, creator_id, created_at, judge_mode, ai_verdict, winner_id,
+        scenario:scenarios(id, content, active_date),
+        participants:duel_participants(
+          user_id, joined_at,
+          profile:profiles(id, username, display_name, avatar_url),
+          answer:answers(id, vote_count)
+        )
+      `)
+      .in('id', duelIds)
+      .order('created_at', { ascending: false })
+      .limit(30)
+    : { data: [] }
+
+  const inviteDuels = (rawInviteDuels ?? []) as any[]
+
+  // ── Answered today? ──
   const today = new Date().toISOString().split('T')[0]
   let answeredToday = false
   try {
@@ -102,10 +112,7 @@ export default async function ProfilPage({ params }: Props) {
       profile={profile}
       currentUserId={user?.id}
       isFollowing={isFollowing}
-      duelCount={duelCount ?? 0}
-      winCount={winCount ?? 0}
-      achievements={[]}
-      recentDuels={recentDuels ?? []}
+      inviteDuels={inviteDuels}
       recentAnswers={recentAnswers ?? []}
       totalVotes={totalVotes}
       answerCount={answerCount ?? 0}

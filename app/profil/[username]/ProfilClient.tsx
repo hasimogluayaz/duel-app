@@ -1,45 +1,76 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
 import { FollowButton } from '@/components/profile/FollowButton'
 import { formatDate } from '@/lib/utils/formatting'
-import { Settings, Swords, Star, MessageCircle } from 'lucide-react'
-import { getTier } from '@/lib/utils/tier'
+import {
+  Settings, Swords, Star, MessageCircle,
+  Clock, Users, Bot, ChevronRight, Trophy,
+} from 'lucide-react'
 
 type Tab = 'cevaplar' | 'duellolar'
+
+// ── Types ─────────────────────────────────────────────────────────────────────
+
+interface DuelParticipant {
+  user_id: string | null
+  profile: { id: string; username: string; display_name: string | null; avatar_url: string | null } | null
+  answer: { id: string; vote_count: number } | null
+}
+
+interface InviteDuel {
+  id: string
+  code: string
+  creator_id: string
+  created_at: string
+  judge_mode: string
+  ai_verdict: string | null
+  winner_id: string | null
+  scenario: { id: string; content: string; active_date: string } | null
+  participants: DuelParticipant[]
+}
 
 interface Props {
   profile: any
   currentUserId?: string
   isFollowing: boolean
-  duelCount: number
-  winCount: number
-  achievements: any[]
-  recentDuels: any[]
+  inviteDuels: InviteDuel[]
   recentAnswers: any[]
   totalVotes: number
   answerCount: number
   answeredToday?: boolean
-  userScenarios?: any[]
-  pinnedAnswers?: any[]
 }
+
+// ── Main Component ─────────────────────────────────────────────────────────────
 
 export default function ProfilClient({
   profile, currentUserId, isFollowing,
-  duelCount, recentDuels, recentAnswers,
+  inviteDuels, recentAnswers,
   totalVotes, answerCount, answeredToday = true,
 }: Props) {
   const [activeTab, setActiveTab] = useState<Tab>('cevaplar')
+  const [nowMs, setNowMs] = useState(0)
+
+  // Live clock — updates every minute for countdown accuracy
+  useEffect(() => {
+    setNowMs(Date.now())
+    const id = setInterval(() => setNowMs(Date.now()), 60_000)
+    return () => clearInterval(id)
+  }, [])
 
   const isOwnProfile = currentUserId === profile.id
+
+  // Separate active vs expired for tab counter
+  const today = new Date().toISOString().split('T')[0]
+  const activeDuels = inviteDuels.filter(d => d.scenario?.active_date === today)
 
   return (
     <div className="max-w-xl mx-auto px-4 py-8">
 
-      {/* ── Header ── */}
+      {/* ── Header ─────────────────────────────────────────── */}
       <div className="flex items-start justify-between mb-6">
         <div className="flex items-center gap-4">
           <Avatar src={profile.avatar_url} username={profile.username} size="xl" className="w-16 h-16 sm:w-20 sm:h-20" />
@@ -54,7 +85,6 @@ export default function ProfilClient({
           </div>
         </div>
 
-        {/* Action buttons */}
         <div className="flex items-center gap-2 shrink-0">
           {isOwnProfile ? (
             <Link href="/profil/ayarlar">
@@ -79,7 +109,7 @@ export default function ProfilClient({
         </div>
       </div>
 
-      {/* ── 3 istatistik ── */}
+      {/* ── Stats grid ──────────────────────────────────────── */}
       <div
         className="grid grid-cols-3 rounded-2xl border overflow-hidden mb-6"
         style={{ borderColor: 'var(--stroke)' }}
@@ -100,10 +130,10 @@ export default function ProfilClient({
         ))}
       </div>
 
-      {/* ── Bugün cevap vermediyse banner ── */}
+      {/* ── Today banner ────────────────────────────────────── */}
       {!answeredToday && isOwnProfile && (
         <div
-          className="flex items-center justify-between gap-3 rounded-2xl px-4 py-3 mb-2"
+          className="flex items-center justify-between gap-3 rounded-2xl px-4 py-3 mb-4"
           style={{ background: 'linear-gradient(135deg, #0f1f55 0%, #1a3a8f 100%)' }}
         >
           <p className="text-sm text-white font-medium leading-snug">
@@ -118,38 +148,44 @@ export default function ProfilClient({
         </div>
       )}
 
-      {/* ── Sekme çubuğu ── */}
+      {/* ── Tabs ────────────────────────────────────────────── */}
       <div className="flex border-b border-stroke mb-5">
         {([
           { id: 'cevaplar' as Tab, label: 'Cevaplarım' },
-          { id: 'duellolar' as Tab, label: 'Düellolarım' },
-        ] as const).map(tab => (
+          {
+            id: 'duellolar' as Tab,
+            label: `Düellolarım${inviteDuels.length > 0 ? ` (${inviteDuels.length})` : ''}`,
+            dot: activeDuels.length > 0,
+          },
+        ]).map(tab => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className="flex-1 py-2.5 text-sm font-semibold transition-colors"
+            className="flex-1 py-2.5 text-sm font-semibold transition-colors relative"
             style={{
               color: activeTab === tab.id ? 'var(--fg)' : 'var(--fg-subtle)',
-              borderBottom: `2px solid ${activeTab === tab.id ? 'var(--k-blue-500, #2a6cf0)' : 'transparent'}`,
-              marginBottom: -1,
               background: 'transparent',
               border: 'none',
-              borderBottomWidth: 2,
-              borderBottomStyle: 'solid',
-              borderBottomColor: activeTab === tab.id ? 'var(--k-blue-500, #2a6cf0)' : 'transparent',
+              borderBottom: `2px solid ${activeTab === tab.id ? 'var(--k-blue-500, #2a6cf0)' : 'transparent'}`,
+              marginBottom: -1,
               cursor: 'pointer',
             }}
           >
-            {tab.label}
+            <span className="flex items-center justify-center gap-1.5">
+              {tab.label}
+              {'dot' in tab && tab.dot && (
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+              )}
+            </span>
           </button>
         ))}
       </div>
 
-      {/* ── Cevaplar ── */}
+      {/* ── Cevaplar ────────────────────────────────────────── */}
       {activeTab === 'cevaplar' && (
         <div className="flex flex-col gap-2">
           {recentAnswers.length === 0 ? (
-            <EmptyState text="Henüz cevap yok" />
+            <AnswerEmptyState />
           ) : recentAnswers.map((a: any) => {
             const sc = Array.isArray(a.scenario) ? a.scenario[0] : a.scenario
             return (
@@ -171,56 +207,256 @@ export default function ProfilClient({
         </div>
       )}
 
-      {/* ── Düellolar ── */}
+      {/* ── Düellolar ───────────────────────────────────────── */}
       {activeTab === 'duellolar' && (
-        <div className="flex flex-col gap-2">
-          {recentDuels.length === 0 ? (
-            <EmptyState text="Henüz düello yok" />
-          ) : recentDuels.map((duel: any) => {
-            const isChallenger = duel.challenger_id === profile.id
-            const opponent = isChallenger ? duel.challenged : duel.challenger
-            const won = duel.winner_id === profile.id
-            const lost = duel.winner_id && duel.winner_id !== profile.id
-            return (
-              <Link key={duel.id} href={`/duel/${duel.share_token}`}>
-                <div className="border border-stroke rounded-2xl px-4 py-3 bg-surface hover:bg-surface-2 transition-colors flex items-center gap-3">
-                  <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs font-black shrink-0 ${
-                    duel.status === 'completed'
-                      ? won ? 'bg-green-500/15 text-green-400 border border-green-500/20'
-                             : 'bg-red-500/15 text-red-400 border border-red-500/20'
-                      : 'bg-surface-2 border border-stroke text-fg-subtle'
-                  }`}>
-                    {duel.status === 'completed' ? (won ? 'W' : 'L') : duel.status === 'active' ? '●' : '·'}
-                  </div>
-                  <Avatar src={opponent?.avatar_url} username={opponent?.username || '?'} size="sm" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-fg truncate">
-                      {opponent?.display_name || opponent?.username}
-                    </p>
-                    {duel.scenario?.content && (
-                      <p className="text-xs text-fg-subtle line-clamp-1 mt-0.5">{duel.scenario.content}</p>
-                    )}
-                  </div>
-                  <span className="text-xs font-semibold shrink-0">
-                    {duel.status === 'completed' && won && <span className="text-green-400">Kazandı</span>}
-                    {duel.status === 'completed' && lost && <span className="text-red-400">Kaybetti</span>}
-                    {duel.status === 'active' && <span className="text-blue-400">Devam</span>}
-                    {duel.status === 'pending' && <span className="text-amber-400">Bekliyor</span>}
-                  </span>
-                </div>
-              </Link>
-            )
-          })}
+        <div className="flex flex-col gap-3">
+          {inviteDuels.length === 0 ? (
+            <DuelEmptyState isOwnProfile={isOwnProfile} />
+          ) : (
+            <>
+              {/* Active duels first */}
+              {activeDuels.length > 0 && (
+                <p className="text-[10px] font-bold text-fg-subtle uppercase tracking-widest px-1">
+                  ● Aktif Bugün
+                </p>
+              )}
+              {inviteDuels.map(duel => (
+                <DuelCard
+                  key={duel.id}
+                  duel={duel}
+                  profileId={profile.id}
+                  currentUserId={currentUserId}
+                  nowMs={nowMs}
+                  today={today}
+                />
+              ))}
+            </>
+          )}
         </div>
       )}
     </div>
   )
 }
 
-function EmptyState({ text }: { text: string }) {
+// ── Duel Card ──────────────────────────────────────────────────────────────────
+
+function DuelCard({
+  duel, profileId, currentUserId, nowMs, today,
+}: {
+  duel: InviteDuel
+  profileId: string
+  currentUserId?: string
+  nowMs: number
+  today: string
+}) {
+  const activeDate = duel.scenario?.active_date ?? ''
+  const isActive = activeDate === today
+
+  // Time remaining string
+  let timeLeft = ''
+  if (isActive && nowMs > 0) {
+    const expiry = new Date(`${activeDate}T23:59:59Z`).getTime()
+    const diff = expiry - nowMs
+    if (diff > 0) {
+      const h = Math.floor(diff / 3_600_000)
+      const m = Math.floor((diff % 3_600_000) / 60_000)
+      timeLeft = h > 0 ? `${h}sa ${m}dk` : `${m}dk`
+    }
+  }
+
+  const isAiMode = duel.judge_mode === 'ai'
+  const hasVerdict = !!duel.ai_verdict
+  const viewerId = currentUserId ?? profileId
+  const isWinner = !!duel.winner_id && duel.winner_id === viewerId
+  const hasLost = !!duel.winner_id && duel.winner_id !== viewerId
+  const totalVotes = duel.participants.reduce((s, p) => s + (p.answer?.vote_count ?? 0), 0)
+  const myParticipant = duel.participants.find(p => p.user_id === viewerId)
+  const myVotes = myParticipant?.answer?.vote_count ?? 0
+  const myPct = totalVotes > 0 ? Math.round((myVotes / totalVotes) * 100) : null
+
+  // Border color based on result
+  const borderColor = isWinner
+    ? 'rgba(245,158,11,0.45)'   // amber — winner
+    : hasLost
+    ? 'var(--stroke)'
+    : isActive
+    ? 'rgba(34,197,94,0.35)'    // green — active
+    : 'var(--stroke)'
+
+  const cardBg = isWinner
+    ? 'color-mix(in oklab, #f59e0b 5%, var(--surface))'
+    : 'var(--surface)'
+
+  return (
+    <Link href={`/d/${duel.code}`}>
+      <div
+        className="rounded-2xl p-4 border transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 flex flex-col gap-3.5 cursor-pointer"
+        style={{ background: cardBg, borderColor }}
+      >
+
+        {/* ── Row 1: Status + Judge mode badge ── */}
+        <div className="flex items-center justify-between gap-2">
+          {/* Status */}
+          {isActive ? (
+            <div className="flex items-center gap-1.5">
+              <span className="relative flex h-2 w-2 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400" />
+              </span>
+              <span className="text-xs font-bold text-green-400">
+                Aktif{timeLeft ? ` · ${timeLeft} kaldı` : ''}
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-1.5 text-xs text-fg-subtle font-medium">
+              <Clock size={10} />
+              <span>Süresi doldu</span>
+            </div>
+          )}
+
+          {/* Judge mode badge */}
+          <div className={`flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border ${
+            isAiMode
+              ? 'bg-amber-500/10 border-amber-500/30 text-amber-500'
+              : 'bg-primary/10 border-primary/20 text-primary'
+          }`}>
+            {isAiMode ? <><Bot size={9} /> AI Modu</> : <><Users size={9} /> Topluluk</>}
+          </div>
+        </div>
+
+        {/* ── Row 2: Scenario text ── */}
+        {duel.scenario && (
+          <p className="text-[14px] font-semibold text-fg leading-snug line-clamp-2">
+            {duel.scenario.content}
+          </p>
+        )}
+
+        {/* ── Row 3: Participant avatars + count ── */}
+        <div className="flex items-center justify-between">
+          {/* Overlapping avatars */}
+          <div className="flex items-center" style={{ paddingLeft: 0 }}>
+            {duel.participants.slice(0, 4).map((p, i) => (
+              <div
+                key={i}
+                className="rounded-full border-2"
+                style={{
+                  width: 28, height: 28,
+                  marginLeft: i === 0 ? 0 : -8,
+                  borderColor: 'var(--surface)',
+                  zIndex: 10 - i,
+                  position: 'relative',
+                  overflow: 'hidden',
+                }}
+              >
+                <Avatar
+                  src={p.profile?.avatar_url ?? null}
+                  username={p.profile?.display_name || p.profile?.username || '?'}
+                  size="xs"
+                />
+              </div>
+            ))}
+            {/* Empty placeholder slots */}
+            {Array.from({ length: Math.max(0, 4 - duel.participants.length) }).map((_, i) => (
+              <div
+                key={`slot-${i}`}
+                className="rounded-full border-2 border-dashed flex items-center justify-center"
+                style={{
+                  width: 28, height: 28,
+                  marginLeft: (duel.participants.length + i) === 0 ? 0 : -8,
+                  borderColor: 'var(--stroke)',
+                  background: 'var(--surface-2)',
+                  zIndex: 6 - i,
+                  position: 'relative',
+                }}
+              >
+                <span className="text-[9px] text-fg-subtle">+</span>
+              </div>
+            ))}
+          </div>
+
+          <span className="text-xs text-fg-subtle tabular-nums">
+            {duel.participants.length}/4 katılımcı
+          </span>
+        </div>
+
+        {/* ── Row 4: Result / bottom strip ── */}
+        <div
+          className="flex items-center justify-between pt-3 border-t"
+          style={{ borderColor: 'var(--stroke)' }}
+        >
+          {/* Left: result info */}
+          <div className="flex items-center gap-1.5 min-w-0">
+            {isWinner ? (
+              <span className="flex items-center gap-1 text-xs font-black text-amber-400">
+                <Trophy size={12} />
+                Kazandın! 🏆
+              </span>
+            ) : isAiMode ? (
+              hasVerdict ? (
+                <span className="text-xs font-semibold text-fg-muted">AI karar verdi</span>
+              ) : duel.participants.length < 2 ? (
+                <span className="text-xs text-fg-subtle">⏳ Katılımcı bekleniyor</span>
+              ) : (
+                <span className="text-xs text-fg-subtle">🤖 AI karar bekliyor</span>
+              )
+            ) : (
+              totalVotes > 0 ? (
+                myPct !== null ? (
+                  <span className="text-xs text-fg-muted truncate">
+                    Oyların <strong className="text-fg">%{myPct}</strong>'i sende · {totalVotes} toplam
+                  </span>
+                ) : (
+                  <span className="text-xs text-fg-muted">{totalVotes} toplam oy</span>
+                )
+              ) : (
+                <span className="text-xs text-fg-subtle">⏳ Oy bekleniyor</span>
+              )
+            )}
+          </div>
+
+          {/* Right: CTA arrow */}
+          <span className="text-xs font-bold text-primary flex items-center gap-0.5 shrink-0 ml-2">
+            {isActive ? 'Devam Et' : 'Görüntüle'}
+            <ChevronRight size={12} />
+          </span>
+        </div>
+      </div>
+    </Link>
+  )
+}
+
+// ── Empty states ───────────────────────────────────────────────────────────────
+
+function AnswerEmptyState() {
   return (
     <div className="text-center py-12">
-      <p className="text-sm text-fg-muted">{text}</p>
+      <p className="text-sm text-fg-muted">Henüz cevap yok</p>
+    </div>
+  )
+}
+
+function DuelEmptyState({ isOwnProfile }: { isOwnProfile: boolean }) {
+  return (
+    <div className="text-center py-14 flex flex-col items-center gap-3">
+      <div className="w-14 h-14 rounded-2xl border-2 border-dashed border-stroke flex items-center justify-center">
+        <Swords size={24} className="text-fg-subtle/40" />
+      </div>
+      <div>
+        <p className="text-sm font-semibold text-fg-muted">Henüz düello yok</p>
+        {isOwnProfile && (
+          <p className="text-xs text-fg-subtle mt-1">
+            Bugünün senaryosuna cevap ver, ardından Düello başlat
+          </p>
+        )}
+      </div>
+      {isOwnProfile && (
+        <Link href="/">
+          <Button size="sm" className="btn-gradient gap-1.5 mt-1">
+            <Swords size={13} />
+            Düello Başlat
+          </Button>
+        </Link>
+      )}
     </div>
   )
 }
