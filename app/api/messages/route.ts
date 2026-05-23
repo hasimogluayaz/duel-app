@@ -32,7 +32,7 @@ export async function GET() {
           .from('profiles')
           .select('id, username, display_name, avatar_url, is_admin, is_banned, total_points, weekly_points, streak_count, bio, last_played_at, personality_type, personality_updated_at, created_at')
           .eq('id', partnerId)
-          .eq('is_admin', false)
+          .eq('is_banned', false)
           .single(),
         supabase
           .from('messages')

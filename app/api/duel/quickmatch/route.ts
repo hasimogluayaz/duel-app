@@ -1,12 +1,27 @@
 import { createApiClient } from '@/lib/supabase/typed'
 import { NextResponse } from 'next/server'
 import { generateShareToken } from '@/lib/utils/formatting'
+import { checkRateLimit } from '@/lib/redis/ratelimit'
+import { checkQuota } from '@/lib/quota/check'
 
 export async function POST(_req: Request) {
   try {
     const supabase = createApiClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Yetkisiz' }, { status: 401 })
+
+    // Redis rate limit (hourly sliding window)
+    const rl = await checkRateLimit('duel', user.id)
+    if (!rl.success) {
+      return NextResponse.json({ error: 'Çok fazla istek. Biraz bekle.' }, { status: 429 })
+    }
+
+    // Quota check (tier-based daily limit)
+    try {
+      await checkQuota(supabase, user.id, 'duels_per_day')
+    } catch (e: any) {
+      return NextResponse.json({ error: e.message }, { status: 429 })
+    }
 
     const today = new Date().toISOString().split('T')[0]
 

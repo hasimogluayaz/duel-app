@@ -1,4 +1,4 @@
-import { createApiClient } from '@/lib/supabase/typed'
+import { createApiClient, createServiceClient } from '@/lib/supabase/typed'
 import { NextResponse } from 'next/server'
 import { generateShareToken } from '@/lib/utils/formatting'
 import { sendDuelInviteEmail } from '@/lib/email/resend'
@@ -108,24 +108,29 @@ export async function POST(req: Request) {
       url: `${process.env.NEXT_PUBLIC_APP_URL}/duel/${shareToken}`,
     }).catch(() => {})
 
-    // Send email to challenged user (fire-and-forget)
-    const { data: challengedUser } = await supabase
-      .from('profiles').select('username').eq('id', challenged_id).single()
-    const { data: { user: authUser } } = await supabase.auth.admin
-      ? { data: { user: null } }
-      : { data: { user: null } }
-    // Get email via service role
-    supabase.auth.admin?.getUserById?.(challenged_id)
-      .then(({ data }: { data: { user: { email?: string } | null } | null }) => {
-        if (data?.user?.email && challengedUser) {
-          sendDuelInviteEmail({
-            to: data.user.email,
-            username: challengedUser.username,
-            challengerName: challenger?.display_name || challenger?.username || '?',
-            duelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/duel/${shareToken}`,
-          }).catch(() => {})
+    // Send email to challenged user (fire-and-forget, uses service role for auth.admin)
+    if (process.env.RESEND_API_KEY && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      ;(async () => {
+        try {
+          const admin = createServiceClient()
+          const [{ data: challengedUser }, { data: authData }] = await Promise.all([
+            admin.from('profiles').select('username').eq('id', challenged_id).single(),
+            admin.auth.admin.getUserById(challenged_id),
+          ])
+          const email = authData?.user?.email
+          if (email && challengedUser) {
+            await sendDuelInviteEmail({
+              to: email,
+              username: challengedUser.username,
+              challengerName: challenger?.display_name || challenger?.username || '?',
+              duelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/duel/${shareToken}`,
+            })
+          }
+        } catch (e) {
+          console.error('[duel/create email]', e)
         }
-      }).catch(() => {})
+      })()
+    }
 
     return NextResponse.json({ duel })
   } catch (_err) {
