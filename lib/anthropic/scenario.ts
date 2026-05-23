@@ -6,33 +6,29 @@ function getGroqClient(): Groq {
   return new Groq({ apiKey })
 }
 
-// Banned topics — scenarios containing these will be regenerated
+// Content moderation — these scenarios are regenerated
 const BANNED_PATTERNS = [
-  /aldatm/i,          // aldatma, aldatıyor, aldattı…
-  /ihanet/i,          // partner ihaneti (arkadaş ihaneti değil)
+  /aldatm/i,       // aldatma, aldatıyor, aldattı…
   /yasadışı/i,
   /intihar/i,
   /şiddet/i,
 ]
 
-// Detect obvious non-Turkish words (Latin letters not in Turkish alphabet running 4+ chars)
-const FOREIGN_WORD_RE = /\b[a-zA-Z]{4,}\b/g
-const TURKISH_ALLOWED = new Set([
-  // common loanwords that are fine in Turkish text
-  'para','bana','sana','ona','bunu','şunu','onu','çok','için','bile',
-  'ama','ile','veya','yani','gibi','daha','çünkü','nasıl','kadar',
-])
+// Specific foreign words that AI sometimes injects (German, English)
+const FOREIGN_WORDS = [
+  /\bnicht[s]?\b/i, /\baber\b/i, /\bund\b/i, /\boder\b/i, /\bdas\b/i,  // German
+  /\bokay\b/i, /\bsorry\b/i, /\bplease\b/i, /\bbut\b/i,                 // English
+]
 
 function hasForeignWord(text: string): boolean {
-  const matches = text.match(FOREIGN_WORD_RE) ?? []
-  return matches.some(w => !TURKISH_ALLOWED.has(w.toLowerCase()))
+  return FOREIGN_WORDS.some(re => re.test(text))
 }
 
 function isValid(scenario: string): boolean {
   if (hasForeignWord(scenario)) return false
   if (BANNED_PATTERNS.some(re => re.test(scenario))) return false
-  if (scenario.length > 280) return false   // enforce short
-  if (scenario.length < 40) return false    // too short to be meaningful
+  if (scenario.length > 350) return false
+  if (scenario.length < 40) return false
   return true
 }
 
