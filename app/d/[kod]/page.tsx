@@ -41,7 +41,7 @@ export default async function DuelInvitePage({ params }: Props) {
   let duel: any = null
   const { data: fullDuel, error: fullError } = await supabase
     .from('duels')
-    .select('id, code, scenario_id, creator_id, created_at, judge_mode, ai_verdict, winner_id')
+    .select('id, code, scenario_id, creator_id, created_at, judge_mode, ai_verdict, winner_id, voting_started_at')
     .eq('code', params.kod.toUpperCase())
     .single()
 
@@ -55,7 +55,7 @@ export default async function DuelInvitePage({ params }: Props) {
       .eq('code', params.kod.toUpperCase())
       .single()
     duel = baseDuel
-      ? { ...baseDuel, judge_mode: 'community', ai_verdict: null, winner_id: null }
+      ? { ...baseDuel, judge_mode: 'community', ai_verdict: null, winner_id: null, voting_started_at: null }
       : null
   }
 

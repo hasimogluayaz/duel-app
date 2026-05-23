@@ -23,7 +23,7 @@ interface Participant {
 }
 
 interface Props {
-  duel: { id: string; code: string; scenario_id: string; creator_id: string; judge_mode?: string; ai_verdict?: string | null; winner_id?: string | null }
+  duel: { id: string; code: string; scenario_id: string; creator_id: string; judge_mode?: string; ai_verdict?: string | null; winner_id?: string | null; voting_started_at?: string | null }
   scenario: { id: string; content: string; active_date: string } | null
   creator: Profile | null
   participants: Participant[]
@@ -43,8 +43,11 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
   const [aiVerdict, setAiVerdict] = useState<string | null>(duel.ai_verdict ?? null)
   const [aiWinnerId, setAiWinnerId] = useState<string | null>(duel.winner_id ?? null)
   const [aiJudging, setAiJudging] = useState(false)
+  const [votingStartedAt, setVotingStartedAt] = useState<string | null>(duel.voting_started_at ?? null)
+  const [startingVoting, setStartingVoting] = useState(false)
 
   const isAiMode = duel.judge_mode === 'ai'
+  const votingOpen = !!votingStartedAt
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kapisio.com'
   const duelUrl = `${appUrl}/d/${duel.code}`
@@ -74,7 +77,15 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
           )
         )
       })
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'duel_participants', filter: `duel_id=eq.${duel.id}` },
+      .on('postgres_changes' as any, { event: 'UPDATE', schema: 'public', table: 'duels', filter: `id=eq.${duel.id}` },
+        (payload: { new: { voting_started_at: string | null; ai_verdict: string | null; winner_id: string | null } }) => {
+          // Creator started voting / AI verdict arrived → propagate to all viewers
+          if (payload.new.voting_started_at) setVotingStartedAt(payload.new.voting_started_at)
+          if (payload.new.ai_verdict) setAiVerdict(payload.new.ai_verdict)
+          if (payload.new.winner_id) setAiWinnerId(payload.new.winner_id)
+        }
+      )
+      .on('postgres_changes' as any, { event: 'INSERT', schema: 'public', table: 'duel_participants', filter: `duel_id=eq.${duel.id}` },
         async () => {
           // Refresh participant list when someone new joins
           const { data } = await supabase
@@ -161,6 +172,22 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
         )
       )
     } catch {}
+  }
+
+  async function startVoting() {
+    if (startingVoting || participants.length < 2) return
+    setStartingVoting(true)
+    try {
+      const res = await fetch(`/api/duel/${duel.id}/start-voting`, { method: 'POST' })
+      const data = await res.json() as { voting_started_at?: string; error?: string }
+      if (!res.ok) { showToast(data.error ?? 'Oylama başlatılamadı.'); return }
+      setVotingStartedAt(data.voting_started_at ?? new Date().toISOString())
+      showToast('🗳️ Oylama başladı!')
+    } catch {
+      showToast('Bağlantı hatası.')
+    } finally {
+      setStartingVoting(false)
+    }
   }
 
   async function requestAiJudge() {
@@ -374,8 +401,8 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
                 {/* Answer text */}
                 <p className="text-[14px] text-fg leading-relaxed flex-1">{p.answer?.content}</p>
 
-                {/* Vote button — only in community mode */}
-                {!isAiMode && (
+                {/* Vote button — community mode + voting opened by creator */}
+                {!isAiMode && votingOpen && (
                   <button
                     onClick={() => p.answer?.id && handleVote(p.answer.id)}
                     disabled={!currentUserId || isMe}
@@ -388,6 +415,13 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
                     <ChevronUp size={14} />
                     {p.answer?.vote_count ?? 0} oy
                   </button>
+                )}
+
+                {/* Community mode + voting not started → pending label */}
+                {!isAiMode && !votingOpen && (
+                  <div className="flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold text-fg-subtle bg-surface-2 border border-dashed border-stroke">
+                    Oylama bekleniyor…
+                  </div>
                 )}
               </div>
             )
@@ -517,6 +551,48 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
               )}
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── Start Voting Panel (community mode, voting not yet open) ─────── */}
+      {!isAiMode && !isExpired && !votingOpen && (
+        <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 flex flex-col items-center gap-3 text-center">
+          <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center">
+            <ChevronUp size={20} className="text-primary" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-fg">Oylama henüz başlamadı</p>
+            <p className="text-xs text-fg-muted mt-0.5">
+              {participants.length < 2
+                ? 'En az 2 katılımcı olunca kurucu oylamayı başlatabilir'
+                : isCreator
+                ? 'Cevaplar hazır — istediğin zaman oylamayı başlat'
+                : `${creatorName} oylamayı başlattığında oy verebilirsin`}
+            </p>
+          </div>
+          {isCreator && (
+            <Button
+              onClick={startVoting}
+              loading={startingVoting}
+              disabled={participants.length < 2}
+              className="btn-gradient gap-2"
+              size="lg"
+            >
+              <ChevronUp size={16} />
+              {startingVoting ? 'Başlatılıyor…' : 'Oylamayı Başlat'}
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* ── Voting Live Banner (community mode, voting open) ──────────────── */}
+      {!isAiMode && !isExpired && votingOpen && (
+        <div className="rounded-xl bg-green-500/10 border border-green-500/20 p-3 flex items-center justify-center gap-2">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-green-400" />
+          </span>
+          <p className="text-xs font-bold text-green-500">Oylama canlı — kim daha haklı?</p>
         </div>
       )}
 
