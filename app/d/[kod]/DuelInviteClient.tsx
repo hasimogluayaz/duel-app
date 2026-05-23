@@ -124,11 +124,16 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
       // 2. Join the invite duel (both authenticated and anonymous — anon goes
       //    in with user_id NULL so the answer is persisted on the duel and
       //    shows up on refresh / for other viewers via realtime)
-      await fetch(`/api/duel/${duel.id}/join`, {
+      const joinRes = await fetch(`/api/duel/${duel.id}/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ answer_id: data.answer.id }),
       })
+      if (!joinRes.ok) {
+        const joinErr = await joinRes.json().catch(() => ({})) as { error?: string }
+        showToast(joinErr.error ?? 'Düelloya katılınamadı.')
+        return
+      }
 
       // 3. Optimistically add self to participants list
       const newEntry: Participant = {

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createApiClient, createServiceClient } from '@/lib/supabase/typed'
+import { createApiClient } from '@/lib/supabase/typed'
 import { optionalAuth } from '@/lib/api/auth'
 import { ApiError } from '@/lib/api/errors'
 
@@ -38,12 +38,9 @@ export const POST = optionalAuth(async (req: Request, { userId, params }) => {
       throw new ApiError('Düelloya katılınamadı.', 500, 'DB_ERROR')
     }
   } else {
-    // Anonymous: bypass RLS (which requires auth.uid() IS NOT NULL).
-    // Server-validated: duelId from URL, answer_id from body. Capacity capped at 4.
-    // Dedupe by answer_id so the same anonymous answer can't be inserted twice.
-    const admin = createServiceClient()
-
-    const { data: existing } = await admin
+    // Anonymous: needs migration 034 (RLS allowing user_id IS NULL inserts).
+    // Dedupe by answer_id so the same answer can't be inserted twice.
+    const { data: existing } = await supabase
       .from('duel_participants')
       .select('id')
       .eq('duel_id', duelId)
@@ -51,13 +48,13 @@ export const POST = optionalAuth(async (req: Request, { userId, params }) => {
       .maybeSingle()
 
     if (!existing) {
-      const { error } = await admin
+      const { error } = await supabase
         .from('duel_participants')
-        .insert({ duel_id: duelId, user_id: null, answer_id })
+        .insert({ duel_id: duelId, user_id: null, answer_id } as any)
 
       if (error) {
         console.error('[duel/join anon]', error)
-        throw new ApiError('Düelloya katılınamadı.', 500, 'DB_ERROR')
+        throw new ApiError(`Düelloya katılınamadı (${error.message}).`, 500, 'DB_ERROR')
       }
     }
   }
