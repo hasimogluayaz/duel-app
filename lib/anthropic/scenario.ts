@@ -6,14 +6,43 @@ function getGroqClient(): Groq {
   return new Groq({ apiKey })
 }
 
+// Banned topics — scenarios containing these will be regenerated
+const BANNED_PATTERNS = [
+  /aldatm/i,          // aldatma, aldatıyor, aldattı…
+  /ihanet/i,          // partner ihaneti (arkadaş ihaneti değil)
+  /yasadışı/i,
+  /intihar/i,
+  /şiddet/i,
+]
+
+// Detect obvious non-Turkish words (Latin letters not in Turkish alphabet running 4+ chars)
+const FOREIGN_WORD_RE = /\b[a-zA-Z]{4,}\b/g
+const TURKISH_ALLOWED = new Set([
+  // common loanwords that are fine in Turkish text
+  'para','bana','sana','ona','bunu','şunu','onu','çok','için','bile',
+  'ama','ile','veya','yani','gibi','daha','çünkü','nasıl','kadar',
+])
+
+function hasForeignWord(text: string): boolean {
+  const matches = text.match(FOREIGN_WORD_RE) ?? []
+  return matches.some(w => !TURKISH_ALLOWED.has(w.toLowerCase()))
+}
+
+function isValid(scenario: string): boolean {
+  if (hasForeignWord(scenario)) return false
+  if (BANNED_PATTERNS.some(re => re.test(scenario))) return false
+  if (scenario.length > 280) return false   // enforce short
+  if (scenario.length < 40) return false    // too short to be meaningful
+  return true
+}
+
 export async function generateDailyScenario(): Promise<string> {
   const groq = getGroqClient()
 
   const categories = [
     'aile ve akraba baskısı',
-    'aşk ve aldatma',
     'para ve borç',
-    'arkadaşlık ve ihanet',
+    'arkadaşlık ve sadakat',
     'iş yeri ve hiyerarşi',
     'gurur ve özür',
     'sosyal medya ve dedikodu',
@@ -22,6 +51,7 @@ export async function generateDailyScenario(): Promise<string> {
     'mahalle ve komşuluk',
     'düğün ve nişan kültürü',
     'sır ve sadakat',
+    'aşk ve ilişki kararları',
   ]
 
   const today = new Date().toISOString().split('T')[0]
@@ -32,62 +62,72 @@ export async function generateDailyScenario(): Promise<string> {
 
 Konu: ${category}
 
-FORMAT KURALI — EN ÖNEMLİ:
-Senaryo TAM OLARAK 1 cümle olacak. Nokta yok, virgül yok; tek cümle, "Ne yaparsın?" ile bitiyor.
-Örnek uzunluk: "Anneni ziyarete gittiğinde kayınvalidenin sana bıraktığı 5.000 TL'yi buluyorsun — ama eşin bundan habersiz. Ne yaparsın?"
+FORMAT — EN KRİTİK KURAL:
+Senaryo TAM OLARAK 1 Türkçe cümle. "Ne yaparsın?" ile bitiyor. Başka hiçbir şey yok.
+Hedef uzunluk: 20-35 kelime.
 
 TÜRK KÜLTÜRÜNE ÖZGÜ OL:
-Aşağıdaki gerçekleri doğal kullan — hepsini değil, sadece konuya uyanı:
-- Kayınvalide, görümce, enişte, yenge dinamikleri
-- Düğün parası, takı, mehir, çeyiz
-- Askerlik, kayırmacılık, torpil
+Şunları doğal kullan (konuya uyanı seç):
+- Kayınvalide, görümce, yenge, enişte dinamikleri
+- Düğün parası, takı, mehir, başlık
+- Torpil, kefil, borç, faiz
 - Komşu dedikodusu, mahalle baskısı
-- Borç vermek/almak, kefil olmak
+- Büyüklere saygı vs. kişisel sınır
+- İş yerinde yaş hiyerarşisi, adam kayırma
 - Sosyal medyada ifşa, ekran görüntüsü
-- Büyüklere saygı vs. kişisel sınır çatışması
-- İstanbul / taşra / göç gerilimi
-- İş yerinde yaş hiyerarşisi, "abicim" kültürü
 
 TAM İKİYE BÖLSÜN:
-İnsanların yarısı "kesinlikle yaparım", yarısı "asla yapmam" desin. Herkesin aynı cevabı vereceği durumlar yasak.
+Yarısı "yaparım" yarısı "yapmam" desin. Herkesin hemfikir olduğu durumlar işe yaramaz.
 
-YASAK:
-- 2 veya daha fazla cümle — sadece 1 cümle
+KESİN YASAKLAR:
+- Eşler arası aldatma, sadakatsizlik, yasadışı ilişki — bunları ASLA yazma
+- Şiddet, intihar, suç içeriği
+- İngilizce, Almanca veya başka dil kelimeler — sadece Türkçe
+- 2 veya daha fazla cümle
 - "Ne düşünürsün?" — sadece "Ne yaparsın?"
-- Yapay, resmi, genel Türkçe — sokak dili kullan
-- Yabancı kelime
-- Çözümü belli olan durumlar
 
-KÖTÜ (çok genel, 2 cümle, kültürsüz):
-"İş arkadaşın fikirlerini çaldı. Ne yaparsın?"
+KÖTÜ (yabancı kelime var, aldatma içeriyor): yasak
+KÖTÜ (2 cümle): yasak
+KÖTÜ (çok genel): "Arkadaşın senden para istedi. Ne yaparsın?"
 
-İYİ (1 cümle, Türk kültürü, ikiye böler):
-"Düğün günü kayınvaliden tarafı için hazırladığın 120 kişilik yemeği kendi anneleri yapmış gibi herkese anlatıyor — ama eşin 'geç kalsın annem mutlu olsun' diyor. Ne yaparsın?"
+İYİ ÖRNEKLER (1 cümle, kültürel, ikiye böler):
+"Kayınvalidenin düğüne davet ettiği 30 kişinin masraf faturası sana geldi, eşin 'annem hep böyle yapar' diyerek geçiştiriyor — ama 8.000 TL senin maaşının yarısı. Ne yaparsın?"
+"Kefil olduğun amcanın oğlu 3 aydır kredi taksitini yatırmıyor ve seni engeledi — banka seni arıyor. Ne yaparsın?"
+"İş yerinde senden kıdemsiz ama müdürün yeğeni olan biri terfi etti, sendikaya şikâyet etmeni isteyen arkadaşların var ama işini kaybetmekten korkuyorsun. Ne yaparsın?"
 
-"Askerliğini erken bitirmek için kaymakamlıkta tanıdığı olan bir amcanoğlu 'bana 15 bin ver hallederim' dedi — devlet sınavında kazanmak için 3 aydır çalışıyorsun. Ne yaparsın?"
-
-Şimdi "${category}" konusunda, yukarıdaki kurallara tam uyan, 1 cümlelik YENİ bir senaryo yaz.
+Şimdi "${category}" konusunda, 1 cümlelik, tamamen Türkçe, YENİ bir senaryo yaz.
 
 Sadece JSON döndür: {"scenario": "senaryo metni"}`
 
-  const completion = await groq.chat.completions.create({
-    model: 'llama-3.3-70b-versatile',
-    messages: [{ role: 'user', content: prompt }],
-    temperature: 0.9,
-    max_tokens: 150,
-    response_format: { type: 'json_object' },
-  })
+  // Up to 4 attempts — retry if output fails validation
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const completion = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.85 + attempt * 0.05, // slightly more random on retry
+      max_tokens: 180,
+      response_format: { type: 'json_object' },
+    })
 
-  const text = completion.choices[0]?.message?.content ?? ''
+    const text = completion.choices[0]?.message?.content ?? ''
 
-  try {
-    const parsed = JSON.parse(text) as { scenario: string }
-    if (!parsed.scenario || typeof parsed.scenario !== 'string') throw new Error('Missing scenario field')
-    return parsed.scenario.trim()
-  } catch {
-    const match = text.match(/\{[\s\S]*\}/)
-    if (match) return (JSON.parse(match[0]) as { scenario: string }).scenario
-    if (text.length > 10) return text.trim()
-    throw new Error(`[Groq] Invalid scenario response: ${text.slice(0, 100)}`)
+    let scenario: string | null = null
+    try {
+      const parsed = JSON.parse(text) as { scenario: string }
+      if (parsed.scenario && typeof parsed.scenario === 'string') {
+        scenario = parsed.scenario.trim()
+      }
+    } catch {
+      const match = text.match(/\{[\s\S]*\}/)
+      if (match) {
+        try { scenario = (JSON.parse(match[0]) as { scenario: string }).scenario?.trim() } catch {}
+      }
+    }
+
+    if (scenario && isValid(scenario)) return scenario
+
+    console.warn(`[scenario] attempt ${attempt + 1} failed validation:`, scenario?.slice(0, 80))
   }
+
+  throw new Error('[scenario] 4 attempts failed validation — check prompt or banned patterns')
 }
