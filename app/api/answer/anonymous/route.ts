@@ -22,9 +22,21 @@ export async function POST(req: Request) {
       throw new ApiError('Senaryo bulunamadı.', 404, 'NOT_FOUND')
     }
 
+    // Capture network fingerprint for admin moderation (best-effort)
+    const ipHeader = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || ''
+    const ipAddress = ipHeader.split(',')[0]?.trim() || null
+    const userAgent = req.headers.get('user-agent')?.slice(0, 500) || null
+
     const { data: answer, error: insertError } = await supabase
       .from('answers')
-      .insert({ user_id: null, scenario_id: scenarioId, content, mode: 'scenario' })
+      .insert({
+        user_id: null,
+        scenario_id: scenarioId,
+        content,
+        mode: 'scenario',
+        ip_address: ipAddress,
+        user_agent: userAgent,
+      } as any)
       .select()
       .single()
 

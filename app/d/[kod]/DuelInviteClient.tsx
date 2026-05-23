@@ -40,6 +40,7 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
   const [copied, setCopied] = useState(false)
   const [showStreakModal, setShowStreakModal] = useState(false)
   const [votedAnswerIds, setVotedAnswerIds] = useState<Set<string>>(new Set())
+  const [votingInFlight, setVotingInFlight] = useState<Set<string>>(new Set())
   const [aiVerdict, setAiVerdict] = useState<string | null>(duel.ai_verdict ?? null)
   const [aiWinnerId, setAiWinnerId] = useState<string | null>(duel.winner_id ?? null)
   const [aiJudging, setAiJudging] = useState(false)
@@ -154,29 +155,53 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
 
   async function handleVote(answerId: string) {
     if (!currentUserId) return
+    // Block spam-clicks: ignore if a vote for this answer is already in flight
+    if (votingInFlight.has(answerId)) return
+
+    setVotingInFlight(prev => {
+      const next = new Set(prev)
+      next.add(answerId)
+      return next
+    })
+
     try {
       const res = await fetch('/api/vote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ answer_id: answerId }),
       })
-      const data = await res.json() as { toggled?: string }
-      // Optimistic UI: toggle voted state
+      const data = await res.json() as { toggled?: string; already_liked?: boolean }
+
+      // Toggle voted state regardless
       setVotedAnswerIds(prev => {
         const next = new Set(prev)
         if (data.toggled === 'off') next.delete(answerId)
         else next.add(answerId)
         return next
       })
-      // Optimistic vote count update
-      setParticipants(prev =>
-        prev.map(p =>
-          p.answer?.id === answerId
-            ? { ...p, answer: { ...p.answer!, vote_count: p.answer!.vote_count + (data.toggled === 'off' ? -1 : 1) } }
-            : p
+
+      // Optimistic count change ONLY when an actual DB change happened.
+      // Server returns already_liked=true when the INSERT hit the unique
+      // constraint (i.e. user was already a voter) — no count delta.
+      if (!data.already_liked) {
+        const delta = data.toggled === 'off' ? -1 : 1
+        setParticipants(prev =>
+          prev.map(p =>
+            p.answer?.id === answerId
+              ? { ...p, answer: { ...p.answer!, vote_count: Math.max(0, (p.answer!.vote_count ?? 0) + delta) } }
+              : p
+          )
         )
-      )
-    } catch {}
+      }
+    } catch {
+      /* realtime will reconcile vote_count from the DB anyway */
+    } finally {
+      setVotingInFlight(prev => {
+        const next = new Set(prev)
+        next.delete(answerId)
+        return next
+      })
+    }
   }
 
   async function startVoting() {
@@ -413,20 +438,23 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
                 <p className="text-[14px] text-fg leading-relaxed flex-1">{p.answer?.content}</p>
 
                 {/* Vote button — community mode + voting opened by creator */}
-                {!isAiMode && votingOpen && (
-                  <button
-                    onClick={() => p.answer?.id && handleVote(p.answer.id)}
-                    disabled={!currentUserId || isMe}
-                    className="flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                    style={{
-                      background: hasVotedThis ? 'var(--primary)' : 'var(--surface-2)',
-                      color: hasVotedThis ? '#fff' : 'var(--fg-subtle)',
-                    }}
-                  >
-                    <ChevronUp size={14} />
-                    {p.answer?.vote_count ?? 0} oy
-                  </button>
-                )}
+                {!isAiMode && votingOpen && (() => {
+                  const inFlight = p.answer?.id ? votingInFlight.has(p.answer.id) : false
+                  return (
+                    <button
+                      onClick={() => p.answer?.id && handleVote(p.answer.id)}
+                      disabled={!currentUserId || isMe || inFlight}
+                      className="flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      style={{
+                        background: hasVotedThis ? 'var(--primary)' : 'var(--surface-2)',
+                        color: hasVotedThis ? '#fff' : 'var(--fg-subtle)',
+                      }}
+                    >
+                      <ChevronUp size={14} className={inFlight ? 'animate-pulse' : ''} />
+                      {p.answer?.vote_count ?? 0} oy
+                    </button>
+                  )
+                })()}
 
                 {/* Community mode + voting not started → pending label */}
                 {!isAiMode && !votingOpen && (
