@@ -2,9 +2,7 @@ import Groq from 'groq-sdk'
 
 function getGroqClient(): Groq {
   const apiKey = process.env.GROQ_API_KEY
-  if (!apiKey) {
-    throw new Error('[Groq] Missing GROQ_API_KEY environment variable')
-  }
+  if (!apiKey) throw new Error('[Groq] Missing GROQ_API_KEY environment variable')
   return new Groq({ apiKey })
 }
 
@@ -12,60 +10,71 @@ export async function generateDailyScenario(): Promise<string> {
   const groq = getGroqClient()
 
   const categories = [
-    'iş hayatı ve kariyer',
-    'aşk ve ilişkiler',
-    'aile baskısı',
+    'aile ve akraba baskısı',
+    'aşk ve aldatma',
     'para ve borç',
-    'arkadaşlık ve sadakat',
-    'sosyal medya ve itibar',
-    'adalet ve dürüstlük',
-    'kıskançlık ve rekabet',
+    'arkadaşlık ve ihanet',
+    'iş yeri ve hiyerarşi',
     'gurur ve özür',
-    'sır ve ihanet',
-    'çocukluk ve geçmiş',
-    'iş arkadaşı ve hiyerarşi',
+    'sosyal medya ve dedikodu',
+    'adalet ve vicdan',
+    'kıskançlık ve rekabet',
+    'mahalle ve komşuluk',
+    'düğün ve nişan kültürü',
+    'sır ve sadakat',
   ]
 
-  // Use date-based index for variety — different category each day, not just 8-day repeat
   const today = new Date().toISOString().split('T')[0]
   const dateNum = parseInt(today.replace(/-/g, ''), 10)
   const category = categories[dateNum % categories.length]
 
-  const prompt = `Sen Kapisio için günlük senaryo yazıyorsun. Kapisio, insanların gerçek hayat durumlarında ne yapacaklarını tartıştığı Türk sosyal platformu.
+  const prompt = `Kapisio için günlük Türk kültürü senaryosu yazıyorsun. Platform: insanlar gerçek hayat kararlarını tartışıyor ve oylanıyor.
 
-Bugünkü konu: ${category}
+Konu: ${category}
 
-ZORUNLU KURALLAR (hepsine uy):
-1. SOMUT DETAY: "Bir arkadaşın" değil "5 yıllık en iyi arkadaşın", "bir miktar para" değil "3.000 TL" de.
-2. TAM İKİYE BÖLSÜN: Okuyanların yarısı kesinlikle A, yarısı kesinlikle B yapardım desin. "Herkes aynı şeyi yapardı" diyebileceğin senaryo kötüdür.
-3. DUYGUSAL YÜKLÜ: Aşağıdakilerden biri olsun — ihanet, utanç, vicdan azabı, kıskançlık, haksızlık, sadakat çatışması.
-4. KISA: Tam 2-3 cümle. Son cümle "Ne yaparsın?" veya "Ne yapardın?" ile bitmeli.
-5. DOĞAL TÜRKÇE: Resmi ya da yapay bir dil kullanma.
+FORMAT KURALI — EN ÖNEMLİ:
+Senaryo TAM OLARAK 1 cümle olacak. Nokta yok, virgül yok; tek cümle, "Ne yaparsın?" ile bitiyor.
+Örnek uzunluk: "Anneni ziyarete gittiğinde kayınvalidenin sana bıraktığı 5.000 TL'yi buluyorsun — ama eşin bundan habersiz. Ne yaparsın?"
+
+TÜRK KÜLTÜRÜNE ÖZGÜ OL:
+Aşağıdaki gerçekleri doğal kullan — hepsini değil, sadece konuya uyanı:
+- Kayınvalide, görümce, enişte, yenge dinamikleri
+- Düğün parası, takı, mehir, çeyiz
+- Askerlik, kayırmacılık, torpil
+- Komşu dedikodusu, mahalle baskısı
+- Borç vermek/almak, kefil olmak
+- Sosyal medyada ifşa, ekran görüntüsü
+- Büyüklere saygı vs. kişisel sınır çatışması
+- İstanbul / taşra / göç gerilimi
+- İş yerinde yaş hiyerarşisi, "abicim" kültürü
+
+TAM İKİYE BÖLSÜN:
+İnsanların yarısı "kesinlikle yaparım", yarısı "asla yapmam" desin. Herkesin aynı cevabı vereceği durumlar yasak.
 
 YASAK:
-- "Ne düşünürsün?" ile bitirme — "Ne yaparsın?" ile bitir
-- Çözümü belli olan durumlar yazma
-- İngilizce veya Türkçe olmayan kelime kullanma
-- Önceki örnekleri tekrar etme
+- 2 veya daha fazla cümle — sadece 1 cümle
+- "Ne düşünürsün?" — sadece "Ne yaparsın?"
+- Yapay, resmi, genel Türkçe — sokak dili kullan
+- Yabancı kelime
+- Çözümü belli olan durumlar
 
-KÖTÜ ÖRNEK (çok genel, ikiye bölmez):
-"Arkadaşın senden para istedi ama daha önce verdiğini geri ödemedi. Ne yaparsın?"
+KÖTÜ (çok genel, 2 cümle, kültürsüz):
+"İş arkadaşın fikirlerini çaldı. Ne yaparsın?"
 
-İYİ ÖRNEK (somut, ikiye böler, duygusal):
-"3 yıldır birlikte çalıştığın iş arkadaşın, toplantıda senin fikirlerini kendi fikirleri gibi sundu ve müdürden övgü aldı. Öğle yemeğinde seninle oturmak istiyor. Ne yaparsın?"
+İYİ (1 cümle, Türk kültürü, ikiye böler):
+"Düğün günü kayınvaliden tarafı için hazırladığın 120 kişilik yemeği kendi anneleri yapmış gibi herkese anlatıyor — ama eşin 'geç kalsın annem mutlu olsun' diyor. Ne yaparsın?"
 
-İYİ ÖRNEK 2 (somut, merak uyandırır):
-"Sevgilinin telefonu masada açık kaldı. Kilit ekranında eski sevgilisinden 'özledim' mesajı gördün. Sevgilin hâlâ duşta. Ne yaparsın?"
+"Askerliğini erken bitirmek için kaymakamlıkta tanıdığı olan bir amcanoğlu 'bana 15 bin ver hallederim' dedi — devlet sınavında kazanmak için 3 aydır çalışıyorsun. Ne yaparsın?"
 
-Şimdi "${category}" kategorisinde, yukarıdaki kurallara uyan YENİ ve özgün bir senaryo yaz.
+Şimdi "${category}" konusunda, yukarıdaki kurallara tam uyan, 1 cümlelik YENİ bir senaryo yaz.
 
 Sadece JSON döndür: {"scenario": "senaryo metni"}`
 
   const completion = await groq.chat.completions.create({
     model: 'llama-3.3-70b-versatile',
     messages: [{ role: 'user', content: prompt }],
-    temperature: 0.85,
-    max_tokens: 300,
+    temperature: 0.9,
+    max_tokens: 150,
     response_format: { type: 'json_object' },
   })
 
@@ -73,9 +82,7 @@ Sadece JSON döndür: {"scenario": "senaryo metni"}`
 
   try {
     const parsed = JSON.parse(text) as { scenario: string }
-    if (!parsed.scenario || typeof parsed.scenario !== 'string') {
-      throw new Error('Missing scenario field')
-    }
+    if (!parsed.scenario || typeof parsed.scenario !== 'string') throw new Error('Missing scenario field')
     return parsed.scenario.trim()
   } catch {
     const match = text.match(/\{[\s\S]*\}/)
