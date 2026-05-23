@@ -36,34 +36,56 @@ export default async function DuelInvitePage({ params }: Props) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { data: duel } = await supabase
+  // Try full query first (needs migration 028 + 029).
+  // If new columns don't exist yet, fall back to base columns so the page doesn't 404.
+  let duel: any = null
+  const { data: fullDuel, error: fullError } = await supabase
     .from('duels')
     .select('id, code, scenario_id, creator_id, created_at, judge_mode, ai_verdict, winner_id')
     .eq('code', params.kod.toUpperCase())
     .single()
 
+  if (!fullError) {
+    duel = fullDuel
+  } else {
+    // Fallback: columns may not be migrated yet — just show the page without AI fields
+    const { data: baseDuel } = await supabase
+      .from('duels')
+      .select('id, code, scenario_id, creator_id, created_at')
+      .eq('code', params.kod.toUpperCase())
+      .single()
+    duel = baseDuel
+      ? { ...baseDuel, judge_mode: 'community', ai_verdict: null, winner_id: null }
+      : null
+  }
+
   if (!duel) notFound()
+
+  // Try to fetch participants (needs migration 027) — fall back to empty
+  let participants: any[] = []
+  try {
+    const { data: dp } = await (supabase as any)
+      .from('duel_participants')
+      .select('id, user_id, answer_id, joined_at, profile:profiles(id, username, display_name, avatar_url), answer:answers(id, content, vote_count)')
+      .eq('duel_id', duel.id)
+      .order('joined_at', { ascending: true })
+    participants = dp ?? []
+  } catch {}
 
   const [
     { data: scenario },
     { data: creator },
-    { data: participants },
   ] = await Promise.all([
     supabase.from('scenarios').select('id, content, active_date').eq('id', duel.scenario_id).single(),
     supabase.from('profiles').select('id, username, display_name, avatar_url').eq('id', duel.creator_id).single(),
-    supabase
-      .from('duel_participants')
-      .select('id, user_id, answer_id, joined_at, profile:profiles(id, username, display_name, avatar_url), answer:answers(id, content, vote_count)')
-      .eq('duel_id', duel.id)
-      .order('joined_at', { ascending: true }),
   ])
 
   return (
     <DuelInviteClient
-      duel={duel as any}
+      duel={duel}
       scenario={scenario ?? null}
       creator={creator ?? null}
-      participants={(participants ?? []) as any[]}
+      participants={participants}
       currentUserId={user?.id ?? null}
     />
   )

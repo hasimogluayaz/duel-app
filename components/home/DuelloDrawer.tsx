@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
-import { X, Swords, Link2, Share2, Check, Users, Bot } from 'lucide-react'
+import { X, Swords, Users, Bot } from 'lucide-react'
 
 interface Props {
   open: boolean
@@ -11,20 +12,18 @@ interface Props {
   userId: string | null
 }
 
-type Status = 'idle' | 'loading' | 'guest' | 'not-answered' | 'ready' | 'error'
+type Status = 'idle' | 'loading' | 'guest' | 'not-answered' | 'error'
 type JudgeMode = 'community' | 'ai'
 
 export function DuelloDrawer({ open, onClose, userId }: Props) {
+  const router = useRouter()
   const [status, setStatus] = useState<Status>('idle')
   const [judgeMode, setJudgeMode] = useState<JudgeMode>('community')
-  const [duelCode, setDuelCode] = useState<string | null>(null)
-  const [copied, setCopied] = useState(false)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
   useEffect(() => {
-    if (!open) { setStatus('idle'); setDuelCode(null); setErrorMsg(null); return }
+    if (!open) { setStatus('idle'); setErrorMsg(null); return }
     if (!userId) { setStatus('guest'); return }
-    // Don't auto-create — wait for user to pick mode and click button
   }, [open, userId])
 
   async function initDuel() {
@@ -47,32 +46,29 @@ export function DuelloDrawer({ open, onClose, userId }: Props) {
         }
         return
       }
-      if (data.code) { setDuelCode(data.code); setStatus('ready') }
-      else setStatus('error')
+
+      if (data.code) {
+        // Close drawer and navigate directly to the duel page
+        onClose()
+        router.push(`/d/${data.code}`)
+      } else {
+        setErrorMsg('Kod alınamadı. Tekrar dene.')
+        setStatus('error')
+      }
     } catch {
       setErrorMsg('Bağlantı hatası. İnternet bağlantını kontrol et.')
       setStatus('error')
     }
   }
 
-  async function handleCopy() {
-    if (!duelCode) return
-    await navigator.clipboard.writeText(`https://kapisio.com/d/${duelCode}`)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  const duelUrl = duelCode ? `https://kapisio.com/d/${duelCode}` : ''
-  const waUrl = duelUrl
-    ? `https://wa.me/?text=${encodeURIComponent(`Kapisio düellosuna davet edildin: ${duelUrl}`)}`
-    : ''
-
   if (!open) return null
 
   return (
     <>
+      {/* Backdrop */}
       <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
+      {/* Panel */}
       <div className="fixed z-50 bg-surface shadow-2xl
         bottom-0 left-0 right-0 rounded-t-2xl max-h-[90vh] overflow-y-auto
         sm:bottom-auto sm:top-0 sm:right-0 sm:left-auto sm:h-full sm:w-[400px] sm:rounded-none sm:rounded-l-2xl
@@ -89,7 +85,10 @@ export function DuelloDrawer({ open, onClose, userId }: Props) {
               <p className="text-xs text-fg-subtle">Aynı senaryoyu birlikte cevaplayın.</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors">
+          <button
+            onClick={onClose}
+            className="p-2 rounded-xl text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors"
+          >
             <X size={20} />
           </button>
         </div>
@@ -101,10 +100,18 @@ export function DuelloDrawer({ open, onClose, userId }: Props) {
             {[
               { n: 1, title: 'Cevabını yaz', desc: 'Sen ne yapardın? Anlat.' },
               { n: 2, title: 'Linki arkadaşına gönder', desc: 'O da kendi cevabını yazsın.' },
-              { n: 3, title: 'Kazanan belli olsun', desc: judgeMode === 'ai' ? 'Yapay zeka okur ve kazananı belirler.' : 'Kimin cevabı daha çok beğenildi görün.' },
+              {
+                n: 3,
+                title: 'Kazanan belli olsun',
+                desc: judgeMode === 'ai'
+                  ? 'Yapay zeka okur ve kazananı belirler.'
+                  : 'Kimin cevabı daha çok beğenildi görün.',
+              },
             ].map(s => (
               <div key={s.n} className="flex items-start gap-3">
-                <div className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center shrink-0 text-sm font-bold">{s.n}</div>
+                <div className="w-7 h-7 rounded-full bg-primary text-white flex items-center justify-center shrink-0 text-sm font-bold">
+                  {s.n}
+                </div>
                 <div>
                   <p className="text-sm font-semibold text-fg">{s.title}</p>
                   <p className="text-xs text-fg-muted">{s.desc}</p>
@@ -132,7 +139,9 @@ export function DuelloDrawer({ open, onClose, userId }: Props) {
                 <p className="text-sm font-semibold text-amber-600 dark:text-amber-400 mb-1">
                   Önce bugünün senaryosuna cevap ver
                 </p>
-                <p className="text-xs text-fg-muted">Düello başlatmak için önce cevabını yazman gerekiyor.</p>
+                <p className="text-xs text-fg-muted">
+                  Düello başlatmak için önce cevabını yazman gerekiyor.
+                </p>
               </div>
               <Link href="/" onClick={onClose} className="w-full">
                 <Button className="w-full btn-gradient">Cevapla →</Button>
@@ -143,9 +152,10 @@ export function DuelloDrawer({ open, onClose, userId }: Props) {
           {/* Idle — mode picker + create button */}
           {status === 'idle' && userId && (
             <div className="flex flex-col gap-4">
-              {/* Judge mode selector */}
               <div>
-                <p className="text-xs font-semibold text-fg-muted mb-2 uppercase tracking-wide">Kazananı kim belirlesin?</p>
+                <p className="text-xs font-semibold text-fg-muted mb-2 uppercase tracking-wide">
+                  Kazananı kim belirlesin?
+                </p>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => setJudgeMode('community')}
@@ -181,55 +191,26 @@ export function DuelloDrawer({ open, onClose, userId }: Props) {
             </div>
           )}
 
-          {/* Loading */}
+          {/* Loading — navigating to duel page */}
           {status === 'loading' && (
-            <div className="text-center py-8">
-              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-              <p className="text-sm text-fg-muted">Link oluşturuluyor…</p>
+            <div className="text-center py-10">
+              <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-sm font-semibold text-fg">Düello oluşturuluyor…</p>
+              <p className="text-xs text-fg-subtle mt-1">Düello sayfasına yönlendiriliyorsun</p>
             </div>
           )}
 
           {/* Error */}
           {status === 'error' && (
-            <div className="flex flex-col gap-2 text-center">
+            <div className="flex flex-col gap-3 text-center py-4">
               <p className="text-sm text-red-400">{errorMsg ?? 'Bir hata oluştu.'}</p>
-              <Button onClick={() => setStatus('idle')} variant="ghost" className="text-sm text-fg-muted">
+              <Button
+                onClick={() => setStatus('idle')}
+                variant="ghost"
+                className="text-sm text-fg-muted"
+              >
                 Tekrar dene
               </Button>
-            </div>
-          )}
-
-          {/* Ready */}
-          {status === 'ready' && duelCode && (
-            <div className="flex flex-col gap-3">
-              {/* Mode badge */}
-              <div className={`text-center text-xs font-semibold px-3 py-1.5 rounded-full border w-fit mx-auto ${
-                judgeMode === 'ai'
-                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-500'
-                  : 'bg-primary/10 border-primary/20 text-primary'
-              }`}>
-                {judgeMode === 'ai' ? '🤖 Yapay Zeka Modu' : '👥 Topluluk Oyu Modu'}
-              </div>
-
-              <div className="flex items-center gap-2 bg-bg border border-stroke rounded-xl px-3 py-2.5">
-                <Link2 size={14} className="text-fg-subtle shrink-0" />
-                <input
-                  type="text"
-                  readOnly
-                  value={duelUrl}
-                  className="flex-1 text-sm text-fg-muted font-mono bg-transparent focus:outline-none min-w-0"
-                  onClick={e => (e.target as HTMLInputElement).select()}
-                />
-              </div>
-              <Button onClick={handleCopy} className="w-full btn-gradient gap-2" size="lg">
-                {copied ? <><Check size={16} /> Kopyalandı ✓</> : <><Link2 size={16} /> Linki Kopyala</>}
-              </Button>
-              <a href={waUrl} target="_blank" rel="noopener noreferrer" className="w-full">
-                <Button className="w-full gap-2 bg-[#25D366] hover:bg-[#1fbd5a] text-white border-transparent" size="lg">
-                  <Share2 size={16} />
-                  WhatsApp&apos;a gönder
-                </Button>
-              </a>
             </div>
           )}
         </div>
