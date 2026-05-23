@@ -3,9 +3,12 @@ import { createApiClient } from '@/lib/supabase/typed'
 import { withAuth } from '@/lib/api/auth'
 import { ApiError } from '@/lib/api/errors'
 
-export const POST = withAuth(async (_req, { userId }) => {
+export const POST = withAuth(async (req, { userId }) => {
   const supabase = createApiClient()
   const today = new Date().toISOString().split('T')[0]
+
+  const body = await req.json().catch(() => ({})) as { judge_mode?: string }
+  const judgeMode = body.judge_mode === 'ai' ? 'ai' : 'community'
 
   // Get today's scenario
   const { data: scenario } = await supabase
@@ -66,7 +69,7 @@ export const POST = withAuth(async (_req, { userId }) => {
 
   const withRef = await supabase
     .from('duels')
-    .insert({ code, scenario_id: scenario.id, creator_id: userId, creator_response_id: answer.id })
+    .insert({ code, scenario_id: scenario.id, creator_id: userId, creator_response_id: answer.id, judge_mode: judgeMode })
     .select('code, id')
     .single()
 
@@ -74,7 +77,7 @@ export const POST = withAuth(async (_req, { userId }) => {
     // Column may not exist yet — retry without it
     const withoutRef = await supabase
       .from('duels')
-      .insert({ code, scenario_id: scenario.id, creator_id: userId })
+      .insert({ code, scenario_id: scenario.id, creator_id: userId, judge_mode: judgeMode })
       .select('code, id')
       .single()
     newDuel = withoutRef.data

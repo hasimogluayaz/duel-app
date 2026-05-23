@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { Avatar } from '@/components/ui/Avatar'
-import { ChevronUp, Send, Swords, Share2, Flame, Copy, Check, Clock, Users } from 'lucide-react'
+import { ChevronUp, Send, Swords, Share2, Flame, Copy, Check, Clock, Users, Bot, Sparkles } from 'lucide-react'
 
 const MAX_PARTICIPANTS = 4
 
@@ -23,7 +23,7 @@ interface Participant {
 }
 
 interface Props {
-  duel: { id: string; code: string; scenario_id: string; creator_id: string }
+  duel: { id: string; code: string; scenario_id: string; creator_id: string; judge_mode?: string; ai_verdict?: string | null; winner_id?: string | null }
   scenario: { id: string; content: string; active_date: string } | null
   creator: Profile | null
   participants: Participant[]
@@ -40,6 +40,11 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
   const [copied, setCopied] = useState(false)
   const [showStreakModal, setShowStreakModal] = useState(false)
   const [votedAnswerIds, setVotedAnswerIds] = useState<Set<string>>(new Set())
+  const [aiVerdict, setAiVerdict] = useState<string | null>(duel.ai_verdict ?? null)
+  const [aiWinnerId, setAiWinnerId] = useState<string | null>(duel.winner_id ?? null)
+  const [aiJudging, setAiJudging] = useState(false)
+
+  const isAiMode = duel.judge_mode === 'ai'
 
   const duelUrl = `https://kapisio.com/d/${duel.code}`
   const isExpired = scenario ? scenario.active_date !== new Date().toISOString().split('T')[0] : true
@@ -155,6 +160,23 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
         )
       )
     } catch {}
+  }
+
+  async function requestAiJudge() {
+    if (aiJudging || participants.length < 2) return
+    setAiJudging(true)
+    try {
+      const res = await fetch(`/api/duel/${duel.id}/ai-judge`, { method: 'POST' })
+      const data = await res.json() as { verdict?: string; winner_user_id?: string; error?: string }
+      if (!res.ok) { showToast(data.error ?? 'AI karar veremedi.'); return }
+      setAiVerdict(data.verdict ?? null)
+      setAiWinnerId(data.winner_user_id ?? null)
+      showToast('🤖 AI kararını verdi!')
+    } catch {
+      showToast('Bağlantı hatası.')
+    } finally {
+      setAiJudging(false)
+    }
   }
 
   async function handleCopy() {
@@ -299,14 +321,17 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
             const totalVotes = participants.reduce((s, x) => s + (x.answer?.vote_count ?? 0), 0)
             const pct = totalVotes > 0 ? Math.round(((p.answer?.vote_count ?? 0) / totalVotes) * 100) : null
             const hasVotedThis = p.answer?.id ? votedAnswerIds.has(p.answer.id) : false
+            const isAiWinner = !!aiWinnerId && p.user_id === aiWinnerId
 
             return (
               <div
                 key={p.id}
-                className="rounded-2xl p-4 border flex flex-col gap-3"
+                className="rounded-2xl p-4 border flex flex-col gap-3 relative"
                 style={{
-                  background: 'var(--surface)',
-                  borderColor: isMe
+                  background: isAiWinner ? 'color-mix(in oklab, #f59e0b 8%, var(--surface))' : 'var(--surface)',
+                  borderColor: isAiWinner
+                    ? '#f59e0b'
+                    : isMe
                     ? 'color-mix(in oklab, var(--primary) 35%, var(--stroke))'
                     : isThisCreator
                     ? 'color-mix(in oklab, var(--primary) 20%, var(--stroke))'
@@ -336,22 +361,33 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
                   )}
                 </div>
 
+                {/* AI winner badge */}
+                {isAiWinner && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-amber-500 text-black shadow flex items-center gap-1">
+                      🏆 AI Kazananı
+                    </span>
+                  </div>
+                )}
+
                 {/* Answer text */}
                 <p className="text-[14px] text-fg leading-relaxed flex-1">{p.answer?.content}</p>
 
-                {/* Vote button */}
-                <button
-                  onClick={() => p.answer?.id && handleVote(p.answer.id)}
-                  disabled={!currentUserId || isMe}
-                  className="flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  style={{
-                    background: hasVotedThis ? 'var(--primary)' : 'var(--surface-2)',
-                    color: hasVotedThis ? '#fff' : 'var(--fg-subtle)',
-                  }}
-                >
-                  <ChevronUp size={14} />
-                  {p.answer?.vote_count ?? 0} oy
-                </button>
+                {/* Vote button — only in community mode */}
+                {!isAiMode && (
+                  <button
+                    onClick={() => p.answer?.id && handleVote(p.answer.id)}
+                    disabled={!currentUserId || isMe}
+                    className="flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    style={{
+                      background: hasVotedThis ? 'var(--primary)' : 'var(--surface-2)',
+                      color: hasVotedThis ? '#fff' : 'var(--fg-subtle)',
+                    }}
+                  >
+                    <ChevronUp size={14} />
+                    {p.answer?.vote_count ?? 0} oy
+                  </button>
+                )}
               </div>
             )
           })}
@@ -434,6 +470,52 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
         <div className="text-center text-xs text-fg-subtle flex items-center justify-center gap-1.5">
           <span className="w-4 h-4 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 text-[10px]">✓</span>
           Cevabın kaydedildi — yeni katılımcılar gelince puanlar güncellenecek
+        </div>
+      )}
+
+      {/* ── AI Verdict ───────────────────────────────── */}
+      {isAiMode && !isExpired && (
+        <div>
+          {aiVerdict ? (
+            <div className="rounded-2xl border border-amber-500/40 bg-gradient-to-br from-amber-500/10 to-orange-500/5 p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                  <Bot size={16} className="text-amber-400" />
+                </div>
+                <div>
+                  <p className="text-sm font-black text-amber-400">AI Kararı</p>
+                  <p className="text-xs text-fg-subtle">Yapay zeka hakemliği</p>
+                </div>
+              </div>
+              <p className="text-sm text-fg leading-relaxed whitespace-pre-wrap">{aiVerdict}</p>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 flex flex-col items-center gap-3 text-center">
+              <Bot size={24} className="text-amber-400" />
+              <div>
+                <p className="text-sm font-bold text-fg">Yapay Zeka Modu</p>
+                <p className="text-xs text-fg-muted mt-0.5">
+                  {participants.length < 2
+                    ? 'En az 2 cevap olunca AI karar verebilir'
+                    : isCreator
+                    ? 'Cevaplar hazır — AI karar versin'
+                    : 'Kurucu AI\'dan karar isteyebilir'}
+                </p>
+              </div>
+              {isCreator && (
+                <Button
+                  onClick={requestAiJudge}
+                  loading={aiJudging}
+                  disabled={participants.length < 2}
+                  className="gap-2"
+                  style={{ background: '#f59e0b', color: '#000', border: 'none' }}
+                >
+                  <Sparkles size={15} />
+                  {aiJudging ? 'AI düşünüyor…' : 'AI Karar Versin'}
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       )}
 
