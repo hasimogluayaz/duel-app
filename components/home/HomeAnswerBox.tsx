@@ -172,7 +172,7 @@ export function HomeAnswerBox({
     if (pending && pendingScenarioId === scenarioId && phase === 'input') {
       localStorage.removeItem('kapisio_pending_response')
       localStorage.removeItem('kapisio_pending_scenario_id')
-      void doSubmit(pending, true)
+      void doSubmit(pending)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, scenarioId])
@@ -202,18 +202,13 @@ export function HomeAnswerBox({
 
   useEffect(() => () => { if (modalTimer.current) clearTimeout(modalTimer.current) }, [])
 
-  async function doSubmit(content: string, isAuth: boolean) {
+  async function doSubmit(content: string) {
     setLoading(true)
     try {
-      const endpoint = isAuth ? '/api/answer' : '/api/answer/anonymous'
-      const body = isAuth
-        ? { scenario_id: scenarioId, content, mode: 'scenario' }
-        : { scenario_id: scenarioId, content }
-
-      const res = await fetch(endpoint, {
+      const res = await fetch('/api/answer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ scenario_id: scenarioId, content, mode: 'scenario' }),
       })
       const data = await res.json() as { answer?: { id: string }; error?: string }
 
@@ -235,17 +230,13 @@ export function HomeAnswerBox({
   function handleSubmit() {
     if (text.length < 10 || loading) return
     if (userId) {
-      void doSubmit(text, true)
+      void doSubmit(text)
     } else {
+      // Anonymous submission disabled — push to signup flow with the text preserved
       localStorage.setItem('kapisio_pending_response', text)
       localStorage.setItem('kapisio_pending_scenario_id', scenarioId)
       modalTimer.current = setTimeout(() => setShowStreakModal(true), 600)
     }
-  }
-
-  async function handleAnonymousSubmit() {
-    setShowStreakModal(false)
-    await doSubmit(text, false)
   }
 
   // Track in-flight votes to prevent double-clicks
@@ -255,16 +246,9 @@ export function HomeAnswerBox({
     if (answerUserId === userId && userId) return // can't vote own answer
     if (votingRef.current.has(answerId)) return   // already in-flight
 
-    // Anon user: localStorage only, no toggle off
+    // Anonymous voting disabled — prompt login
     if (!userId) {
-      if (votedIds.has(answerId)) return
-      const newVoted = new Set(votedIds)
-      newVoted.add(answerId)
-      setVotedIds(newVoted)
-      try { localStorage.setItem('kapisio_votes', JSON.stringify(Array.from(newVoted))) } catch {}
-      setAnswers(prev =>
-        prev.map(a => a.id === answerId ? { ...a, vote_count: a.vote_count + 1 } : a)
-      )
+      setShowStreakModal(true)
       return
     }
 
@@ -367,25 +351,21 @@ export function HomeAnswerBox({
         <div className="w-11 h-11 rounded-xl bg-warm-50 flex items-center justify-center">
           <Flame size={22} className="text-warm-500" />
         </div>
-        <h2 className="text-lg font-bold text-fg text-center tracking-tight">Streak&apos;ini başlatalım mı?</h2>
+        <h2 className="text-lg font-bold text-fg text-center tracking-tight">Giriş yapmalısın</h2>
         <p className="text-sm text-fg-muted text-center leading-relaxed">
-          Hesap oluşturursan her gün cevabını kaydeder,<br />
-          art arda kaç gün geldiğini sayarız.{' '}
-          <span className="text-fg-subtle">Ücretsiz, 10 saniye.</span>
+          Cevap yazmak ve oy vermek için ücretsiz bir hesap aç — Google ile
+          10 saniyede tamamlanır, streak&apos;in başlar.
         </p>
         <Link href={`/kayit?answer=${encodeURIComponent(text)}`} className="w-full">
           <Button className="w-full btn-gradient" size="lg">
             Ücretsiz hesap oluştur
           </Button>
         </Link>
-        <Button
-          variant="ghost"
-          className="w-full text-fg-subtle"
-          onClick={phase === 'input' ? handleAnonymousSubmit : () => setShowStreakModal(false)}
-          disabled={loading}
-        >
-          Şimdi değil
-        </Button>
+        <Link href={`/giris?redirect=${encodeURIComponent('/')}`} className="w-full">
+          <Button variant="ghost" className="w-full text-fg-muted">
+            Zaten hesabım var
+          </Button>
+        </Link>
       </div>
     </Modal>
   )

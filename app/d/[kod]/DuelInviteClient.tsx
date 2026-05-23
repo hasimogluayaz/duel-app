@@ -105,15 +105,14 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
   async function handleSubmit() {
     if (text.trim().length < 10 || loading) return
     if (!currentUserId) { setShowStreakModal(true); return }
-    await doSubmit(true)
+    await doSubmit()
   }
 
-  async function doSubmit(isAuth: boolean) {
+  async function doSubmit() {
     setLoading(true)
     try {
-      // 1. Submit answer
-      const endpoint = isAuth ? '/api/answer' : '/api/answer/anonymous'
-      const res = await fetch(endpoint, {
+      // 1. Submit answer (authenticated only — anonymous answers disabled)
+      const res = await fetch('/api/answer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ scenario_id: duel.scenario_id, content: text.trim(), mode: 'scenario' }),
@@ -154,7 +153,7 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
   }
 
   async function handleVote(answerId: string) {
-    if (!currentUserId) return
+    if (!currentUserId) { setShowStreakModal(true); return }
     // Block spam-clicks: ignore if a vote for this answer is already in flight
     if (votingInFlight.has(answerId)) return
 
@@ -261,23 +260,25 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
         </div>
       )}
 
-      {/* Streak modal for anon */}
+      {/* Login required modal — anonymous answers/votes disabled */}
       <Modal open={showStreakModal} onClose={() => setShowStreakModal(false)}>
         <div className="flex flex-col items-center gap-4 py-2">
           <div className="w-11 h-11 rounded-xl bg-warm-50 flex items-center justify-center">
             <Flame size={22} className="text-warm-500" />
           </div>
-          <h2 className="text-lg font-bold text-fg text-center">Streak&apos;ini başlatalım mı?</h2>
+          <h2 className="text-lg font-bold text-fg text-center">Giriş yapmalısın</h2>
           <p className="text-sm text-fg-muted text-center leading-relaxed">
-            Hesap oluşturursan cevabın kaydedilir, streak sayılır.{' '}
-            <span className="text-fg-subtle">Ücretsiz, 10 saniye.</span>
+            Düelloya katılmak ve oy vermek için ücretsiz bir hesap aç —
+            Google ile 10 saniyede tamamlanır.
           </p>
-          <Link href={`/kayit?answer=${encodeURIComponent(text)}`} className="w-full">
+          <Link href={`/kayit?answer=${encodeURIComponent(text)}&redirect=${encodeURIComponent(`/d/${duel.code}`)}`} className="w-full">
             <Button className="w-full btn-gradient" size="lg">Ücretsiz hesap oluştur</Button>
           </Link>
-          <Button variant="ghost" className="w-full text-fg-subtle" onClick={() => { setShowStreakModal(false); void doSubmit(false) }} disabled={loading}>
-            Şimdi değil, anonim gönder
-          </Button>
+          <Link href={`/giris?redirect=${encodeURIComponent(`/d/${duel.code}`)}`} className="w-full">
+            <Button variant="ghost" className="w-full text-fg-muted">
+              Zaten hesabım var
+            </Button>
+          </Link>
         </div>
       </Modal>
 
@@ -443,7 +444,7 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
                   return (
                     <button
                       onClick={() => p.answer?.id && handleVote(p.answer.id)}
-                      disabled={!currentUserId || isMe || inFlight}
+                      disabled={isMe || inFlight}
                       className="flex items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       style={{
                         background: hasVotedThis ? 'var(--primary)' : 'var(--surface-2)',
