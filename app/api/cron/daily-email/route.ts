@@ -1,4 +1,4 @@
-import { createApiClient } from '@/lib/supabase/typed'
+import { createServiceClient } from '@/lib/supabase/typed'
 import { NextResponse } from 'next/server'
 import { sendDailyScenarioEmail } from '@/lib/email/resend'
 
@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: 'RESEND_API_KEY not set, skipping.' })
   }
 
-  const supabase = createApiClient()
+  const supabase = createServiceClient()
   const today = new Date().toISOString().split('T')[0]
 
   const { data: scenario } = await supabase

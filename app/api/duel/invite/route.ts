@@ -45,7 +45,7 @@ export const POST = withAuth(async (req, { userId }) => {
   if (existing?.code) {
     return NextResponse.json({
       code: existing.code,
-      url: `https://kapisio.com/d/${existing.code}`,
+      url: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://kapisio.com'}/d/${existing.code}`,
     })
   }
 
@@ -98,6 +98,6 @@ export const POST = withAuth(async (req, { userId }) => {
 
   return NextResponse.json({
     code: newDuel.code,
-    url: `https://kapisio.com/d/${newDuel.code}`,
+    url: `${process.env.NEXT_PUBLIC_APP_URL ?? 'https://kapisio.com'}/d/${newDuel.code}`,
   })
 })

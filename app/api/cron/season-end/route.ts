@@ -48,7 +48,7 @@ export async function POST(req: Request) {
 
   const winners = top3 ?? []
   const RANK_EMOJIS = ['🥇', '🥈', '🥉']
-  const RANK_NAMES = ['Birinci', 'İkinci', 'Üçüncü']
+  const RANK_NAMES = ['birinci', 'ikinci', 'ucuncu']
   const RANK_BONUS = [2000, 1000, 500]
 
   // Award achievements + notifications + bonus points to top 3
@@ -56,12 +56,13 @@ export async function POST(req: Request) {
     const w = winners[i] as any
     const emoji = RANK_EMOJIS[i]
     const rankName = RANK_NAMES[i]
+    const rankLabel = ['Birinci', 'İkinci', 'Üçüncü'][i]
     const bonus = RANK_BONUS[i]
 
-    // Achievement
+    // Achievement (type must match CHECK constraint)
     await (supabase as any).from('achievements').upsert({
       user_id: w.id,
-      type: `season_${rankName.toLowerCase()}`,
+      type: `season_${rankName}`,
       earned_at: new Date().toISOString(),
     }).catch(() => {})
 
@@ -78,8 +79,8 @@ export async function POST(req: Request) {
     await supabase.from('notifications').insert({
       user_id: w.id,
       type: 'achievement',
-      title: `${emoji} Sezon Sona Erdi — Sen ${rankName} Oldun!`,
-      message: `${season.name} sezonunu ${w.season_points} puanla ${rankName.toLowerCase()} tamamladın! +${bonus} puan kazandın.`,
+      title: `${emoji} Sezon Sona Erdi — Sen ${rankLabel} Oldun!`,
+      message: `${season.name} sezonunu ${w.season_points} puanla ${rankLabel.toLowerCase()} tamamladın! +${bonus} puan kazandın.`,
       data: { season_id: season.id, rank: i + 1, season_points: w.season_points, bonus },
     } as any).catch(() => {})
   }

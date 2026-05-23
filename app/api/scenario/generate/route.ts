@@ -6,11 +6,10 @@ import { generateDailyScenario } from '@/lib/anthropic/scenario'
 async function handler(req: Request) {
   try {
     const auth = req.headers.get('authorization')
-    const isInternal = req.headers.get('x-internal') === 'true'
     const cronSecret = process.env.CRON_SECRET
 
-    // Allow cron/internal callers
-    let authorized = isInternal || auth === `Bearer ${cronSecret}`
+    // Allow cron callers (Vercel sends Bearer token)
+    let authorized = auth === `Bearer ${cronSecret}`
 
     // Also allow admin users
     if (!authorized) {

@@ -19,10 +19,21 @@
     {
       "path": "/api/cron/daily-reminder",
       "schedule": "0 17 * * *"
+    },
+    {
+      "path": "/api/cron/daily-email",
+      "schedule": "5 3 * * *"
+    },
+    {
+      "path": "/api/cron/weekly-digest",
+      "schedule": "0 8 * * 1"
     }
   ],
   "functions": {
     "app/api/duel/[id]/result/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/duel/[id]/ai-judge/route.ts": {
       "maxDuration": 30
     },
     "app/api/scenario/generate/route.ts": {
@@ -30,6 +41,12 @@
     },
     "app/api/personality/analyze/route.ts": {
       "maxDuration": 20
+    },
+    "app/api/cron/daily-email/route.ts": {
+      "maxDuration": 60
+    },
+    "app/api/cron/weekly-digest/route.ts": {
+      "maxDuration": 60
     }
   }
 }

@@ -46,7 +46,8 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
 
   const isAiMode = duel.judge_mode === 'ai'
 
-  const duelUrl = `https://kapisio.com/d/${duel.code}`
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://kapisio.com'
+  const duelUrl = `${appUrl}/d/${duel.code}`
   const isExpired = scenario ? scenario.active_date !== new Date().toISOString().split('T')[0] : true
   const isCreator = currentUserId === duel.creator_id
   const isFull = participants.length >= MAX_PARTICIPANTS

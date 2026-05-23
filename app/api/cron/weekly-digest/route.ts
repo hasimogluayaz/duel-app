@@ -1,4 +1,4 @@
-import { createApiClient } from '@/lib/supabase/typed'
+import { createServiceClient } from '@/lib/supabase/typed'
 import { NextResponse } from 'next/server'
 import { sendWeeklyDigestEmail } from '@/lib/email/resend'
 
@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: 'RESEND_API_KEY not set, skipping.' })
   }
 
-  const supabase = createApiClient()
+  const supabase = createServiceClient()
 
   // Top 3 scenarios from the last 7 days by answer_count
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
