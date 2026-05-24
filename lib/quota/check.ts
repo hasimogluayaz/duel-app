@@ -16,7 +16,7 @@ export async function checkQuota(
 ): Promise<void> {
   const { data: profile } = await supabase
     .from('profiles')
-    .select('total_points, is_premium, premium_until')
+    .select('total_points')
     .eq('id', userId)
     .single()
 
@@ -41,7 +41,7 @@ export async function checkQuota(
 
     if ((count ?? 0) >= limit) {
       throw new ApiError(
-        `Günlük senaryo limitine ulaştın (${limit}/gün). Premium'a geç veya yarın tekrar dene.`,
+        `Günlük senaryo limitine ulaştın (${limit}/gün). Yarın tekrar dene.`,
         429,
         'QUOTA_EXCEEDED',
       )
@@ -68,7 +68,7 @@ export async function checkQuota(
 
     if (total >= limit) {
       throw new ApiError(
-        `Günlük düello limitine ulaştın (${limit}/gün). Premium'a geç veya yarın tekrar dene.`,
+        `Günlük düello limitine ulaştın (${limit}/gün). Yarın tekrar dene.`,
         429,
         'QUOTA_EXCEEDED',
       )
@@ -102,7 +102,7 @@ export async function checkQuota(
     const used = (p as any)?.personality_analysis_count ?? 0
     if (used >= limit) {
       throw new ApiError(
-        `Kişilik analizi limitine ulaştın (${limit} toplam). Premium üyelikle sınırsız analiz yapabilirsin.`,
+        `Kişilik analizi limitine ulaştın (${limit} toplam). Daha çok puan kazanırsan limit artar.`,
         429,
         'QUOTA_EXCEEDED',
       )
@@ -127,7 +127,7 @@ export async function getUserQuotaUsage(supabase: any, userId: string) {
     { count: answersToday },
     { data: analysisProfile },
   ] = await Promise.all([
-    supabase.from('profiles').select('total_points, is_premium, premium_until').eq('id', userId).single(),
+    supabase.from('profiles').select('total_points').eq('id', userId).single(),
     supabase.from('scenarios').select('id', { count: 'exact', head: true }).eq('user_id', userId).eq('is_user_created', true).gte('created_at', todayIso),
     supabase.from('duels').select('id', { count: 'exact', head: true }).eq('challenger_id', userId).gte('created_at', todayIso),
     supabase.from('duels').select('id', { count: 'exact', head: true }).eq('creator_id', userId).gte('created_at', todayIso),
@@ -136,7 +136,7 @@ export async function getUserQuotaUsage(supabase: any, userId: string) {
   ])
   const duelsToday = (classicDuelsToday ?? 0) + (inviteDuelsToday ?? 0)
 
-  const limits = profile ? getQuotaLimits(profile) : getQuotaLimits({ total_points: 0, is_premium: false, premium_until: null })
+  const limits = profile ? getQuotaLimits(profile) : getQuotaLimits({ total_points: 0 })
 
   return {
     limits,
@@ -146,6 +146,5 @@ export async function getUserQuotaUsage(supabase: any, userId: string) {
       answers_per_day: answersToday ?? 0,
       ai_analysis_total: (analysisProfile as any)?.personality_analysis_count ?? 0,
     },
-    is_premium: profile?.is_premium ?? false,
   }
 }

@@ -6,7 +6,7 @@ function getGroqClient(): Groq {
   return new Groq({ apiKey })
 }
 
-// ── Content moderation — these scenarios are regenerated ──────────────────────
+// ── Content moderation ────────────────────────────────────────────────────────
 const BANNED_PATTERNS = [
   /aldatm/i,
   /yasadışı/i,
@@ -14,7 +14,6 @@ const BANNED_PATTERNS = [
   /şiddet/i,
 ]
 
-// Foreign words AI sometimes leaks in (German, English)
 const FOREIGN_WORDS = [
   /\bnicht[s]?\b/i, /\baber\b/i, /\bund\b/i, /\boder\b/i, /\bdas\b/i,
   /\bokay\b/i, /\bsorry\b/i, /\bplease\b/i, /\bbut\b/i,
@@ -24,72 +23,75 @@ function hasForeignWord(text: string): boolean {
   return FOREIGN_WORDS.some(re => re.test(text))
 }
 
-/**
- * Detect joined / hallucinated Turkish words.
- * The model occasionally smashes things together: "görümceaneyi", "annemhep",
- * "evdebir". Heuristics that reject this without false-positiving real
- * compound Turkish words:
- *   - any single word longer than 22 chars (real Turkish words rarely exceed
- *     this; only specific suffix chains do)
- *   - 4+ consonants in a row mid-word (Turkish has vowel harmony, this is
- *     almost never legitimate)
- *   - known seam patterns: lowercase letter pairs that signal two roots joined
- */
-const KNOWN_BAD_SEAMS = [
-  /eane\w/i,          // ".eane.." (görümce + ane)
-  /ehep\w/i,          // ".ehep..." (.e + hep)
-  /\wim\d/i,          // suffix + digit
-]
+const KNOWN_BAD_SEAMS = [/eane\w/i, /ehep\w/i, /\wim\d/i]
 
 function hasJoinedWords(text: string): boolean {
   const words = text.split(/\s+/)
   for (const w of words) {
-    // Strip punctuation
     const clean = w.replace(/[.,!?;:()'"–—-]/g, '')
     if (clean.length > 22) return true
-    // 4+ consonants in a row (Turkish consonants only)
     if (/[bcçdfgğhjklmnpqrsştvwxyz]{4,}/i.test(clean)) return true
   }
   return KNOWN_BAD_SEAMS.some(re => re.test(text))
+}
+
+/**
+ * Reject scenarios that ASSUME the user is married, has a spouse, görümce,
+ * kayınvalide, kuzen, çocuk etc. These exclude all single/young users.
+ * The scenario must work for "everyone" — a 22-year-old single university
+ * student OR a 45-year-old parent should both be able to answer.
+ */
+const MARRIAGE_ONLY_PATTERNS = [
+  /görümce/i, /kayınvalide/i, /kayınpeder/i, /kayınbirader/i, /kayınvalden/i,
+  /\beşin\b/i, /\beşiniz\b/i, /\beşinle\b/i, /\beşine\b/i, /\beşinin\b/i, /\beşim\b/i,
+  /\bkocanın\b/i, /\bkocan\b/i, /\bkocanız\b/i, /\bkarın\b/i, /\bkarınız\b/i,
+  /\bnişanlın\b/i, /\bnişanlınız\b/i, /\bgelinin\b/i, /\bdamadın\b/i,
+  /\bçocuğun\b/i, /\bçocuğunuz\b/i, /\boğlunuz\b/i, /\bkızınız\b/i,
+  /düğün/i, // weddings — also exclude
+]
+
+function isMarriageOnly(text: string): boolean {
+  return MARRIAGE_ONLY_PATTERNS.some(re => re.test(text))
 }
 
 function isValid(scenario: string): boolean {
   if (hasForeignWord(scenario)) return false
   if (BANNED_PATTERNS.some(re => re.test(scenario))) return false
   if (hasJoinedWords(scenario)) return false
+  if (isMarriageOnly(scenario)) return false
   if (scenario.length > 350) return false
   if (scenario.length < 40) return false
-  // Must have a question mark at the end (Ne yaparsın?)
   if (!scenario.trim().endsWith('?')) return false
-  // Reasonable word count
   const wordCount = scenario.split(/\s+/).length
   if (wordCount < 12 || wordCount > 50) return false
   return true
 }
 
-// ── Categories (rotated by date) ───────────────────────────────────────────────
+// ── Categories — inclusive of single, young, working, student users ──────────
 const CATEGORIES = [
-  'aile ve akraba baskısı',
-  'para ve borç',
-  'arkadaşlık ve sadakat',
-  'iş yeri ve hiyerarşi',
-  'gurur ve özür',
-  'sosyal medya ve dedikodu',
-  'adalet ve vicdan',
-  'kıskançlık ve rekabet',
-  'mahalle ve komşuluk',
-  'düğün ve nişan kültürü',
-  'sır ve sadakat',
-  'aşk ve ilişki kararları',
+  'arkadaşlık ve sırrı tutma',
+  'para borç verme ve geri isteme',
+  'iş yeri sınırları ve mobbing',
+  'sosyal medya itibarı',
+  'flört ve buluşma kuralları',
+  'aile içi otorite ve özgürlük',
+  'komşu ve apartman gerginliği',
+  'oda arkadaşı ve ev paylaşımı',
+  'üniversite ve sınav baskısı',
+  'grup içinde dışlanma',
+  'mahremiyet ve özel hayat',
+  'kıskançlık ve karşılaştırma',
+  'kalabalıkta yardım etme',
+  'haksızlığa şahit olma',
+  'verdiğin sözü tutma',
 ]
 
 /**
  * Generate today's scenario.
  *
- * @param avoidRecent  Last N scenarios (full content) to tell the model "do
- *                     not repeat the SUBJECT or KEY ROLES of these". Pulled
- *                     by the route from the DB.
- * @param category     Optional override; if omitted, rotates by date.
+ * @param avoidRecent  Last N scenarios. Used to push the model away from
+ *                     repeating subjects, characters, key nouns.
+ * @param category     Optional override; default = date-rotated.
  */
 export async function generateDailyScenario(
   avoidRecent: string[] = [],
@@ -102,62 +104,78 @@ export async function generateDailyScenario(
   const chosenCategory = category ?? CATEGORIES[dateNum % CATEGORIES.length]
 
   const avoidBlock = avoidRecent.length > 0
-    ? `\nSON GÜNLERDE ŞU SENARYOLAR YAYINLANDI — bunların ana karakterini, durumunu, kelimelerini TEKRAR ETME:\n${avoidRecent.map((s, i) => `${i + 1}. "${s}"`).join('\n')}\n`
+    ? `\nSON GÜNLERDE YAYINLANAN SENARYOLAR — bunların KARAKTERİNİ, KONUSUNU, KELİMELERİNİ TEKRAR ETME:\n${avoidRecent.map((s, i) => `${i + 1}. "${s}"`).join('\n')}\n`
     : ''
 
-  const prompt = `Kapisio için günlük Türk kültürü senaryosu yazıyorsun. Platform: insanlar gerçek hayat kararlarını tartışıyor ve oylanıyor.
+  const prompt = `Kapisio için günlük Türk kültürü senaryosu yazıyorsun. Platform: her yaştan, her statüden insan gerçek hayat ikilemlerini tartışıyor.
 
 BUGÜNÜN KONUSU: ${chosenCategory}
 ${avoidBlock}
-FORMAT — EN KRİTİK KURAL:
-Senaryo TAM OLARAK 1 Türkçe cümle. "Ne yaparsın?" ile bitiyor. Başka hiçbir şey yok.
-Hedef uzunluk: 20-35 kelime.
 
-YAZIM KURALI — KESİNLİKLE UY:
-- Her kelimeyi BOŞLUKLA ayır. "görümceyi" yaz, "görümceaneyi" değil.
-- Kelimeleri ASLA birleştirme: "annemhep" YANLIŞ, "annem hep" DOĞRU.
-- Türkçe karakter (ç, ğ, ı, ö, ş, ü) kullan, harfleri eksik bırakma.
-- 22 harften uzun tek kelime yazma.
-- Yazdığın senaryoyu zihinde TEKRAR OKU, yazım hatası varsa düzelt.
+🚨 EN ÖNEMLİ KURAL — HERKESİ KAPSA:
+Senaryo şu kişilere de cevap verebilir olmalı:
+- 19 yaşında üniversite öğrencisi (BEKAR, evli değil)
+- 25 yaşında çalışan genç (henüz evlenmemiş)
+- 30 yaşında bekar profesyonel
+- 40 yaşında evli birey
+- 60 yaşında emekli
 
-TÜRK KÜLTÜRÜNE ÖZGÜ OL — bugünün konusuna göre seç:
-- Aile: kayınvalide, görümce, yenge, enişte, dayı, hala, kuzen
-- Para: düğün masrafı, takı, kefil, faiz, başlık parası, harçlık
-- İş: torpil, kıdem, müdür yeğeni, mesai, sigorta
-- Mahalle: kapı komşusu, apartman yöneticisi, balkon kavgası
-- Sosyal: WhatsApp grubu, Instagram story, ekran görüntüsü, ifşa
+YAPMA — bu kelimeleri ASLA kullanma:
+❌ "eşin", "eşinle", "eşinin", "kocan", "karın"
+❌ "görümce", "kayınvalide", "kayınpeder", "kayınbirader"
+❌ "nişanlın", "düğünün", "gelinin", "damadın"
+❌ "çocuğun", "oğlun", "kızın"
+❌ Evlilik kabul eden herhangi bir ifade
 
-ÇEŞİTLİLİK:
-Eğer son senaryolarda "görümce" geçtiyse görümce yazma, "kuzen" veya "yenge" dene.
-Eğer "para" geçtiyse para yazma, "yardım" veya "iyilik" dene.
-HER GÜN FARKLI bir karakter ve durum.
+YAP — bu kişilik/ilişki dinamiklerine odaklan:
+✅ Arkadaşlık: yakın arkadaş, grup, ekip, mahalle arkadaşı
+✅ Aile (HERKESİN olduğu): anne, baba, kardeş, kuzen, hala, dayı, teyze, amca, dede, nine
+✅ İş/okul: ekip arkadaşı, müdür, hoca, sınıf arkadaşı, oda arkadaşı, stajyer
+✅ Sosyal: komşu, tanıdık, eski arkadaş, sosyal medya takipçisi
+✅ Romantik (kabul eden ama zorunlu olmayan): hoşlandığın biri, çıktığın kişi, eski sevgili — sadece konuya direkt uygunsa
+
+FORMAT KURALLARI:
+- TAM 1 Türkçe cümle, 20-35 kelime
+- "Ne yaparsın?" ile bit
+- Her kelimeyi BOŞLUKLA ayır ("annemin söylediği", "anneminsöylediği" DEĞİL)
+- 22 harften uzun tek kelime yazma
+- Türkçe karakter (ç, ğ, ı, ö, ş, ü) kullan
+- Sadece Türkçe — İngilizce/Almanca kelime yok
+
+ÇEŞİTLİLİK ZORUNLU:
+Eğer son senaryolarda "arkadaş" geçtiyse "ekip arkadaşı" yaz.
+Eğer "para" geçtiyse "yardım" veya "iyilik" yaz.
+HER GÜN farklı bir karakter, farklı bir durum.
 
 TAM İKİYE BÖLSÜN:
-Yarısı "yaparım" yarısı "yapmam" desin. Herkesin hemfikir olduğu durumlar işe yaramaz.
+Yarısı "yaparım" yarısı "yapmam" desin. Yarısı bir tarafı haklı bulsun, yarısı diğerini.
 
 KESİN YASAKLAR:
-- Eşler arası aldatma, sadakatsizlik — ASLA
+- Aldatma, sadakatsizlik, yasadışı ilişki — ASLA
 - Şiddet, intihar, suç — ASLA
-- İngilizce / Almanca / yabancı kelime — sadece Türkçe
 - 2 veya daha fazla cümle
-- Bitişik kelime hatası ("görümceaneyi" tarzı)
+- Bitişik kelime hatası
 
-İYİ ÖRNEKLER (yazıma dikkat):
-"Kayınvalidenin düğüne davet ettiği 30 kişinin masraf faturası sana geldi, eşin 'annem hep böyle yapar' diyerek geçiştiriyor ama 8000 TL senin maaşının yarısı. Ne yaparsın?"
-"Kefil olduğun amcanın oğlu 3 aydır kredi taksitini yatırmıyor ve seni engelledi, banka seni arıyor. Ne yaparsın?"
-"Apartman yöneticisi sana sormadan ortak alana spor aleti koyma kararı aldı, sen karşı çıkınca grup seni yargılıyor. Ne yaparsın?"
+İYİ ÖRNEKLER (evlilik yok, herkesi kapsıyor):
+"En yakın arkadaşın 3 aydır borçlu ama yeni telefonun fotoğrafını sürekli sosyal medyada paylaşıyor — Sen ne yaparsın?"
+"Grup ödevinde sadece sen çalışıyorsun, diğer 3 kişi hiçbir şey yapmıyor ama hoca eşit not verecek — Ne yaparsın?"
+"Oda arkadaşın senin yokluğunda eşyalarını sürekli kullanıyor ve karşı çıkınca 'bu kadar bencillik olmaz' diyor — Ne yaparsın?"
+"Müdürün toplantıda senin fikrini kendisininmiş gibi sundu, müdür yardımcısı da hemfikir görünüyor — Ne yaparsın?"
+"Annenle aynı evdesin, 25 yaşındasın ve her gece nereye gittiğini sorguya çekiyor — Ne yaparsın?"
+"Eski arkadaşın yeni bir hayat kurdu ve tüm grup sohbetinden çıktı, sen de takip ediyorsun ama yorum yapmıyor — Ne yaparsın?"
+"Otobüste hamile bir kadın ayakta, hiç kimse yer vermiyor, sen sıkıştın ve ayağın çok ağrıyor — Ne yaparsın?"
+"Sınavda yanındaki kız kopya çekiyor, hoca o tarafa hiç bakmıyor ve sen aynı sınavdan kötü not alabilirsin — Ne yaparsın?"
 
-Şimdi "${chosenCategory}" konusunda, 1 cümlelik, tamamen Türkçe, YENİ ve son senaryolardan farklı bir senaryo yaz.
+Şimdi "${chosenCategory}" konusunda, 1 cümlelik, tamamen Türkçe, EVLİLİK İÇERMEYEN, YENİ ve son senaryolardan farklı bir senaryo yaz.
 
 Sadece JSON döndür: {"scenario": "senaryo metni"}`
 
-  // Up to 5 attempts — retry if output fails validation
   let lastInvalid = ''
-  for (let attempt = 0; attempt < 5; attempt++) {
+  for (let attempt = 0; attempt < 6; attempt++) {
     const completion = await groq.chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.85 + attempt * 0.05,
+      temperature: 0.9 + attempt * 0.04,
       max_tokens: 200,
       response_format: { type: 'json_object' },
     })
@@ -183,5 +201,5 @@ Sadece JSON döndür: {"scenario": "senaryo metni"}`
     console.warn(`[scenario] attempt ${attempt + 1} failed validation:`, lastInvalid.slice(0, 100))
   }
 
-  throw new Error(`[scenario] 5 attempts failed validation — last: "${lastInvalid.slice(0, 100)}"`)
+  throw new Error(`[scenario] 6 attempts failed validation — last: "${lastInvalid.slice(0, 100)}"`)
 }

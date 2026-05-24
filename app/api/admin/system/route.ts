@@ -18,9 +18,6 @@ const ENV_VARS = [
   { name: 'GROQ_API_KEY', purpose: 'AI scenario + judge', critical: true },
   { name: 'NEXT_PUBLIC_APP_URL', purpose: 'Public site URL (share links)', critical: false },
   { name: 'RESEND_API_KEY', purpose: 'Email notifications', critical: false },
-  { name: 'STRIPE_SECRET_KEY', purpose: 'Premium billing', critical: false },
-  { name: 'STRIPE_WEBHOOK_SECRET', purpose: 'Stripe webhook verification', critical: false },
-  { name: 'STRIPE_PREMIUM_PRICE_ID', purpose: 'Premium plan price ID', critical: false },
   { name: 'UPSTASH_REDIS_REST_URL', purpose: 'Rate limiting', critical: false },
   { name: 'UPSTASH_REDIS_REST_TOKEN', purpose: 'Rate limiting auth', critical: false },
   { name: 'NEXT_PUBLIC_POSTHOG_KEY', purpose: 'Analytics', critical: false },
@@ -38,7 +35,6 @@ const CRON_JOBS = [
   { path: '/api/cron/daily-email', schedule: '5 3 * * *', label: 'Günlük email' },
   { path: '/api/cron/weekly-digest', schedule: '0 8 * * 1', label: 'Haftalık özet emaili' },
   { path: '/api/cron/cleanup-stories', schedule: '0 4 * * *', label: 'Story temizliği' },
-  { path: '/api/cron/premium-maintenance', schedule: '0 6 * * *', label: 'Premium bakım (expire + freeze)' },
 ]
 
 export async function GET() {
@@ -57,7 +53,7 @@ export async function GET() {
   const tableCounts = await Promise.all([
     'profiles', 'answers', 'scenarios', 'duels', 'duel_participants',
     'answer_likes', 'comments', 'followers', 'messages', 'notifications',
-    'reports', 'push_subscriptions', 'achievements', 'subscriptions',
+    'reports', 'push_subscriptions', 'achievements',
   ].map(async (table) => {
     try {
       const { count } = await service.from(table).select('*', { count: 'exact', head: true })

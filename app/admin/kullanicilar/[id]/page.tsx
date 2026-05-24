@@ -81,7 +81,6 @@ export default function AdminUserDetailPage({ params }: { params: Promise<{ id: 
               <h1 className="text-xl font-black text-fg">{profile.display_name || profile.username}</h1>
               {profile.is_admin && <Badge variant="warning">Admin</Badge>}
               {profile.is_banned && <Badge variant="danger">Banlı</Badge>}
-              {profile.is_premium && <Badge variant="default">Premium</Badge>}
             </div>
             <p className="text-sm text-fg-muted">@{profile.username}</p>
             <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-fg-subtle">

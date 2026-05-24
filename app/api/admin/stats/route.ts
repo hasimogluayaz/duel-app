@@ -33,7 +33,6 @@ export async function GET() {
     { count: userMonth },
     { count: userBanned },
     { count: userAdmin },
-    { count: userPremium },
 
     // DAU/WAU/MAU (distinct users who answered something)
     { data: dauRaw },
@@ -78,7 +77,6 @@ export async function GET() {
     service.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', iso(monthStart)),
     service.from('profiles').select('*', { count: 'exact', head: true }).eq('is_banned', true),
     service.from('profiles').select('*', { count: 'exact', head: true }).eq('is_admin', true),
-    service.from('profiles').select('*', { count: 'exact', head: true }).eq('is_premium', true),
 
     // DAU/WAU/MAU
     service.from('answers').select('user_id').gte('created_at', iso(todayStart)).not('user_id', 'is', null),
@@ -165,7 +163,6 @@ export async function GET() {
       month: userMonth ?? 0,
       banned: userBanned ?? 0,
       admin: userAdmin ?? 0,
-      premium: userPremium ?? 0,
     },
     engagement: {
       dau, wau, mau,

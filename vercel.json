@@ -35,10 +35,6 @@
     {
       "path": "/api/cron/cleanup-stories",
       "schedule": "0 4 * * *"
-    },
-    {
-      "path": "/api/cron/premium-maintenance",
-      "schedule": "0 6 * * *"
     }
   ],
   "functions": {

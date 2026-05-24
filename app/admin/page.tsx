@@ -8,13 +8,13 @@ import { formatPoints } from '@/lib/utils/formatting'
 import {
   Users, Swords, FileText, ShieldOff, TrendingUp, Activity,
   Calendar, AlertTriangle, MessageSquare, ThumbsUp, Bot,
-  UsersRound, Sparkles, ArrowUpRight, Flame,
+  UsersRound, ArrowUpRight, Flame,
 } from 'lucide-react'
 import Link from 'next/link'
 import DauChart from '@/components/admin/DauChart'
 
 interface Stats {
-  users: { total: number; today: number; week: number; month: number; banned: number; admin: number; premium: number }
+  users: { total: number; today: number; week: number; month: number; banned: number; admin: number }
   engagement: {
     dau: number; wau: number; mau: number
     answersToday: number; answersWeek: number; answersTotal: number; answersAnonymous: number
@@ -108,7 +108,7 @@ export default function AdminDashboard() {
         <SmallKpi label="Bu hafta yeni" value={stats.users.week} icon={TrendingUp} color="text-green-400" />
         <SmallKpi label="Bu ay yeni" value={stats.users.month} icon={Calendar} color="text-blue-400" />
         <SmallKpi label="Banlı" value={stats.users.banned} icon={ShieldOff} color="text-red-400" />
-        <SmallKpi label="Premium" value={stats.users.premium} icon={Sparkles} color="text-amber-400" />
+        <SmallKpi label="Admin" value={stats.users.admin} icon={Bot} color="text-amber-400" />
       </div>
 
       {/* ── Today's pulse ───────────────────────────────────────────────── */}

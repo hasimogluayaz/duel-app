@@ -37,7 +37,13 @@
       "Bash(vercel teams *)",
       "Bash(node -e ' *)",
       "Bash(cd \"C:\\\\duel-app\" && grep -r \"oyun\" app --include=\"*.tsx\" --include=\"*.ts\" -l 2>&1 | head -20)",
-      "Bash(mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\recursing-villani-57b850\\\\app\\\\d\\\\[kod]\")"
+      "Bash(mkdir -p \"C:\\\\duel-app\\\\.claude\\\\worktrees\\\\recursing-villani-57b850\\\\app\\\\d\\\\[kod]\")",
+      "Bash(xargs grep -l \"daily.*scenario\\\\|scenario.*daily\")",
+      "Bash(git rm *)",
+      "Bash(git reset *)",
+      "Bash(git push *)",
+      "Bash(grep -rn \"type: \\\\`season_\" /c/duel-app/app/api/)",
+      "Bash(xargs cat)"
     ]
   }
 }

@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { Avatar } from '@/components/ui/Avatar'
 import { Button } from '@/components/ui/Button'
 import type { Profile } from '@/types'
-import { Sun, Moon, Swords, User, Settings, LogOut, ChevronDown, Shield, Crown } from 'lucide-react'
+import { Sun, Moon, Swords, User, Settings, LogOut, ChevronDown, Shield } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import Image from 'next/image'
 import { DuelloDrawer } from '@/components/home/DuelloDrawer'
@@ -141,15 +141,6 @@ export function Navbar({ initialProfile }: { initialProfile?: Profile | null }) 
                     >
                       <Settings size={15} className="text-fg-muted" />
                       Ayarlar
-                    </Link>
-                    <Link
-                      href="/premium"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-2.5 px-4 py-2.5 text-sm hover:bg-surface-2 transition-colors"
-                      style={{ color: profile.is_premium ? '#f59e0b' : 'var(--fg)' }}
-                    >
-                      <Crown size={15} className={profile.is_premium ? 'text-amber-500' : 'text-fg-muted'} />
-                      {profile.is_premium ? 'Premium ⚡' : 'Premium\'a Geç'}
                     </Link>
                     {profile.is_admin && (
                       <Link
