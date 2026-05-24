@@ -29,7 +29,8 @@ const ENV_VARS = [
 
 // Vercel cron jobs (mirrors vercel.json)
 const CRON_JOBS = [
-  { path: '/api/scenario/generate', schedule: '0 21 * * *', label: 'Günlük senaryo üret' },
+  { path: '/api/scenario/generate', schedule: '1 21 * * *', label: 'Günlük senaryo üret (TR 00:01)' },
+  { path: '/api/scenario/generate', schedule: '0 6 * * *', label: 'Senaryo safety-net (TR 09:00)' },
   { path: '/api/cron/weekly-reset', schedule: '0 21 * * 0', label: 'Haftalık reset' },
   { path: '/api/cron/streak-reset', schedule: '0 22 * * *', label: 'Streak reset' },
   { path: '/api/cron/season-end', schedule: '0 23 * * *', label: 'Sezon sonu' },
