@@ -111,19 +111,12 @@ export default function PremiumPage() {
         </Card>
       )}
 
-      {/* Not premium yet */}
+      {/* Not premium yet — paid flow disabled, showing roadmap */}
       {ready && !premium?.active && (
         <Card className="mb-6 relative overflow-hidden border-amber-500/30 bg-gradient-to-br from-amber-500/5 to-orange-500/5">
           <div className="pointer-events-none absolute -top-10 -right-10 w-40 h-40 rounded-full bg-amber-500/10" />
-          <div className="text-center mb-6 relative">
-            <div className="flex items-end justify-center gap-1 mb-1">
-              <span className="text-4xl font-black text-fg">₺29</span>
-              <span className="text-fg-subtle mb-1.5">/ay</span>
-            </div>
-            <p className="text-xs text-fg-subtle">İstediğin zaman iptal et</p>
-          </div>
 
-          <div className="flex flex-col gap-3 mb-6">
+          <div className="flex flex-col gap-3 mb-6 relative">
             {FEATURES.map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-3">
                 <div className="w-5 h-5 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center shrink-0">
@@ -137,18 +130,13 @@ export default function PremiumPage() {
             ))}
           </div>
 
-          <Button
-            onClick={startCheckout}
-            loading={loading}
-            className="w-full gap-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-transparent shadow-lg"
-            size="lg"
-          >
-            <Crown size={16} />
-            {user ? 'Premium\'a Geç' : 'Giriş Yap ve Premium Ol'}
-          </Button>
-          <p className="text-center text-[10px] text-fg-subtle mt-2">
-            🔒 Güvenli ödeme · Stripe ile işlenir
-          </p>
+          <div className="flex flex-col items-center gap-2 py-5 px-4 rounded-xl bg-surface border border-stroke text-center">
+            <span className="text-2xl">🚧</span>
+            <p className="text-sm font-bold text-fg">Çok Yakında</p>
+            <p className="text-xs text-fg-subtle leading-relaxed">
+              Premium üyelik henüz açılmadı. Kapisio şu an tamamen ücretsiz — gelişmeler için takipte kal!
+            </p>
+          </div>
         </Card>
       )}
 
