@@ -1,64 +1,116 @@
-﻿'use client'
+'use client'
 
-import { useState, useEffect } from 'react'
-import { Download, X } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { X, Download, Smartphone } from 'lucide-react'
+import { Button } from '@/components/ui/Button'
 
-export default function InstallPrompt() {
-  const [prompt, setPrompt] = useState<any>(null)
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>
+}
+
+const STORAGE_KEY = 'kapisio_install_prompt'
+const COOLDOWN_DAYS = 7
+
+export function InstallPrompt() {
+  const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null)
   const [show, setShow] = useState(false)
-  const [dismissed, setDismissed] = useState(false)
+  const [isIosSafari, setIsIosSafari] = useState(false)
 
   useEffect(() => {
-    // Don't show if already installed (standalone mode)
-    if (window.matchMedia('(display-mode: standalone)').matches) return
-    if (localStorage.getItem('pwa_dismissed')) return
-
-    const handler = (e: Event) => {
-      e.preventDefault()
-      setPrompt(e)
-      // Show after 30 seconds of use
-      setTimeout(() => setShow(true), 30_000)
+    const stored = localStorage.getItem(STORAGE_KEY)
+    if (stored) {
+      try {
+        const { until } = JSON.parse(stored) as { until: number }
+        if (Date.now() < until) return
+      } catch {}
     }
-    window.addEventListener('beforeinstallprompt', handler)
-    return () => window.removeEventListener('beforeinstallprompt', handler)
+
+    if (window.matchMedia('(display-mode: standalone)').matches) return
+    if ((navigator as any).standalone) return
+
+    const ua = navigator.userAgent
+    const iosSafari = /iPhone|iPad|iPod/.test(ua) && !/CriOS|FxiOS/.test(ua)
+    if (iosSafari) {
+      setIsIosSafari(true)
+      const t = setTimeout(() => setShow(true), 30_000)
+      return () => clearTimeout(t)
+    }
+
+    const onBeforeInstall = (e: Event) => {
+      e.preventDefault()
+      setDeferred(e as BeforeInstallPromptEvent)
+      setTimeout(() => setShow(true), 15_000)
+    }
+    window.addEventListener('beforeinstallprompt', onBeforeInstall)
+    return () => window.removeEventListener('beforeinstallprompt', onBeforeInstall)
   }, [])
 
-  async function install() {
-    if (!prompt) return
-    prompt.prompt()
-    const { outcome } = await prompt.userChoice
-    if (outcome === 'accepted') setShow(false)
-  }
-
-  function dismiss() {
+  function snooze() {
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ until: Date.now() + COOLDOWN_DAYS * 86_400_000 }),
+    )
     setShow(false)
-    setDismissed(true)
-    localStorage.setItem('pwa_dismissed', '1')
   }
 
-  if (!show || dismissed) return null
+  async function install() {
+    if (!deferred) return
+    await deferred.prompt()
+    const { outcome } = await deferred.userChoice
+    if (outcome === 'accepted') {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ until: Date.now() + 365 * 86_400_000 }))
+    }
+    setShow(false)
+    setDeferred(null)
+  }
+
+  if (!show) return null
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 z-40 max-w-sm mx-auto">
-      <div className="bg-surface border border-primary/30 rounded-2xl p-4 shadow-2xl shadow-black/50 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
-          <Download size={18} className="text-primary/70" />
+    <div
+      className="fixed bottom-4 left-4 right-4 sm:left-auto sm:bottom-6 sm:right-6 sm:max-w-sm z-40 rounded-2xl border border-stroke bg-surface shadow-2xl animate-in slide-in-from-bottom duration-300"
+      role="dialog"
+      aria-label="Uygulamayı yükle"
+    >
+      <button
+        onClick={snooze}
+        className="absolute top-2.5 right-2.5 p-1.5 rounded-lg text-fg-subtle hover:text-fg hover:bg-surface-2 transition-colors"
+        aria-label="Kapat"
+      >
+        <X size={14} />
+      </button>
+
+      <div className="p-4 pr-10">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+            <Smartphone size={18} className="text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-fg">Kapisio'yu telefonuna ekle</p>
+            <p className="text-xs text-fg-muted mt-0.5 leading-relaxed">
+              {isIosSafari
+                ? 'Safari Paylaş menüsünden "Ana Ekrana Ekle" — uygulama gibi açılsın.'
+                : 'Tek dokunuşla aç, bildirim al, offline çalışsın.'}
+            </p>
+          </div>
         </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-fg">Uygulamayı Yükle</p>
-          <p className="text-xs text-fg-muted">Ana ekrana ekle, daha hızlı aç</p>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            onClick={install}
-            className="bg-primary hover:bg-primary text-white rounded-xl px-3 py-1.5 text-xs font-semibold transition-colors"
-          >
-            Yükle
-          </button>
-          <button onClick={dismiss} className="text-fg-subtle hover:text-fg-muted transition-colors">
-            <X size={16} />
-          </button>
-        </div>
+
+        {!isIosSafari ? (
+          <div className="flex items-center gap-2 mt-3">
+            <Button onClick={install} className="flex-1 btn-gradient gap-1.5" size="sm">
+              <Download size={13} />
+              Yükle
+            </Button>
+            <Button onClick={snooze} variant="ghost" size="sm" className="text-fg-muted">
+              Sonra
+            </Button>
+          </div>
+        ) : (
+          <Button onClick={snooze} variant="ghost" size="sm" className="w-full mt-3 text-fg-muted">
+            Anladım
+          </Button>
+        )}
       </div>
     </div>
   )

@@ -1,8 +1,9 @@
 'use client'
 
 import { useEffect } from 'react'
+import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, Home, RefreshCw, MessageCircle } from 'lucide-react'
 
 export default function Error({
   error,
@@ -13,30 +14,51 @@ export default function Error({
 }) {
   useEffect(() => {
     console.error(error)
-    // Temporary: log to a visible place for debugging
     if (typeof window !== 'undefined') {
       (window as any).__LAST_ERROR__ = { message: error.message, stack: error.stack, digest: error.digest }
     }
   }, [error])
 
   return (
-    <div className="min-h-[70vh] flex items-center justify-center text-center px-4">
-      <div className="max-w-sm">
-        <div className="w-16 h-16 rounded-2xl bg-surface border border-stroke flex items-center justify-center mx-auto mb-6">
-          <AlertTriangle size={28} className="text-fg-subtle" />
+    <div className="min-h-[80vh] flex items-center justify-center text-center px-4 py-16">
+      <div className="max-w-md w-full">
+        <div className="relative inline-block mb-6">
+          <div className="w-20 h-20 rounded-3xl bg-gradient-to-br from-red-500 to-orange-500 flex items-center justify-center shadow-lg">
+            <AlertTriangle size={32} className="text-white" />
+          </div>
+          <div className="absolute -bottom-1 -right-1 text-2xl">💥</div>
         </div>
-        <h2 className="text-2xl font-black text-fg mb-3">Bir şeyler ters gitti</h2>
-        <p className="text-fg-muted text-sm leading-relaxed mb-8">
-          Beklenmedik bir hata oluştu. Birkaç saniye bekleyip tekrar dene.
+
+        <h1 className="text-2xl sm:text-3xl font-black text-fg mb-3 tracking-tight">
+          Bir şeyler ters gitti
+        </h1>
+        <p className="text-fg-muted text-sm sm:text-base leading-relaxed mb-8 max-w-sm mx-auto">
+          Beklenmedik bir hata oluştu. Genellikle birkaç saniye sonra düzelir.
         </p>
-        <div className="flex gap-3 justify-center">
-          <Button onClick={reset}>Tekrar Dene</Button>
-          <Button variant="secondary" onClick={() => window.location.href = '/'}>
-            Ana Sayfa
+
+        <div className="flex flex-col gap-2">
+          <Button onClick={reset} className="w-full btn-gradient gap-2" size="lg">
+            <RefreshCw size={16} />
+            Tekrar Dene
           </Button>
+          <div className="grid grid-cols-2 gap-2">
+            <Link href="/">
+              <Button variant="ghost" className="w-full gap-1.5">
+                <Home size={14} /> Ana Sayfa
+              </Button>
+            </Link>
+            <Link href="/iletisim">
+              <Button variant="ghost" className="w-full gap-1.5">
+                <MessageCircle size={14} /> Bildir
+              </Button>
+            </Link>
+          </div>
         </div>
+
         {error.digest && (
-          <p className="text-xs text-fg-subtle mt-6 font-mono opacity-50">#{error.digest}</p>
+          <p className="text-[10px] text-fg-subtle mt-8 font-mono opacity-50">
+            Hata kodu: #{error.digest}
+          </p>
         )}
       </div>
     </div>

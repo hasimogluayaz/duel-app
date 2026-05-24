@@ -6,7 +6,8 @@ import { Footer } from '@/components/layout/Footer'
 import { CookieBanner } from '@/components/layout/CookieBanner'
 import { ToastProvider } from '@/components/ui/Toast'
 import { ServiceWorkerRegister } from '@/components/layout/ServiceWorkerRegister'
-import InstallPrompt from '@/components/pwa/InstallPrompt'
+import { InstallPrompt } from '@/components/pwa/InstallPrompt'
+import { WelcomeModal } from '@/components/onboarding/WelcomeModal'
 import { PushSubscriber } from '@/components/push/PushSubscriber'
 import { PostHogProvider } from '@/components/analytics/PostHogProvider'
 import { PostHogPageView } from '@/components/analytics/PostHogPageView'
@@ -92,6 +93,7 @@ export default async function RootLayout({
             <ServiceWorkerRegister />
             <InstallPrompt />
             {initialProfile && <PushSubscriber />}
+            {initialProfile && <WelcomeModal userId={initialProfile.id} username={initialProfile.username} />}
             <Suspense fallback={null}><PostHogPageView /></Suspense>
             <Analytics />
           </ToastProvider>

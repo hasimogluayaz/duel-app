@@ -8,6 +8,7 @@ import { Modal } from '@/components/ui/Modal'
 import {
   ChevronUp, Share2, Check, Flame, Trophy, Clock, Copy, Send
 } from 'lucide-react'
+import { celebrateSafe } from '@/lib/fx/confetti'
 
 // ── Types ──────────────────────────────────────────────────────────────────
 
@@ -220,6 +221,7 @@ export function HomeAnswerBox({
         setMyAnswerId(data.answer.id)
         setPhase('submitted')
         showToast('✓ Cevabın gönderildi')
+        celebrateSafe('answer-sent')
         await fetchAnswers()
       }
     } finally {

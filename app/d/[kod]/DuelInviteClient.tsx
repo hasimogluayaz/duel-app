@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button'
 import { Modal } from '@/components/ui/Modal'
 import { Avatar } from '@/components/ui/Avatar'
 import { ChevronUp, Send, Swords, Share2, Flame, Copy, Check, Clock, Users, Bot, Sparkles } from 'lucide-react'
+import { celebrateSafe } from '@/lib/fx/confetti'
 
 const MAX_PARTICIPANTS = 4
 
@@ -80,9 +81,12 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
       })
       .on('postgres_changes' as any, { event: 'UPDATE', schema: 'public', table: 'duels', filter: `id=eq.${duel.id}` },
         (payload: { new: { voting_started_at: string | null; ai_verdict: string | null; winner_id: string | null } }) => {
-          // Creator started voting / AI verdict arrived → propagate to all viewers
-          if (payload.new.voting_started_at) setVotingStartedAt(payload.new.voting_started_at)
-          if (payload.new.ai_verdict) setAiVerdict(payload.new.ai_verdict)
+          // Creator started voting / AI verdict arrived → propagate to all viewers + celebrate
+          if (payload.new.voting_started_at && !votingStartedAt) setVotingStartedAt(payload.new.voting_started_at)
+          if (payload.new.ai_verdict && !aiVerdict) {
+            setAiVerdict(payload.new.ai_verdict)
+            celebrateSafe(payload.new.winner_id === currentUserId ? 'win' : 'verdict')
+          }
           if (payload.new.winner_id) setAiWinnerId(payload.new.winner_id)
         }
       )
@@ -147,6 +151,7 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
       setParticipants(prev => [...prev, newEntry])
       setText('')
       showToast('Cevabın gönderildi! 🎉')
+      celebrateSafe('answer-sent')
     } finally {
       setLoading(false)
     }
@@ -229,6 +234,7 @@ export default function DuelInviteClient({ duel, scenario, creator, participants
       setAiVerdict(data.verdict ?? null)
       setAiWinnerId(data.winner_user_id ?? null)
       showToast('🤖 AI kararını verdi!')
+      celebrateSafe(data.winner_user_id === currentUserId ? 'win' : 'verdict')
     } catch {
       showToast('Bağlantı hatası.')
     } finally {
